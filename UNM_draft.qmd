@@ -1,0 +1,931 @@
+---
+title: "Using Quarto to Generate Documents in APA Style (7th Edition)"
+# If blank, the running header is the title in upper case.
+shorttitle: "Template for the apaquarto Extension"
+# Set names and affiliations.
+# It is nice to specify everyone's orcid, if possible.
+# There can be only one corresponding author, but declaring one is optional.
+author:
+  - name: Ana Fulano
+    corresponding: true
+    orcid: 0000-0000-0000-0001
+    email: sm@example.org
+    url: https://example.org/
+    # Roles are optional. 
+    # Select from the CRediT: Contributor Roles Taxonomy https://credit.niso.org/
+    # conceptualization, data curation, formal Analysis, funding acquisition, investigation, 
+    # methodology, project administration, resources, software, supervision, validation, 
+    # visualization, writing, editing
+    roles:
+      - conceptualization
+      - writing
+    affiliations:
+      - id: id1
+        name: "Ana and Blanca's University"
+        group: Clinical Psychology Program
+        department: Department of Psychology
+        address: 1234 Capital St.
+        city: Albany
+        region: NY
+        postal-code: 12084-1234
+  - name: Blanca Zutano
+    orcid: 0000-0000-0000-0002
+    roles:
+      - project administration
+      - formal analysis
+    affiliations: 
+      - ref: id1
+  - name: Carina Mengano
+    orcid: 0000-0000-0000-0003
+    deceased: true
+    roles:
+      - formal analysis
+      - writing
+    affiliations:
+      - name: "Carina's Primary Affiliation"
+      - name: "Carina's Secondary Affiliation"
+    # Because Dolorita is unaffiliated, specify her city instead
+  - name: 
+      - given: Dolorita C.
+        family: Perengano
+    orcid: 0000-0000-0000-0004
+    roles:
+      - writing
+      - methodology
+      - formal analysis
+    # List city and region/state for unaffiliated authors
+    affiliations:
+      - city: Buffalo
+        region: NY
+author-note:
+  status-changes: 
+    # Example: [Author name] is now at [affiliation].
+    affiliation-change: ~
+    # Example: [Author name] is deceased.
+    deceased: ~
+  # Disclosures condensed to one paragraph, but you can start a field with two line breaks to break them up: \n\nNew Paragraph
+  disclosures:
+    # Example: This study was registered at X (Identifier Y).
+    study-registration: ~
+    # Acknowledge and cite data/materials to be shared.
+    data-sharing: ~
+    # Example: This article is based on data published in [Reference].
+    # Example: This article is based on the dissertation completed by [citation].  
+    related-report: ~
+    # Example: [Author name] has been a paid consultant for Corporation X, which funded this study.
+    conflict-of-interest: ~
+    # Example: This study was supported by Grant [Grant Number] from [Funding Source].
+    financial-support: ~
+    # Example: The authors are grateful to [Person] for [Reason].
+    gratitude: ~
+    # Example. Because the authors are equal contributors, order of authorship was determined by a fair coin toss.
+    authorship-agreements: ~
+abstract: "This document is a template demonstrating the apaquarto format."
+# Put as many keywords at you like, separated by commmas (e.g., [reliability, validity, generalizability])
+keywords: [keyword1, keyword2, keyword3]
+# If true, tables and figures are mingled with the text instead of listed at the end of the document.
+floatsintext: false
+# Numbered lines (.pdf and .docx only)
+numbered-lines: false
+# File with references
+bibliography: bibliography.bib
+# Suppress title page
+suppress-title-page: false
+# Masks references that appear in the masked-citations list
+mask: false
+masked-citations:
+  - schneider2012cattell
+  - schneider2015intelligence
+# Language options. See https://quarto.org/docs/authoring/language.html
+lang: en
+language:
+  citation-last-author-separator: "and"
+  citation-masked-author: "Masked Citation"
+  citation-masked-date: "n.d."
+  citation-masked-title: "Masked Title"
+  title-block-author-note: "Author Note"
+  title-block-correspondence-note: "Correspondence concerning this article should be addressed to"
+  title-block-role-introduction: "Author roles were classified using the Contributor Role Taxonomy (CRediT; https://credit.niso.org/) as follows:"
+format:
+  apaquarto-docx: default
+  apaquarto-html: default
+  apaquarto-pdf:
+    # Can be jou (journal), man (manuscript), stu (student), or doc (document)
+    documentmode: man
+---
+
+```{r}
+#| label: setup
+#| include: false
+library(conflicted)
+library(tidyverse)
+library(flextable)
+library(ftExtra)
+library(officer)
+library(knitr)
+library(papaja)
+library(afex)
+library(BayesFactor)
+library(apa)
+library(emmeans)
+library(dplyr)
+options(digits = 3)
+
+conflicts_prefer(dplyr::filter, .quiet = TRUE)
+conflicts_prefer(flextable::separate_header, .quiet = TRUE)
+conflicted::conflicts_prefer(papaja::theme_apa)
+
+# function to force scientific formatting of numbers (used for large BFs)
+changeSciNot <- function(n) {
+  output <- format(n, scientific = TRUE, digits = 2) #Transforms the number into scientific notation even if small
+  output <- sub("e", "x10^", output) #Replace e with 10^
+  output <- sub("\\+0?", "", output) #Remove + symbol and leading zeros on exponent, if > 1
+  output <- sub("-0?", "-", output) #Leaves - symbol but removes leading zeros on exponent, if < 1
+  output <- paste0(output,"^")
+  # output = strsplit(output, "^", fixed = TRUE)
+  # output = paste0(output[[1]][1],"^", output[[1]][2], "^")
+  output
+}
+# function to extract and report BFs with error %s
+report_BF_and_error <- function(BF_in, sci_not = FALSE, hyp = "alt"){
+  
+  if (hyp == "alt") {
+    BF_notation = "BF~10~ = "
+  } else if (hyp == "null") {
+    BF_notation = "BF~01~ = "
+  }
+  
+  if (sci_not == TRUE) {
+    BF_value = changeSciNot(extractBF(BF_in)$bf) # change to sci notation
+  } else {
+    BF_value = round(extractBF(BF_in)$bf,2) # otherwise round
+  }
+  
+  paste0(BF_notation, 
+         BF_value, 
+         " &plusmn; ", 
+         round(100*extractBF(BF_in)$error,2), 
+         "%")
+}
+```
+
+# Experiment 1
+
+Experiment 1 aimed to pilot different ways of recognition memory testing to find the most suitable for our design. All subjects undertook the same training, and two tests after it. In both tests, the target was an image that was used as a cue in training, that was presented side to side with a new image called foil. The two tests differed in what the new image was. In the first test, the foil had the same shape as the target presented but changing the colours. In the second test, however, the foil was not related with the target, but to other cues in the experiment. There were three groups, depending on how similar the foils were to the targets: very similar (VS), similar (S) and no similar (NS). The design of Experiment 1 can be seen in @tbl-exp1.
+
+::: {#tbl-exp1 apa-note="Uppercase letters A, B, X, and Y represent the cues presented during training. O1 and O2 represent the outcomes presented in training. Lowercase letters *a*, *b*, *x*, and *y* represent the foils that have some similarity (depending on the group) to the cues presented in the training phase." apa-twocolumn="true"}
+| Training |     |  Test1   |     |      Test2       |
+|:--------:|-----|:--------:|-----|:----------------:|
+|  AX-O1   |     | A vs *a* |     | A vs *b*/*x*/*y* |
+|  AY-O1   |     | B vs *b* |     | B vs *a*/*x*/*y* |
+|  BX-O2   |     | X vs *x* |     | X vs *a*/*b*/*y* |
+|  BY-O2   |     | Y vs *y* |     | Y vs *a*/*b*/*x* |
+
+Experimental design of Experiment 1
+:::
+
+## Methods
+
+### Participants
+
+```{r, include=FALSE}
+#load the data
+load("UNM05_proc_data.RData")
+UNM05_demographics <- demographics
+UNM05_training <- training
+UNM05_test1 <- test1
+UNM05_test2 <- test2
+UNM05_demographics <-  transform(UNM05_demographics, Age = as.numeric(Age))
+UNM05_not_passed <- not_passed_pNum
+```
+
+`r nrow(UNM05_demographics)` participants were recruited through Prolific. The sample consisted of `r length(which(UNM05_demographics$Sex == "Female"))` females and `r length(which(UNM05_demographics$Sex == "Male"))` males, with `r n_distinct(UNM05_demographics$Nationality)` different nationalities, and a mean age of the participants was `r mean(UNM05_demographics$Age)` (range `r min(UNM05_demographics$Age)` - `r max(UNM05_demographics$Age)`). The pre-screening of participants in Prolific included for them to have normal or corrected to normal vision and fluency in English language, as well as excluding participants from previous studies. Participants were rewarded with £2.70 for their participation in the study. `r length(which(UNM05_test2$session == 1))/24` participants were randomly allocated to each of the 3 groups (VS, S and NS).
+
+### Apparatus and stimuli
+
+Participants were presented with a task built in PsychoPy [v. 2022.2.4; @peircePsychoPy2ExperimentsBehavior2019] and hosted in Pavlovia. The task was designed so it could only be run in a computer, not in mobile devices. The screen background colour was grey (RGB: 128, 128, 128) and all stimuli and instructions were presented against this background. The 4 cues presented to each participant (A, B, X and Y) were randomly selected from a set of 8 images, representing imaginary chemical compounds made of 3 red circles and 3 blue circles connected with black lines. Each cue was 945x945 pixels, automatically re-scaled to 0.4x0.4 of the window size. The outcomes (O1 and O2) were two images displaying a mutant creature, black with yellow details. Each was 332x664 pixels, automatically re-scaled to 0.16x0.2 of the window size. The foils used in the tests were modifications of the original cues: for the VS group, one pair of circles swapped colours, in such way that one red circle was now blue and the blue circle was red; for the S group, two pairs of circles swapped colours; and for the NS group, all the three pairs of circles swapped colours. For an example, see @fig-foil_example, and for all the images used as stimuli, see Appendix I.
+
+```{r fig-foil_example}
+#| fig-cap: Example of the modifications in the original cue image to create the foils.
+#| apa-twocolumn: true
+#| apa-note: "In the central top part of the figure an example of a cue used in the experiment can be seen. In the bottom left part, the foil corresponding to the VS group for this cue is displayed, note that the two small circles had swapped colors. In the bottom central part, the foil corresponding to the S group for this cue is displayed, note that the two small and the two medium circles had swapped colors. In the bottom rigth part, the foil corresponding to the NS group for this cue is displayed, note that all the circles had swapped colors."
+#| out-width: 100%
+#| fig-pos: h
+knitr::include_graphics("stimuli/foil_example.png")
+```
+
+### Procedure
+
+In the first screens, participants were presented with the consent information and had to reply to the consent questions. If the participants failed to provide consent, the experiment was exited. If participants provided their consent, they proceeded into the training phase instructions. These instructions were as follows:
+
+> *In this task you will be presented with various pairs of chemicals at the top of the screen. An example of a "chemical" stimulus is shown below: \[an image similar to the ones that were going to be presented was displayed\]. On each trial, two chemicals are mixed together, and a mutant creature will be produced (see below for an example of a “mutant” stimulus). \[an image similar to the ones used as outcomes was displayed\] Your task is to decide which of two mutants would be produced if the two chemicals presented are combined. On each trial, select the mutant that you think will be created by clicking on it. Only one of the mutants is the correct outcome in each trial. As soon as you click on it, you will receive feedback on whether you selected the correct mutant. The feedback will consist on a green frame around the correct mutant and the word CORRECT! if you chose the correct mutant or the word INCORRECT! if you chose the wrong mutant. Use this feedback to learn how to make more accurate responses as the task goes on. On each trial, you will have 10 seconds to choose a mutant. If you exceed this time, you will see a screen saying TIMEOUT - TOO SLOW, and the next trial will then appear. Please try to avoid timeouts as it makes the task longer. This task takes about 10 minutes. Before clicking the continue button below, please make sure you are in a quiet space and have the time to pay full attention to the task. Make sure there are no distractions to interrupt you when you get started. The aim of the task is to get as many correct answers as possible, while avoiding timeouts.*
+
+After reading these instructions, participants were presented with the following comprehension check:
+
+> *As noted, in this task you will be presented with various pairs of chemicals and two mutants which represent the outcome of combining the chemicals. On each trial, all you need to do is decide which mutant would result from the two chemicals, and then select your choice by clicking on the mutant icon. You need to respond within the 10 seconds trial duration. What are you instructed to do in this task (click on the correct answer)? Please, re-read the instructions above if you are not sure. You will have two opportunities to get this question correct.* 
+*Learn which mutant would result of each chemicals combinatio.n* 
+*Predict which mutant would take over the world.* 
+*Decide if the chemicals are organic or inorganic.*
+
+If participants failed this comprehension check twice, they were informed of their fail, and the experiment ended. When participants passed this comprehension check, they proceeded to the training phase. All the trials in the training phase started with a 0.5 second blank screen. After that, two cues were presented in the top part and the two outcomes in the bottom part. The participants had to select one of the outcomes by clicking on them, which was indicated by a yellow frame surrounding the selected outcome. Feedback was provided after 0.5 second: the correct outcome was surrounded by a green frame; if the correct outcome was selected, the message "CORRECT!" was displayed in the centre of the screen in green (RGB: 0, 255, 0), whereas, if the outcome selected was not the correct one, the message "INCORRECT!" appeared in red (RGB: 255, 0, 0). After 2 seconds, the next trial started. If participants failed to select an outcome within the 10 seconds after the presentation of the cues and outcomes, all images disappeared from the screen and the message "TIMEOUT - TOO SLOW" was presented in the centre of the screen in red, and the next trial started after 1 second. The training phase consisted in four blocks, each block consisting of 20 trials. The trials were of four different types: cues A and X were presented, and the correct outcome was outcome 1; cues A and Y were presented, and the correct outcome was outcome 1; cues B and X were presented, and the correct outcome was outcome 2; and cues B and Y were presented, and the correct outcome was outcome 2. Each type of trial was presented 5 times per block. The position of the cues and the outcomes (right-left), as well as the order of presentation of the trials, was fully randomized within the block. Thus, cues A and B were always predictive of one outcome (O1 and O2, respectively), but cues X and Y were followed in half of the trials by each outcome.
+
+Once participants had completed the training phase, the instructions for Test 1 were displayed:
+
+> *The following task will require you to take a simple memory test. Two chemicals will appear in the top half of the screen. One of these chemicals has been presented in the task you have just finished, whereas the other is a similar one, but with different colours. Important: you have seen only one of these chemicals before. Your task is to select the chemical you have seen before by clicking on it. Once you make your choice, you will be presented with a scale in which you need to rate how certain you are that you made the correct choice, on a scale from 1 (completely uncertain) to 10 (completely certain). If you are guessing, select 1. No feedback will be provided on your choices. This task lasts for about 2 minutes. Before clicking the continue button below, please make sure there are no distractions and that you can pay full attention to the task. The aim of the task is to try your best and be honest about the confidence of your choices.*
+
+After the participants completed these instructions, another comprehension check was included:
+
+> *Two chemicals will appear in the top half of the screen. One of these chemicals has been presented in the task you have just finished, whereas the other is a similar one, but with different colours. Your task is to select the chemical you have seen before by clicking on it. Once you make your choice, you will be presented with a scale to rate how certain you are that you made the correct choice (from 1 = completely uncertain to 10 = completely certain). What are you instructed to do in this task (click on the correct answer)? Please, re-read the instructions above if you are not sure. You will have two opportunities to get this question correct.* 
+*Click on the mutant that would result of each chemicals combination.*
+*Select the chemical you have seen before.*
+*Rate how beautiful the chemicals presented are.*
+
+This comprehension check was presented only once and participants continued to the test, independently of the response given.
+
+All trials started with a 0.5 second blank screen. After that, the images of a target (a cue presented in the training phase) and a foil were presented in the top half of the screen. Participants had to click on the image they thought had seen in the previous phase, after which a rating scale was displayed for them to give a confidence rating. Above this rating scale, the question *How confident are you or your response?* was displayed. The rating scale had 10 points, with the labels *I am guessing* in the left end and *I am certain* in the right end, and a red dot in the middle. Once participants had placed the red dot in the rating scale, a button that said *CONTINUE* appeared and once it was clicked, the next trial started. Test1 consisted of 8 trials of four types: cue A versus its corresponding foil, cue B versus its corresponding foil, cue X versus its corresponding foil, and cue Y versus its corresponding foil. The left-right display of the target and the foil was counterbalanced, in such way that each target appeared once on the left and once on the right.
+
+Once participants had completed Test1, the instructions for Test2 were displayed, as follows:
+
+> *This task is very similar to the previous memory test. On each trial, two chemicals will be presented, and you have only seen one of them before in the learning part of the experiment (Task 1). However, this time the two chemicals will not be similar. Your task is the same, choose the one you have seen in the first part of the experiment (Task 1). As before, your task is to select the chemical you have seen before by clicking on it. Once you make your choice, you will be presented with a scale in which you need to rate how certain you are that you made the correct choice, on a scale from 1 (completely uncertain) to 10 (completely certain). If you are guessing, select 1. No feedback will be provided on your choices. This task lasts for about 4 minutes. Before clicking the continue button below, please make sure there are no distractions and that you can pay full attention to the task. The aim of the task is to try your best and be honest about the confidence of your choices.*
+
+Yet another comprehension check was included before the start of Test2, as can be read below:
+
+> *On each trial, two chemicals will be presented. As before, only one of these chemicals was presented in the learning part of the experiment (Task 1). However, this time the two chemicals will not be similar. Your task is to choose the one you have seen in the first part of the experiment (Task 1) by clicking on it. Once you make your choice, you will be presented with a scale to rate how certain you are that you made the correct choice (from 1 = completely uncertain to 10 = completely certain). What are you instructed to do in this task (click on the correct answer)? Please, re-read the instructions above if you are not sure. You will have two opportunities to get this question correct.*
+*Click on the mutant that would result of each chemicals combination.*
+*Select the chemical you have seen in Task 1.*
+*Rate how beautiful the chemicals presented are.*
+
+Test2 was identical to Test1, except for the type of trials. 24 trials of 12 types were presented: cue A versus the foil corresponding to cue B, cue A versus the foil corresponding to cue x, cue A versus the foil corresponding to cue Y, cue B versus the foil corresponding to cue A, cue B versus the foil corresponding to cue X, cue B versus the foil corresponding to cue Y, cue X versus the foil corresponding to cue A, cue X versus the foil corresponding to cue B, cue X versus the foil corresponding to cue Y, cue Y versus the foil corresponding to cue A, cue Y versus the foil corresponding to cue B, and cue Y versus the foil corresponding to cue X.
+
+### Data analysis
+
+In training, the outcomes clicked were recorded. An accuracy score was computed by scoring 0 when the outcome selected was incorrect and 1 when the outcome selected was correct. This score was analysed with a mixed-methods ANOVA with the within-subjects factor block (1-4), and the between-subjects Group (VS, S, and NS). In Test1 and Test2, the image clicked was recorded, as well as the confidence rating given to that decision. A memory score was computed taking the rating score when the image clicked was the target and scoring 0 when the image selected was the foil. In Test1, a mixed-methods ANOVA was performed with the between-subjects factor Group (VS, S and NS) and the within-subjects factor Predictiveness. Predictive trials were the ones in which the target was predictive of an outcome in the training phase (cues A and B), whereas non-predictive trials were the ones in which the target was non-predictive in the training phase (cues X and Y). In Test2, a mixed-methods ANOVA was performed with the between-subjects Group (VS, S, and NS) and the within-subjects factors Predictiveness and Congruence. Congruence refers to the predictive status of the two images presented in the test: if both target and foil were predictive or non-predictive, the trial was considered congruent; if target and foil were one predictive and the other non-predictive, the trial was considered incongruent.
+
+## Results
+
+Participants that failed either the comprehension check before Test1 or Test2 were excluded from these analyses. `r nrow(UNM05_not_passed)` participants were excluded based on this criterion (`r length(which(UNM05_not_passed$session == 1))` from group VS, `r length(which(UNM05_not_passed$session == 2))` from group S, and `r length(which(UNM05_not_passed$session == 3))` from group NS).
+
+```{r, include = FALSE}
+#add a group variable
+UNM05_training <- UNM05_training %>%
+  mutate(group = case_when(session == 1 ~ "VS",
+                                session == 2 ~ "S",
+                                session == 3 ~ "NS"))
+#Clean participants that did not pass check 2 and/or 3
+UNM05_training <- filter(UNM05_training, !pNum %in% UNM05_not_passed)
+#Calculate the mean accuracy and standard error for each block, including the groups
+UNM05_MA_training <- UNM05_training %>%
+  group_by(block, group) %>%
+  summarise(mean_accuracy = mean(correct_answer, na.rm = TRUE), 
+            se_accuracy = sd(correct_answer, na.rm = TRUE)/sqrt(length(correct_answer)))
+```
+```{r}
+#| label: fig-trainingExp1
+#| fig-cap: Accuracy on the training phase of Experiment 1.
+#| apa-note: "Proportion of accurate responses (±SEM) on the traning phase of Experiment 1, plotted against the 4 blocks of trials, for each Group."
+#| fig-height: 4
+ggplot(UNM05_MA_training, mapping = aes(x = block, y = mean_accuracy, group = group)) +
+  geom_point(mapping = aes(shape = group)) +
+  geom_line(mapping = aes(linetype = group)) +
+  geom_errorbar(aes(x= block, y = mean_accuracy, ymin = mean_accuracy-se_accuracy, ymax = mean_accuracy+se_accuracy), color = "black", width=.1)+
+  scale_x_continuous(name = "Block") + 
+  labs(shape = "Group", linetype = "Group") +
+  scale_y_continuous(name = "Accuracy", limits = c(NA, 1))+
+  theme_apa()
+```
+```{r, include=FALSE}
+#ANOVA
+UNM05_acc <- UNM05_training %>%
+  group_by (pNum, block, group) %>%
+  summarise(mean_response = mean(correct_answer, na.rm = TRUE))
+UNM05_acc$block <- factor(UNM05_acc$block)
+UNM05_acc$pNum <- factor(UNM05_acc$pNum)
+UNM05_acc$group <- factor(UNM05_acc$group)
+ANOVA_UNM05_acc <- aov_car(formula = mean_response ~ group + Error(pNum/block), data = UNM05_acc)
+print(ANOVA_UNM05_acc)
+#Bayesian Anova
+bay_ANOVA_UNM05_acc <- anovaBF(formula = mean_response ~ group + block + pNum,
+        data = data.frame(UNM05_acc),
+        whichRandom = "pNum")
+print(bay_ANOVA_UNM05_acc)
+bay_ANOVA_UNM05_acc_int <- bay_ANOVA_UNM05_acc[4]/bay_ANOVA_UNM05_acc[3]
+print(bay_ANOVA_UNM05_acc_int)
+```
+
+In @fig-trainingExp1 the mean block accuracy for each group is displayed. All groups showed a similar increase in responding across blocks, reaching an approximate accuracy of 0.85 in the final block of the experiment. This was confirmed by a mixed-methods ANOVA, that found a significant main effect of the Block, with extreme Bayesian evidence for the alternative hypothesis (`r apa(ANOVA_UNM05_acc, effect = "block")`, `r report_BF_and_error(bay_ANOVA_UNM05_acc[1], sci_not = TRUE)`), but not of the main effect of Group (`r apa(ANOVA_UNM05_acc, effect = "group")`, `r report_BF_and_error(bay_ANOVA_UNM05_acc[2])`) nor of their interaction (`r apa(ANOVA_UNM05_acc, effect = "group:block")`, `r report_BF_and_error(bay_ANOVA_UNM05_acc_int[1])`), both showing moderate Bayesian evidence for the null hypothesis. These results indicate that the training was equally effective for the three groups, all of them increasing their performance as the phase progressed.
+
+```{r, include = FALSE}
+#add a group variable
+UNM05_test1 <- UNM05_test1 %>%
+  mutate(group = case_when(session == 1 ~ "VS",
+                                session == 2 ~ "S",
+                                session == 3 ~ "NS"))
+#create the memory_score
+UNM05_test1 <- UNM05_test1 %>%
+mutate (c_mem_score = case_when(acc == 0 ~ 0, acc == 1 ~ mem_score))
+#Clean participants that did not pass check 2 and/or 3
+UNM05_test1 <- filter(UNM05_test1, !pNum %in% UNM05_not_passed)
+#factorize the session, which is the factor that contains the group
+UNM05_test1$session <- as.factor(UNM05_test1$session)
+#Calculate the mean accuracy and standard error for each block, including the groups
+UNM05_MS_test1 <- UNM05_test1 %>%
+  group_by(predictiveness, group) %>%
+    summarise(mean_mem_score = mean(c_mem_score, na.rm = TRUE), 
+            se_mem_score = sd(c_mem_score, na.rm = TRUE)/sqrt(length(c_mem_score)))
+```
+```{r}
+#| label: fig-test1Exp1
+#| fig-cap: Memory scores on the Test1 of Experiment 1.
+#| apa-note: "Mean memory scores (±SEM) on Test1 of Experiment 1 for predictive and non-predictive trials in the very similar (VS), similar (S) and no similar (NS) groups."
+#| fig-height: 4
+ggplot(UNM05_MS_test1, mapping = aes(x = group, y = mean_mem_score, fill = predictiveness)) +
+  geom_col(position = position_dodge2()) +
+  geom_errorbar(aes(ymin = mean_mem_score - se_mem_score, ymax = mean_mem_score + se_mem_score), width=.2, position=position_dodge(0.9)) +
+  scale_x_discrete (name = "Group") +
+  scale_y_continuous(name = "Memory score")+
+  scale_fill_grey(start = 0.33) +
+  theme_apa()
+```
+```{r, include=FALSE}
+#ANOVA mem_score
+UNM05_memscore_test1 <- UNM05_test1 %>%
+  group_by (pNum, group, predictiveness) %>%
+  summarise(mem_score = mean(c_mem_score, na.rm = TRUE))
+UNM05_memscore_test1$predictiveness <- factor(UNM05_memscore_test1$predictiveness)
+UNM05_memscore_test1$group <- factor(UNM05_memscore_test1$group)
+UNM05_memscore_test1$pNum <- factor(UNM05_memscore_test1$pNum)
+ANOVA_UNM05_test1 <- aov_car(formula = mem_score ~ group + Error(pNum*predictiveness), data = UNM05_memscore_test1)
+print(ANOVA_UNM05_test1)
+bay_ANOVA_UNM05_test1 <- anovaBF(formula = mem_score ~ group*predictiveness + pNum,
+        data = data.frame(UNM05_memscore_test1),
+        whichRandom = "pNum")
+print(bay_ANOVA_UNM05_test1)
+bay_ANOVA_UNM05_test1_int <- bay_ANOVA_UNM05_test1[4]/bay_ANOVA_UNM05_test1[3]
+print(bay_ANOVA_UNM05_test1_int)
+```
+
+Mean memory scores for Test1 are displayed in @fig-test1Exp1. In groups NS and S, memory score was higher for the predictive than the non-predictive cue, whereas this tendency was inverted in the VS group. Also, groups VS and S showed higher memory score than group NS. Is worth noting that these differences were very small, and according to the mixed-method ANOVA, none of the main effects or the interaction were significant, and all showed moderate Bayesian evidence for the null hypothesis (Group: `r apa(ANOVA_UNM05_test1, effect = "group")`, `r report_BF_and_error(bay_ANOVA_UNM05_test1[1])`; Predictiveness: `r apa(ANOVA_UNM05_test1, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_UNM05_test1[2])`; GroupxPredictiveness: `r apa(ANOVA_UNM05_test1, effect = "group:predictiveness")`, `r report_BF_and_error(bay_ANOVA_UNM05_test1[1])`). Thus, not only the similarity between the cues did not have an effect on memory in this test, but the test failed to show memory differences between predictive and non-predictive cues.
+
+```{r, include = FALSE}
+UNM05_test2 <- UNM05_test2 %>%
+  #add a group variable
+  mutate(group = case_when(session == 1 ~ "VS",
+                                session == 2 ~ "S",
+                                session == 3 ~ "NS"),
+         #add a trial_type variable (PredictivenessxCongruence)
+         trial_type = case_when((target == 1 & distractor_test2 == 2) | (target == 2 & distractor_test2 == 1) ~ "Pt vs Pf" ,
+                                (target == 5 & distractor_test2 == 6) | (target == 6 & distractor_test2 == 5) ~ "NPt vs NPf",
+                                (target == 1 & (distractor_test2 == 5 | distractor_test2 == 6)) | (target == 2 & (distractor_test2 == 5 | distractor_test2 == 6)) ~ "Pt vs NPf",
+                                  (target == 5 & (distractor_test2 == 1 | distractor_test2 == 2)) | (target == 6 & (distractor_test2 == 1 | distractor_test2 == 2)) ~  "NPt vs Pf"),
+         #add a congruence variable
+         congruence = case_when ((trial_type == "Pt vs Pf") | (trial_type == "NPt vs NPf") ~ "congruent",
+                                 (trial_type == "Pt vs NPf") | (trial_type == "NPt vs Pf") ~ "incongruent"),
+         #create a memory_score
+         c_mem_score = case_when(acc == 0 ~ 0, acc == 1 ~ mem_score))
+#Clean participants that did not pass check 2 and/or 3
+UNM05_test2 <- filter(UNM05_test2, !pNum %in% UNM05_not_passed)
+#Calculate the mean accuracy and standard error for each block, including the groups
+UNM05_MS_test2 <- UNM05_test2 %>%
+  group_by(trial_type, group) %>%
+    summarise(mean_mem_score = mean(c_mem_score, na.rm = TRUE), 
+            se_mem_score = sd(c_mem_score, na.rm = TRUE)/sqrt(length(c_mem_score)))
+```
+```{r}
+#| label: fig-test2Exp1
+#| fig-cap: Memory scores on the Test2 of Experiment 1.
+#| apa-note: "Mean memory scores (±SEM) on Test1 of Experiment 1 in the very similar (VS), similar (S) and no similar (NS) groups. The 4 bars per group represent the 4 types of trials: trials in which a non-predictive target was presented with a non-predictive foil (NPt vs NPf), trials in which a non-predictive target was presented with a predictive foil (NPt vs Pf), trials in which a predictive target was presented with a non-predictive foil (Pt vs NPf), and trials in which a predictive target was presented with a predictive foil (Pt vs Pf)."
+#| fig-height: 4
+ggplot(UNM05_MS_test2, mapping = aes(x = group, y = mean_mem_score, fill = trial_type)) +
+  geom_col(position = position_dodge2()) +
+  geom_errorbar(aes(ymin = mean_mem_score - se_mem_score, ymax = mean_mem_score + se_mem_score), width=.2, position=position_dodge(0.9)) +
+  scale_x_discrete (name = "Group") +
+  scale_y_continuous(name = "Memory score")+
+  labs(fill = "Trial type")+
+  scale_fill_grey(start = 0.33)+
+  #scale_fill_brewer(palette = "PRGn")+
+  theme_apa()
+```
+```{r, include=FALSE}
+#ANOVA mem_score
+UNM05_memscore_test2 <- UNM05_test2 %>%
+  group_by (pNum, group, predictiveness, congruence) %>%
+  summarise(mem_score = mean(c_mem_score, na.rm = TRUE))
+UNM05_memscore_test2$predictiveness <- factor(UNM05_memscore_test2$predictiveness)
+UNM05_memscore_test2$congruence <- factor(UNM05_memscore_test2$congruence)
+UNM05_memscore_test2$group <- factor(UNM05_memscore_test2$group)
+UNM05_memscore_test2$pNum <- factor(UNM05_memscore_test2$pNum)
+ANOVA_UNM05_test2 <- aov_car(formula = mem_score ~ group + Error(pNum*predictiveness*congruence), data = UNM05_memscore_test2)
+print(ANOVA_UNM05_test2)
+bay_ANOVA_UNM05_test2  <- anovaBF(formula = mem_score ~ group + predictiveness + congruence + pNum,
+        data = data.frame(UNM05_memscore_test2),
+        whichRandom = "pNum")
+print(bay_ANOVA_UNM05_test2)
+bay_ANOVA_UNM05_test2_sxp <- bay_ANOVA_UNM05_test2[4]/bay_ANOVA_UNM05_test2[3]
+print(bay_ANOVA_UNM05_test2_sxp)
+bay_ANOVA_UNM05_test2_pxc <- bay_ANOVA_UNM05_test2[13]/bay_ANOVA_UNM05_test2[7]
+print(bay_ANOVA_UNM05_test2_pxc)
+bay_ANOVA_UNM05_test2_sxc <- bay_ANOVA_UNM05_test2[10]/bay_ANOVA_UNM05_test2[6]
+print(bay_ANOVA_UNM05_test2_sxc)
+bay_ANOVA_UNM05_test2_sxpxc <- bay_ANOVA_UNM05_test2[18]/bay_ANOVA_UNM05_test2[17]
+print(bay_ANOVA_UNM05_test2_sxpxc)
+```
+
+As can be seen in @fig-test2Exp1, mean memory scores were smaller for non-predictive than for predictive cues. This difference was more pronounced in the VS group than on the other groups. However, there were no apparent differences between the congruent trials (in which both target and foil were predictive or non-predictive) and incongruent trials (in which target and foil were one predictive and one non-predictive). A mixed methods ANOVA found that the only significant differences were due to the main effect of Predictiveness, with strong Bayesian evidence for the alternative hypothesis (`r apa(ANOVA_UNM05_test2, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_UNM05_test2[2])`). No other significant effects were found (Group: `r apa(ANOVA_UNM05_test2, effect = "group")`, Congruence: `r apa(ANOVA_UNM05_test2, effect = "congruence")`; GroupxPredictiveness `r apa(ANOVA_UNM05_test2, effect = "group:predictiveness")`; PredictivenessxCongruence: `r apa(ANOVA_UNM05_test2, effect = "predictiveness:congruence")`; GroupxCongruence: `r apa(ANOVA_UNM05_test2, effect = "group:congruence")`; GroupxPredictivenessxCongruence: `r apa(ANOVA_UNM05_test2, effect = "group:predictiveness:congruence")`), and the Bayesian evidence was moderate for the null hypothesis for all non-significant effects (Group: `r report_BF_and_error(bay_ANOVA_UNM05_test2[1])`; Congruence `r report_BF_and_error(bay_ANOVA_UNM05_test2[5])`; GroupxPredictiveness: `r report_BF_and_error(bay_ANOVA_UNM05_test2_sxp[1])`; PredictivenessxCongruence:`r report_BF_and_error(bay_ANOVA_UNM05_test2_pxc[1])`; GroupxCongruence: `r report_BF_and_error(bay_ANOVA_UNM05_test2_sxc[1])`), except for the three-way interaction, in which it was strong (`r report_BF_and_error(bay_ANOVA_UNM05_test2_sxpxc[1])`). The results indicate that, in Test2, participants showed better memory for predictive that non-predictive cues, but there were no differences due to the congruence of the test trial, nor the group.
+
+```{r, include = FALSE}
+#Calculate the mean accuracy and standard error for each block, including the groups
+UNM05_test2_groups <- UNM05_test2 %>%
+  group_by(predictiveness, group) %>%
+    summarise(mean_mem_score = mean(c_mem_score, na.rm = TRUE), 
+            se_mem_score = sd(c_mem_score, na.rm = TRUE)/sqrt(length(c_mem_score)))
+```
+```{r}
+#| label: fig-test2Exp1Groups
+#| fig-cap: Memory scores on the Test2 of Experiment 1.
+#| apa-note: "Mean memory scores (±SEM) on Test1 of Experiment 1 in the very similar (VS), similar (S) and no similar (NS) groups. The 4 bars per group represent the 4 types of trials: trials in which a non-predictive target was presented with a non-predictive foil (NPt vs NPf), trials in which a non-predictive target was presented with a predictive foil (NPt vs Pf), trials in which a predictive target was presented with a non-predictive foil (Pt vs NPf), and trials in which a predictive target was presented with a predictive foil (Pt vs Pf)."
+#| fig-height: 4
+ggplot(UNM05_test2_groups, mapping = aes(x = group, fill = predictiveness, y = mean_mem_score)) +
+  geom_col(position = position_dodge2()) +
+  geom_errorbar(aes(ymin = mean_mem_score - se_mem_score, ymax = mean_mem_score + se_mem_score), width=.2, position=position_dodge(0.9)) +
+  scale_x_discrete (name = "Group") +
+  scale_y_continuous(name = "Memory score") +
+  scale_fill_grey(start = 0.33)+
+  #scale_fill_brewer(palette = "PRGn")+
+  theme_apa()
+```
+```{r, include = FALSE}
+#t test for NS
+UNM05_test2_NS <- filter(UNM05_test2, group == "NS") %>%
+  group_by (pNum, predictiveness) %>%
+  summarise(mem_score = mean(c_mem_score, na.rm = TRUE))
+# compute the difference
+d <- with(UNM05_test2_NS, 
+        mem_score[predictiveness == "non-predictive"] - mem_score[predictiveness == "predictive"])
+# Shapiro-Wilk normality test for the differences
+shapiro.test(d)
+t.test_UNM05_test2_NS <- t.test(mem_score ~ predictiveness, data = UNM05_test2_NS, paired = TRUE)
+print(t.test_UNM05_test2_NS)
+pred_UNM05_test2_NS <- subset(UNM05_test2_NS,  predictiveness == "predictive", mem_score, drop = TRUE)
+nonpred_UNM05_test2_NS <- subset(UNM05_test2_NS,  predictiveness == "non-predictive", mem_score, drop = TRUE)
+bay_t.test_UNM05_test2_NS <-  ttestBF(pred_UNM05_test2_NS, nonpred_UNM05_test2_NS, paired = TRUE)
+print(bay_t.test_UNM05_test2_NS)
+
+#t test for S
+UNM05_test2_S <- filter(UNM05_test2, group == "S") %>%
+  group_by (pNum, predictiveness) %>%
+  summarise(mem_score = mean(c_mem_score, na.rm = TRUE))
+# compute the difference
+d <- with(UNM05_test2_S, 
+        mem_score[predictiveness == "non-predictive"] - mem_score[predictiveness == "predictive"])
+# Shapiro-Wilk normality test for the differences
+shapiro.test(d)
+wilcox.test_UNM05_test2_S <- wilcox.test(mem_score ~ predictiveness, data = UNM05_test2_S, paired = TRUE)
+print(wilcox.test_UNM05_test2_S)
+pred_UNM05_test2_S <- subset(UNM05_test2_S,  predictiveness == "predictive", mem_score, drop = TRUE)
+nonpred_UNM05_test2_S <- subset(UNM05_test2_S,  predictiveness == "non-predictive", mem_score, drop = TRUE)
+bay_t.test_UNM05_test2_S <-  ttestBF(pred_UNM05_test2_S, nonpred_UNM05_test2_S, paired = TRUE)
+print(bay_t.test_UNM05_test2_S)
+
+#t test for NS
+UNM05_test2_VS <- filter(UNM05_test2, group == "VS") %>%
+  group_by (pNum, predictiveness) %>%
+  summarise(mem_score = mean(c_mem_score, na.rm = TRUE))
+# compute the difference
+d <- with(UNM05_test2_VS, 
+        mem_score[predictiveness == "non-predictive"] - mem_score[predictiveness == "predictive"])
+# Shapiro-Wilk normality test for the differences
+shapiro.test(d)
+t.test_UNM05_test2_VS <- t.test(mem_score ~ predictiveness, data = UNM05_test2_VS, paired = TRUE)
+print(t.test_UNM05_test2_VS)
+pred_UNM05_test2_VS <- subset(UNM05_test2_VS,  predictiveness == "predictive", mem_score, drop = TRUE)
+nonpred_UNM05_test2_VS <- subset(UNM05_test2_VS,  predictiveness == "non-predictive", mem_score, drop = TRUE)
+bay_t.test_UNM05_test2_VS <-  ttestBF(pred_UNM05_test2_VS, nonpred_UNM05_test2_VS, paired = TRUE)
+print(bay_t.test_UNM05_test2_VS)
+```
+
+Due to this experiment being a pilot to find the way of testing participants' memory, even when there were no group differences, each group was analysed separately. Also, the effect of congruence was not included on the following analyses, as it was non-significant. The collapsed data can be seen in @fig-test2Exp1Groups. Again, predictive trials had a higher memory score than non-predictive trials for all groups, but the biggest difference was observed in group VS. For group No-Subtle (NS), the t test for Predictiveness showed no significant effects and moderate Bayesian evidence in favour of the null hypothesis (`r apa(t.test_UNM05_test2_NS)`, `r report_BF_and_error(bay_t.test_UNM05_test2_NS[1])`). For group Subtle (S), a Wilcoxon signed rank test was performed due to lack of normality in the data. This analysis again yielded no differences, and the Bayesian analysis showed moderate evidence for the null hypothesis (*V* = `r  wilcox.test_UNM05_test2_S[["statistic"]]`, *p* = `r wilcox.test_UNM05_test2_S[["p.value"]]`, `r report_BF_and_error(bay_t.test_UNM05_test2_S[1])`). Finally, the t test performed for Group Very-Subtle (VS) found a significant effect of Predictiveness, with moderate Bayesian evidence in favour of the alternative hypothesis (`r apa(t.test_UNM05_test2_VS)`, `r report_BF_and_error(bay_t.test_UNM05_test2_VS[1])`). These results indicate that the only group that had a better memory for predictive trials was the VS group.
+
+## Discussion
+
+Experiment 1 aimed to find the best way to examine the memory for predictive and non-predictive cues. Two different tests were used, both involving the presentation of a target (a previously trained cue) and a foil (a novel cue). In the first test, the foil was of the same shape as the target but with the colours swapped, and in the second test, the foil was a colour-swap of another target. Also, three groups of participants had different levels of target-foil similarity. Test1 revealed no differences in memory due to predictiveness nor due to the groups. Test2 showed better memory for predictive than non-predictive cues, and, although there was not a significant effect of the group, further analysis showed that only the Very Subtle group (in which the colour-swap was in 1 of the 3 pairs of circles of the cues) showed a better memory for predictive cues than for the non-predictive ones. From these results can be concluded that the most sensitive test to detect differences in memory between predictive and non-predictive was the one in which the target was presented against foils that were very similar to the rest of the targets.
+
+# Experiment 2
+
+Experiment 2 aimed to examine the differences in recognition memory in a learned predictiveness procedure under certain and uncertain cue-outcome contingency conditions. Two groups were trained, one with a contingency between the predictive cues and outcome of 1 (Certain) and one with a contingency of 0.8 (Uncertain). After this training, the memory test that was most successful in Experiment 1 was used. The design of Experiment 2 can be seen in @tbl-exp2.
+
+::: {#tbl-exp2 apa-note="Uppercase letters A, B, X, and Y represent the cues presented during training. O1 and O2 represent the outcomes presented in training. Lowercase letters a, b, x, and y represent the foils that have some similarity to the cues presented in the training phase. The numbers before the trials define the proportion of trials of that type that were presented (1 being that the trial was always presented, 0.8 that was presented 80% of times, and 0.2 that was presented 205 of times)." apa-twocolumn="true"}
++----------------+---------------------------+------------------+
+| Group          | Training                  | Test             |
++================+:=========================:+:================:+
+| Certain        | 1 AX - O1                 | A vs *b*/*x*/*y* |
+|                |                           |                  |
+|                | 1 AY - O1                 | B vs *a*/*x*/*y* |
+|                |                           |                  |
+|                | 1 BX - O2                 | X vs *a*/*b*/*y* |
+|                |                           |                  |
+|                | 1 BY - O2                 | Y vs *a*/*b*/*x* |
++----------------+---------------------------+------------------+
+| Uncertain      | 0.8 AX - O1 / 0.2 AX - O2 | A vs *b*/*x*/*y* |
+|                |                           |                  |
+|                | 0.8 AY - O1 / 0.2 AY - O2 | B vs *a*/*x*/*y* |
+|                |                           |                  |
+|                | 0.8 BX - O2 / 0.2 BX - O1 | X vs *a*/*b*/*y* |
+|                |                           |                  |
+|                | 0.8 BY - O2 / 0.2 BY - O1 | Y vs *a*/*b*/*x* |
++----------------+---------------------------+------------------+
+
+Experimental design of Experiment 2
+:::
+
+## Methods
+
+```{r, include=FALSE}
+#load the data
+load("UNM07_proc_data.RData")
+UNM07_demographics <- demographics
+UNM07_training <- training
+UNM07_test <- test
+UNM07_demographics <-  transform(UNM07_demographics, Age = as.numeric(Age))
+UNM07_not_passed <- not_passed_pNum
+```
+
+`r nrow(UNM07_demographics)` participants were recruited through Prolific. The mean age of the participants was `r mean(UNM07_demographics$Age)` (range `r min(UNM07_demographics$Age)` - `r max(UNM07_demographics$Age)`), with `r length(which(UNM07_demographics$Sex == "Female"))` females and `r length(which(UNM07_demographics$Sex == "Male"))` males, and `r n_distinct(UNM07_demographics$Nationality)` different nationalities. In this experiment, participants passed a training phase and a test identical to Test2 from the previous experiment, except for the training phase being 8 block long, with a total of 160 trials. The trials in the training phase were identical to the ones in Experiment 1 for the group Certain, but for the group Uncertain there were 8 different types of trials with different frequencies. Trials in which cues A and X were presented and the correct outcome, was outcome 1 cues A and Y were presented and the correct outcome was outcome 1, cues B and X were presented and the correct outcome was outcome 2, and cues B and Y were presented and the correct outcome was outcome 2 were presented 4 times per block each. Trials in which cues A and X were presented and the correct outcome was outcome 2, cues A and Y were presented and the correct outcome was outcome 2, cues B and X were presented and the correct outcome was outcome 1, and cues B and Y were presented and the correct outcome was outcome 1 were presented 1 time per block each. Accuracy was calculated slightly different in this experiment: for the Certain group, the score was computed by scoring 0 when the outcome selected was incorrect and 1 when the outcome selected was correct, but for the Uncertain group, the score was 0 when participants chose the less probable outcome and 1 when they chose the most probable outcome. That is, when participants were presented with an AX or AY trial, they scored 0 if the outcome selected was outcome 2 and 1 if they selected outcome 1, and when they were presented with a BX or BY trials, they scored 0 if the outcome selected was outcome 1 and 1 if they selected outcome 2. Accuracy in training phase was analysed with a mixed-methods ANOVA with the within-subjects factor block (1-8), and the between-subjects Group (Certain and Uncertain). In test, a mixed-methods ANOVA was performed with the between-subjects factor Group (Certain and uncertain) and the within-subjects factor Predictiveness. All other details about participants, apparatus, procedure, and data analysis were identical to Experiment 1.
+
+## Results
+
+```{r, include = FALSE}
+#create the probable response accuracy measure
+UNM07_training <- UNM07_training %>%
+  mutate(prob_response = case_when((cue1 == 1 | cue1 == 3) & cue_o_mouse.clicked_name == "o1_image" ~ 1,
+                                   (cue1 == 1 | cue1 == 3) & cue_o_mouse.clicked_name == "o2_image" ~ 0, 
+                                   (cue1 == 2 | cue1 == 4) & cue_o_mouse.clicked_name == "o1_image" ~ 0,
+                                   (cue1 == 2 | cue1 == 4) & cue_o_mouse.clicked_name == "o2_image" ~ 1))
+
+#detect and clean participants that had an accuracy lower than 0.6 in the final block or not passed the test comprehension check
+UNM07_block8 <- filter(UNM07_training, block == 8) %>%
+  group_by(pNum, condition) %>%
+  summarise (mean_response = mean(prob_response, na.rm = TRUE))
+UNM07_low_acc_total <- filter(UNM07_block8, mean_response < 0.6) 
+UNM07_low_acc <- UNM07_low_acc_total$pNum
+UNM07_training <- filter(UNM07_training, !pNum %in% UNM07_not_passed & !pNum %in% UNM07_low_acc)
+UNM07_test <- filter(UNM07_test, !pNum %in% UNM07_not_passed & !pNum %in% UNM07_low_acc)
+```
+
+Participants that failed the comprehension check before test were excluded from these analyses. `r nrow(UNM07_not_passed)` participants were excluded based on this criterion, `r length(which(UNM07_not_passed$condition == "Certain"))` in group Certain and `r length(which(UNM07_not_passed$condition == "Uncertain"))` in group Uncertain. Following Le Pelley & Mackintosh [-@lepelleyLearnedAssociabilityAssociative2003; see also @lepelleyLearnedPredictivenessInfluences2013], an additional criterion was added in this experiment due to the poor performance of some participants in the training phase, such that those that had a mean accuracy in the training phase lower than 0.6 in the final block of the training phase where removed from the analyses. This led to an exclusion of `r nrow(UNM07_low_acc)` participants, `r length(which(UNM07_low_acc_total$condition == "Certain"))` in group Certain and `r length(which(UNM07_low_acc_total$condition == "Uncertain"))` in group Uncertain. Thus, the results below are for the remaining `r nrow(UNM07_test)/24` participants.
+
+```{r, include = FALSE}
+#Calculate the mean accuracy and standard error for each block, including the groups
+UNM07_MA_training <- UNM07_training %>%
+  group_by(block, condition) %>%
+  summarise(mean_accuracy = mean(prob_response, na.rm = TRUE), 
+            se_accuracy = sd(prob_response, na.rm = TRUE)/sqrt(length(correct_answer)))
+```
+```{r, echo = FALSE}
+#| label: fig-trainingExp2
+#| fig-cap: Accuracy on the training phase of Experiment 2.
+#| apa-note: "Proportion of accurate responses (±SEM) on the traning phase of Experiment 2, plotted against the 8 blocks of trials, for each Group."
+#| fig-height: 4
+ggplot(UNM07_MA_training, mapping = aes(x = block, y = mean_accuracy, group = condition)) +
+  geom_point(mapping = aes(shape = condition)) +
+  geom_line(mapping = aes(linetype = condition)) +
+  geom_errorbar(aes(x= block, y = mean_accuracy, ymin = mean_accuracy-se_accuracy, ymax = mean_accuracy+se_accuracy), color = "black", width=.1)+
+  scale_x_continuous(name = "Block") + 
+  labs(shape = "Group", linetype = "Group") +
+  scale_y_continuous(name = "Accuracy", limits = c(NA, 1))+
+  theme_apa()
+```
+```{r, include=FALSE}
+#ANOVA
+UNM07_acc <- UNM07_training %>%
+  group_by (pNum, block, condition) %>%
+  summarise(mean_response = mean(prob_response, na.rm = TRUE))
+UNM07_acc$block <- factor(UNM07_acc$block)
+UNM07_acc$pNum <- factor(UNM07_acc$pNum)
+UNM07_acc$condition <- factor(UNM07_acc$condition)
+ANOVA_UNM07_acc <- aov_car(formula = mean_response ~ condition + Error(pNum/block), data = UNM07_acc)
+print(ANOVA_UNM07_acc)
+#Bayesian Anova
+bay_ANOVA_UNM07_acc <- anovaBF(formula = mean_response ~ condition + block + pNum,
+        data = data.frame(UNM07_acc),
+        whichRandom = "pNum")
+print(bay_ANOVA_UNM07_acc)
+bay_ANOVA_UNM07_acc_int <- bay_ANOVA_UNM07_acc[4]/bay_ANOVA_UNM07_acc[3]
+print(bay_ANOVA_UNM07_acc_int)
+```
+
+In @fig-trainingExp2 the mean block accuracy for each group is displayed. Subjects in Certain group showed higher accuracy through training than the Uncertain group, reaching an accuracy of around 0.92 on block 8. However, Uncertain group showed a slower increase in their accuracy that reached 0.77 in block 8. This was confirmed by a mixed-methods ANOVA, that found significant both main effects, with extreme Bayesian evidence for the alternative hypothesis (Group: `r apa(ANOVA_UNM07_acc, effect = "condition")`, `r report_BF_and_error(bay_ANOVA_UNM07_acc[2])`; Block: `r apa(ANOVA_UNM07_acc, effect = "block")`, `r report_BF_and_error(bay_ANOVA_UNM07_acc[1], sci_not = TRUE)`), but not for the interaction, that showed very strong Bayesian evidence for the null hypothesis (`r apa(ANOVA_UNM07_acc, effect = "condition:block")`, `r report_BF_and_error(bay_ANOVA_UNM07_acc_int[1])`). These results indicate that the training increased the accuracy for both groups, as the effect of Block was significant. However, Certain group showed a consistently higher accuracy than Uncertain group, probably due to the higher contingency in this group.
+
+```{r, include = FALSE}
+#create the memory_score
+UNM07_test <- UNM07_test %>%
+  mutate (c_mem_score = case_when(acc == 0 ~ 0, acc == 1 ~ mem_score))
+#Calculate the mean accuracy and standard error for each block, including the groups
+UNM07_MS_test <- UNM07_test %>%
+  group_by(predictiveness, condition) %>%
+    summarise(mean_mem_score = mean(c_mem_score, na.rm = TRUE), 
+            se_mem_score = sd(c_mem_score, na.rm = TRUE)/sqrt(length(c_mem_score)))
+```
+```{r}
+#| label: fig-testExp2
+#| fig-cap: Memory scores on the Test of Experiment 2.
+#| apa-note: "Mean memory scores (±SEM) on Test of Experiment 2 for predictive and non-predictive trials in the Certain and Uncertain groups."
+#| fig-height: 4
+ggplot(UNM07_MS_test, mapping = aes(x = condition, y = mean_mem_score, fill = predictiveness)) +
+  geom_col(position = position_dodge2()) +
+  geom_errorbar(aes(ymin = mean_mem_score - se_mem_score, ymax = mean_mem_score + se_mem_score), width=.2, position=position_dodge(0.9)) +
+  scale_x_discrete (name = "Group") +
+  scale_y_continuous(name = "Memory score")+
+  scale_fill_grey(start = 0.33) +
+  theme_apa()
+```
+```{r, include=FALSE}
+#ANOVA mem_score
+UNM07_memscore_test <- UNM07_test %>%
+  group_by (pNum, condition, predictiveness) %>%
+  summarise(mem_score = mean(c_mem_score, na.rm = TRUE))
+UNM07_memscore_test$predictiveness <- factor(UNM07_memscore_test$predictiveness)
+UNM07_memscore_test$condition <- factor(UNM07_memscore_test$condition)
+UNM07_memscore_test$pNum <- factor(UNM07_memscore_test$pNum)
+ANOVA_UNM07_test <- aov_car(formula = mem_score ~ condition + Error(pNum*predictiveness), data = UNM07_memscore_test)
+print(ANOVA_UNM07_test)
+bay_ANOVA_UNM07_test <- anovaBF(formula = mem_score ~ condition*predictiveness + pNum,
+        data = data.frame(UNM07_memscore_test),
+        whichRandom = "pNum")
+print(bay_ANOVA_UNM07_test)
+bay_ANOVA_UNM07_test_int <- bay_ANOVA_UNM07_test[4]/bay_ANOVA_UNM07_test[3]
+print(bay_ANOVA_UNM07_test_int)
+```
+```{r, include = FALSE}
+# Pairwise comparisons between group levels
+#interaction analysis
+UNM07_memscore_test_interaction <- emmeans(ANOVA_UNM07_test, ~ predictiveness|condition)
+pairs(UNM07_memscore_test_interaction, adjust = "bon")
+```
+
+@fig-testExp2 showed that the memory for non-predictive cues was lower than for the predictive cues in the Certain group. This difference, although in the same direction, was minimal in the Uncertain group. Also, is worth noting that the memory for the cues in the Uncertain group was lower than the memory for the predictive cues in the Certain group, but higher than for the non-predictive. A mixed-methods ANOVA showed a significant main effect of Predictiveness, with moderate Bayesian evidence (`r apa(ANOVA_UNM07_test, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_UNM07_test[2])`) and the GroupxPredictiveness interaction, with anecdotal Bayesian evidence (`r apa(ANOVA_UNM07_test, effect = "condition:predictiveness")`, `r report_BF_and_error(bay_ANOVA_UNM07_test[1])`). However, the Group effect was not significant and the evidence for the null hypothesis, moderate (`r apa(ANOVA_UNM07_test, effect = "condition")`, `r report_BF_and_error(bay_ANOVA_UNM07_test[1])`). Bonferroni-corrected pairwise comparisons showed that there was a significant difference between predictive and non-predictive cues in the Certain group (*t*(75) = 3.633, *p* \< .001), but not in the Uncertain group (*t*(75) = 0.276, *p* = .783). This indicated that the training with certain contingency produces a difference in memory for the cues depending on their predictiveness, but that difference does not follow from the uncertain training.
+
+## Discussion
+
+Experiment 2 aimed to examine the effect that uncertainty (induced by imperfect cue-outcome contingency) had in recognition memory. Subjects that were exposed to this uncertainty in the cue-outcome relationship on a training phase, showed a similar level of recall for predictive and non-predictive cues, whereas subjects that experienced a certain cue-outcome relationship remembered better the predictive than the non-predictive cues. These results are consistent with previous results [@beesleyUncertaintyPredictivenessDetermine2015; @easdaleOnsetUncertaintyFacilitates2019] that showed attention (measured as eye-gaze) decreased for non-predictive cues under a certain training, but not under uncertain training. That decrease in attention could be responsible for the worse memory performance for the non-predictive cues. However, these previous studies found greater attention to cues trained under uncertain contingency than cues trained under certainty. A similar effect was not found in Experiment 2, as subjects in group Uncertain did not show better memory than Certain group. This might be due to the differences in procedure, as, in the said studies, uncertainty was manipulated within-subjects, whereas in the present study it was manipulated between subjects. Subjects in previous studies might have had less cognitive resources and decided to allocate those attentional resources towards the uncertain cues to reduce that uncertainty. Thus, the performance in our study might be showing a ceiling effect that fails to produce a better overall remembrance of uncertain cues over certain cues. 
+Also, is worth noting that the previous studies then progressed into a phase of training the cues in new associations. The increased attention seen in that first phase did not benefit the learning rate in this new phase, which is very paradoxical, especially for attentional models of learning, that assume that increased attention promotes increased associability. This experiment contributes to disentangle the relationship between attention and learning. If that worsened learning would be due to a degraded stimulus processing result of increased attention, we would have observed a worse recognition memory of the uncertain cues, which was not the case. In fact, the memory score for the non-predictive cues in the Certain group was even lower than the scores in the Uncertain group. One central distinction made in @easdaleOnsetUncertaintyFacilitates2019 was that between expected and unexpected uncertainty. The sustained training in the uncertain condition can lead to a tolerance to uncertainty that makes participants slower at learning new associations compared to those that experienced certain conditions and for whom, a sudden change in contingency, is more noticeable. For that reason, Experiment 3 introduced two stages in training: a first stage in which all subjects were trained with certain cue-outcome contingencies, and a second stage in which one group continued in this certain training and the other group was trained under uncertainty.
+
+# Experiment 3
+
+Experiment 3 aimed to examine the differences in recognition memory in a learned predictiveness procedure under certain and uncertain cue-outcome contingency conditions, after experiencing a period of certainty. Two groups were trained, for 6 blocks, with a contingency between the predictive cues and the outcomes of 1. After this, a second phase of 4 blocks proceeded. One of the groups continued with the certain training, whereas the other was switched to the uncertain condition, with a contingency of 0.8. Once the two training phases were completed, subjects proceeded to the memory test. The design of Experiment 3 can be seen in @tbl-exp3.
+
+::: {#tbl-exp3 apa-note="Uppercase letters A, B, X, and Y represent the cues presented during training. O1 and O2 represent the outcomes presented in training. Lowercase letters a, b, x, and y represent the foils that have some similarity to the cues presented in the training phases. The numbers before the trials define the proportion of trials of that type that were presented (1 being that the trial was always presented, 0.8 that was presented 80% of times, and 0.2 that was presented 205 of times)." apa-twocolumn="true"}
++----------------+-----------+---------------------------+------------------+
+| Group          | Phase 1   | Phase 2                   | Test             |
++================+===========+:=========================:+:================:+
+| Certain        | 1 AX - O1 | 1 AX - O1                 | A vs *b*/*x*/*y* |
+|                |           |                           |                  |
+|                | 1 AY - O1 | 1 AY - O1                 | B vs *a*/*x*/*y* |
+|                |           |                           |                  |
+|                | 1 BX - O2 | 1 BX - O2                 | X vs *a*/*b*/*y* |
+|                |           |                           |                  |
+|                | 1 BY - O2 | 1 BY - O2                 | Y vs *a*/*b*/*x* |
++----------------+-----------+---------------------------+------------------+
+| Uncertain      | 1 AX - O1 | 0.8 AX - O1 / 0.2 AX - O2 | A vs *b*/*x*/*y* |
+|                |           |                           |                  |
+|                | 1 AY - O1 | 0.8 AY - O1 / 0.2 AY - O2 | B vs *a*/*x*/*y* |
+|                |           |                           |                  |
+|                | 1 BX - O2 | 0.8 BX - O2 / 0.2 BX - O1 | X vs *a*/*b*/*y* |
+|                |           |                           |                  |
+|                | 1 BY - O2 | 0.8 BY - O2 / 0.2 BY - O1 | Y vs *a*/*b*/*x* |
++----------------+-----------+---------------------------+------------------+
+
+Experimental design of Experiment 3
+:::
+
+## Methods
+
+```{r, include=FALSE}
+#load the data
+load("UNM08_proc_data.RData")
+UNM08_demographics <- demographics
+UNM08_training <- rbind(stage1, stage2)
+UNM08_test <- test
+UNM08_demographics <-  transform(UNM08_demographics, Age = as.numeric(Age))
+UNM08_demographics_original <- filter(UNM08_demographics, condition == 1 | condition == 2)
+UNM08_demographics_cs <- filter(UNM08_demographics, condition == 3)
+UNM08_not_passed <- not_passed_pNum
+
+#change Certain_short to Certain short
+UNM08_training <- UNM08_training %>%
+  mutate(condition = case_when(condition == "Certain_short" ~ "Certain short",
+                               condition == "Certain" ~ "Certain",
+                               condition == "Uncertain" ~ "Uncertain"))
+UNM08_test <- UNM08_test %>%
+  mutate(condition = case_when(condition == "Certain_short" ~ "Certain short",
+                               condition == "Certain" ~ "Certain",
+                               condition == "Uncertain" ~ "Uncertain"))
+```
+
+`r nrow(UNM08_demographics_original)` participants were recruited through Prolific. The mean age of the participants was `r mean(UNM08_demographics_original$Age)` (range `r min(UNM08_demographics$Age)` - `r max(UNM08_demographics_original$Age)`), with `r length(which(UNM08_demographics_original$Sex == "Female"))` females and `r length(which(UNM08_demographics_original$Sex == "Male"))` males, and `r n_distinct(UNM08_demographics_original$Nationality)` different nationalities. In this experiment, participants passed two training phases and a memory test. The first training phase consisted of 6 blocks of certain training for both groups. The second training phase consisted of 4 blocks, in which one group (Certain) continued with the certain training, and the other group (Uncertain), was switched to uncertain training. 
+
+Another group was added and recruited after the results were first analysed, to make sure that any difference was due to the effect of changing from certain to uncertain training and not to the effect of extended certain training. That group (Certain short) was trained fro 6 block under certainty and progressed directly to the memory test. This group had `r nrow(UNM08_demographics_cs)` participants, with a mean age of `r mean(UNM08_demographics_cs$Age)`, with `r length(which(UNM08_demographics_cs$Sex == "Female"))` females and `r length(which(UNM08_demographics_cs$Sex == "Male"))` males, and with `r n_distinct(UNM08_demographics_cs$Nationality)` different nationalities.
+
+All other details about participants, apparatus, procedure, and data analysis were identical to Experiment 2.
+
+## Results
+
+```{r, include = FALSE}
+#create the probable response accuracy measure
+UNM08_training <- UNM08_training %>%
+  mutate(prob_response = case_when((cue1 == 1 | cue1 == 3) & cue_o_mouse.clicked_name == "o1_image" ~ 1,
+                                   (cue1 == 1 | cue1 == 3) & cue_o_mouse.clicked_name == "o2_image" ~ 0, 
+                                   (cue1 == 2 | cue1 == 4) & cue_o_mouse.clicked_name == "o1_image" ~ 0,
+                                   (cue1 == 2 | cue1 == 4) & cue_o_mouse.clicked_name == "o2_image" ~ 1))
+
+#detect and clean participants that had an accuracy lower than 0.6 in the final block or not passed the test comprehension check
+UNM08_block6 <- filter(UNM08_training, block == 6) %>%
+  group_by(pNum, condition) %>%
+  summarise (mean_response = mean(prob_response, na.rm = TRUE))
+UNM08_low_acc_total <- filter(UNM08_block6, mean_response < 0.6) 
+UNM08_low_acc <- UNM08_low_acc_total$pNum
+UNM08_training <- filter(UNM08_training, !pNum %in% UNM08_not_passed & !pNum %in% UNM08_low_acc)
+UNM08_test <- filter(UNM08_test, !pNum %in% UNM08_not_passed & !pNum %in% UNM08_low_acc)
+```
+
+As in Experiment 2, `r nrow(UNM08_not_passed)` participants were excluded on the base of failing the comprehension check before test, all in group Uncertain; `r nrow(UNM08_low_acc_total)` participants were excluded due to a low accuracy (< 0.6) at the final block (block 6) of the first training phase, `r length(which(UNM08_low_acc_total$condition == "Certain"))` in group Certain, `r length(which(UNM08_low_acc_total$condition == "Uncertain"))` in group Uncertain, and `r length(which(UNM08_low_acc_total$condition == "Certain short"))`. Thus, the results below are for the remaining `r nrow(UNM08_test)/24` participants.
+
+```{r, include = FALSE}
+#Calculate the mean accuracy and standard error for each block, including the groups and stages
+UNM08_MA_training <- UNM08_training %>%
+  group_by(block, stage, condition) %>%
+  summarise(mean_accuracy = mean(prob_response, na.rm = TRUE), 
+            se_accuracy = sd(prob_response, na.rm = TRUE)/sqrt(length(correct_answer)))
+
+#add a dummy to display stage 2 for certain short
+MA_stage2_dummy <- data.frame(stage = c('stage 2', 'stage 2', 'stage 2', 'stage 2'),
+                              block = c(7:10),
+                              condition = c('Certain short', 'Certain short', 'Certain short', 'Certain short'),
+                              mean_accuracy = c(0.001, 0.002, 0.003, 0.004),
+                              se_accuracy = c(0.0001, 0.00020, 0.0003, 0.00004))
+UNM08_MA_training <- rbind(UNM08_MA_training, MA_stage2_dummy)
+#change stage 1 and stage 2 to Stage1 and Stage 2, and Certain_short to Certain short
+UNM08_MA_training <- UNM08_MA_training %>%
+  mutate(stage = case_when(stage == "stage 1" ~ "Stage 1",
+                           stage == "stage 2" ~ "Stage 2"))
+```
+```{r, echo = FALSE}
+#| label: fig-trainingExp3
+#| fig-cap: Accuracy on the training phase of Experiment 23.
+#| apa-note: "Proportion of accurate responses (±SEM) on the traning phase of Experiment 3, plotted against the 8 blocks of trials, for each Group."
+#| fig-height: 4
+ggplot(UNM08_MA_training, mapping = aes(x = block, y = mean_accuracy, group = condition)) +
+  geom_point(mapping = aes(shape = condition)) +
+  geom_line(mapping = aes(linetype = condition)) +
+  geom_errorbar(aes(x= block, y = mean_accuracy, ymin = mean_accuracy-se_accuracy, ymax = mean_accuracy+se_accuracy), color = "black", width=.1)+
+  facet_grid(cols = vars(stage), space = "free_x", scales = "free_x") + 
+  scale_x_continuous(name = "Block", breaks = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)) + 
+  labs(shape = "Group", linetype = "Group") +
+  scale_y_continuous(name = "Accuracy", limits = c(0.5, 1))+
+  theme_apa()
+```
+
+```{r, include=FALSE}
+#ANOVA
+UNM08_acc <- UNM08_training %>%
+  group_by (pNum, block, condition) %>%
+  summarise(mean_response = mean(prob_response, na.rm = TRUE))
+UNM08_acc$block <- factor(UNM08_acc$block)
+UNM08_acc$pNum <- factor(UNM08_acc$pNum)
+UNM08_acc$condition <- factor(UNM08_acc$condition)
+ANOVA_UNM08_acc <- aov_car(formula = mean_response ~ condition + Error(pNum/block), data = UNM08_acc)
+print(ANOVA_UNM08_acc)
+#Bayesian Anova
+bay_ANOVA_UNM08_acc <- anovaBF(formula = mean_response ~ condition + block + pNum,
+        data = data.frame(UNM08_acc),
+        whichRandom = "pNum")
+print(bay_ANOVA_UNM08_acc)
+bay_ANOVA_UNM08_acc_int <- bay_ANOVA_UNM08_acc[4]/bay_ANOVA_UNM08_acc[3]
+print(bay_ANOVA_UNM08_acc_int)
+# Pairwise comparisons for the interaction analysis
+resp_interaction <- emmeans(ANOVA_UNM08_acc, ~condition|block)
+pairs(resp_interaction, adjust = "bon")
+```
+
+In @fig-trainingExp3 the mean block accuracy for each group in each stage is displayed. All subjects showed a similar increase in accuracy in stage 1, reaching an accuracy of around 0.95 on block 6. In stage 2, the group Certain showed a similar accuracy to block 6, but the Uncertain group showed a decrease in accuracy, maintaining a consistent level of around 0.8. 
+A mixed-methods ANOVA, with the between-subjects factor condition (Certain vs uncertain) and the within-subjects factor Block (1-10), did not find significant the effect of the Group, showing moderate Bayesian evidence for the null hypothesis (`r apa(ANOVA_UNM08_acc, effect = "condition")`, `r report_BF_and_error(bay_ANOVA_UNM08_acc[2])`), but found a significant effect of  Block and of the interaction, both showing extreme Bayesian evidence for the alternative hypothesis (Block: `r apa(ANOVA_UNM07_acc, effect = "block")`, `r report_BF_and_error(bay_ANOVA_UNM08_acc[1], sci_not = TRUE)`; Interaction: `r apa(ANOVA_UNM08_acc, effect = "condition:block")`, `r report_BF_and_error(bay_ANOVA_UNM08_acc_int[1])`). Bonferroni-corrected comparisons showed that the Uncertain group showed a lower accuracy on the stage 2 blocks (*t*(63) > 3.572, *p* < .001), but no differences in stage 1 blocks (*t* < 1.218, *p* > .228). 
+```{r, include=FALSE}
+#ANOVA
+UNM08_acc_stage1 <- filter(UNM08_training, stage == "stage 1") %>%
+  group_by (pNum, block, condition) %>%
+  summarise(mean_response = mean(prob_response, na.rm = TRUE))
+UNM08_acc_stage1$block <- factor(UNM08_acc_stage1$block)
+UNM08_acc_stage1$pNum <- factor(UNM08_acc_stage1$pNum)
+UNM08_acc_stage1$condition <- factor(UNM08_acc_stage1$condition)
+ANOVA_UNM08_acc_stage1 <- aov_car(formula = mean_response ~ condition + Error(pNum/block), data = UNM08_acc_stage1)
+print(ANOVA_UNM08_acc_stage1)
+#Bayesian Anova
+bay_ANOVA_UNM08_acc_stage1 <- anovaBF(formula = mean_response ~ condition + block + pNum,
+        data = data.frame(UNM08_acc_stage1),
+        whichRandom = "pNum")
+print(bay_ANOVA_UNM08_acc_stage1)
+bay_ANOVA_UNM08_acc_stage1_int <- bay_ANOVA_UNM08_acc_stage1[4]/bay_ANOVA_UNM08_acc_stage1[3]
+print(bay_ANOVA_UNM08_acc_stage1_int)
+```
+Furthermore, a mixed-methods ANOVA for Stage 1, including the between-subjects factor Condition (Certain, Certain short, and Uncertain), and the within-subjects factor Block (1-6), found only significant the effect of the Block, with extreme Bayesian evidence for the alternative hypothesis (`r apa(ANOVA_UNM08_acc_stage1, effect = "block")`, `r report_BF_and_error(bay_ANOVA_UNM08_acc_stage1[1], sci_not = TRUE)`), but not of the Condition, that showed strong evidence for the null hypothesis (`r apa(ANOVA_UNM08_acc_stage1, effect = "condition")`, `r report_BF_and_error(bay_ANOVA_UNM08_acc_stage1[2])`) nor the interaction, that showed extreme evidence for the null hypothesis (`r apa(ANOVA_UNM08_acc_stage1, effect = "condition:block")`, `r report_BF_and_error(bay_ANOVA_UNM08_acc_stage1_int[1])`).
+Taken together, these results indicate that the training in stage 1 increased the accuracy for all groups in the same fashion, consistent with the significant effect of Block in both ANOVAS. However, in stage 2, the Certain group showed a consistently higher accuracy than the Uncertain group, which can be explained by the lower contingency experienced by this group in stage 2.
+
+```{r, include = FALSE}
+#create the memory_score
+UNM08_test <- UNM08_test %>%
+  mutate (c_mem_score = case_when(acc == 0 ~ 0, acc == 1 ~ mem_score))
+#Calculate the mean accuracy and standard error for each block, including the groups
+UNM08_MS_test <- UNM08_test %>%
+  group_by(predictiveness, condition) %>%
+    summarise(mean_mem_score = mean(c_mem_score, na.rm = TRUE), 
+            se_mem_score = sd(c_mem_score, na.rm = TRUE)/sqrt(length(c_mem_score)))
+```
+```{r}
+#| label: fig-testExp3
+#| fig-cap: Memory scores on the Test of Experiment 3.
+#| apa-note: "Mean memory scores (±SEM) on Test of Experiment 2 for predictive and non-predictive trials in the Certain and Uncertain groups."
+#| fig-height: 4
+ggplot(UNM08_MS_test, mapping = aes(x = factor(condition, level=c('Uncertain', 'Certain', 'Certain short')), y = mean_mem_score, fill = predictiveness)) +
+  geom_col(position = position_dodge2()) +
+  geom_errorbar(aes(ymin = mean_mem_score - se_mem_score, ymax = mean_mem_score + se_mem_score), width=.2, position=position_dodge(0.9)) +
+  scale_x_discrete (name = "Group") +
+  scale_y_continuous(name = "Memory score")+
+  scale_fill_grey(start = 0.33) +
+  theme_apa()
+```
+```{r, include=FALSE}
+#ANOVA mem_score
+UNM08_memscore_test <- filter(UNM08_test, condition == "Certain" | condition == "Uncertain") %>%
+  group_by (pNum, condition, predictiveness) %>%
+  summarise(mem_score = mean(c_mem_score, na.rm = TRUE))
+UNM08_memscore_test$predictiveness <- factor(UNM08_memscore_test$predictiveness)
+UNM08_memscore_test$condition <- factor(UNM08_memscore_test$condition)
+UNM08_memscore_test$pNum <- factor(UNM08_memscore_test$pNum)
+ANOVA_UNM08_test <- aov_car(formula = mem_score ~ condition + Error(pNum*predictiveness), data = UNM08_memscore_test)
+print(ANOVA_UNM08_test)
+bay_ANOVA_UNM08_test <- anovaBF(formula = mem_score ~ condition*predictiveness + pNum,
+        data = data.frame(UNM08_memscore_test),
+        whichRandom = "pNum")
+print(bay_ANOVA_UNM08_test)
+bay_ANOVA_UNM08_test_int <- bay_ANOVA_UNM08_test[4]/bay_ANOVA_UNM08_test[3]
+print(bay_ANOVA_UNM08_test_int)
+```
+
+@fig-testExp3 showed that the memory for non-predictive cues was lower than for the predictive cues in the all groups, but this difference was minimal in the Uncertain group. Also, is worth noting that the memory for the cues in the Uncertain group was higher than in the Certain group. A mixed-methods ANOVA, including the between-subjects factor Group (Certain vs Uncertain), and the within-subjects factor Predictiveness (predictive vs non-predictive) showed a significant main effect of the Group, with anecdotal evidence for the alternative hypothesis (`r apa(ANOVA_UNM08_test, effect = "condition")`, `r report_BF_and_error(bay_ANOVA_UNM08_test[1])`) and of Predictiveness, with very strong evidence (`r apa(ANOVA_UNM08_test, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_UNM08_test[2])`), but not of the GroupxPredictiveness interaction, with anecdotal Bayesian evidence for the null hypothesis (`r apa(ANOVA_UNM08_test, effect = "condition:predictiveness")`, `r report_BF_and_error(bay_ANOVA_UNM08_test[1])`).
+```{r, include=FALSE}
+#ANOVA mem_score
+UNM08_memscore_cs <- filter(UNM08_test, condition == "Certain" | condition == "Certain short") %>%
+  group_by (pNum, condition, predictiveness) %>%
+  summarise(mem_score = mean(c_mem_score, na.rm = TRUE))
+UNM08_memscore_cs$predictiveness <- factor(UNM08_memscore_cs$predictiveness)
+UNM08_memscore_cs$condition <- factor(UNM08_memscore_cs$condition)
+UNM08_memscore_cs$pNum <- factor(UNM08_memscore_cs$pNum)
+ANOVA_UNM08_test_cs <- aov_car(formula = mem_score ~ condition + Error(pNum*predictiveness), data = UNM08_memscore_cs)
+print(ANOVA_UNM08_test_cs)
+bay_ANOVA_UNM08_test_cs <- anovaBF(formula = mem_score ~ condition*predictiveness + pNum,
+        data = data.frame(UNM08_memscore_cs),
+        whichRandom = "pNum")
+print(bay_ANOVA_UNM08_test_cs)
+bay_ANOVA_UNM08_test_cs_int <- bay_ANOVA_UNM08_test_cs[4]/bay_ANOVA_UNM08_test_cs[3]
+print(bay_ANOVA_UNM08_test_cs_int)
+```
+Furthermore, lower performance in the Certain group cannot be attributed to a worsened memory due to the extended training, as a mixed-methods ANOVA comparing it with group Certain short found only significant the main effect of Predictiveness, with extreme Bayesian evidence for the alternative hypothesis (`r apa(ANOVA_UNM08_test_cs, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_UNM08_test_cs[2])`), but not the effect of Group or interaction, both showing moderate Bayesian evidence for the null hypothesis (Group: `r apa(ANOVA_UNM08_test_cs, effect = "condition")`, `r report_BF_and_error(bay_ANOVA_UNM08_test_cs[1])`; GroupxPredictiveness: `r apa(ANOVA_UNM08_test_cs, effect = "condition:predictiveness")`, `r report_BF_and_error(bay_ANOVA_UNM08_test_cs_int[1])`).
+These results indicate that memory for predictive cues was better than for non-predictive cues in all instances, and that switching participants to uncertain training after a period of certain training increased their memory for both predictive and non-predictive cues. 
+
+
+## Discussion
+
+Experiment 3 aimed to examine the effect that uncertainty (induced by imperfect cue-outcome contingency) had in recognition memory after a period of certainty. Subjects that were exposed to this uncertainty on the second training phase, showed a higher level of recall of the cues than the subjects that received only certain training. Also, in all cases, recall was better for predictive than non-predictive cues, but this difference was smaller in the uncertain group (although not significant). 
+A difference between Experiment 2 and 3 is worth noting: uncertain group on Experiment 2 did not show a lower recall of non-predictive cues, whereas that difference was found in Experiment 3. Furthermore, in Experiment 2, Certain and Uncertain groups had a similar memory of the cues, whereas in this experiment, the Uncertain group showed a better memory. These differences can be due to the differences in the expectancy of uncertainty, as in Experiment 3, uncertainty is experienced after a period of certain training. 
+
+These results are consistent with previous results [@beesleyUncertaintyPredictivenessDetermine2015; @easdaleOnsetUncertaintyFacilitates2019] that showed longer proportion of eye fixation (a measure of attention) to uncertain cues than to certain cues. These studies also showed a decrease in attention to non-predictive cues for the certain group, but not on the uncertain one. Although, in this experiment, a significant interaction was not found, in absolute terms, the difference between predictive and non-predictive cues was larger on the Certain than the Uncertain group. These results strengthen the idea that the worse learning found on the previous studies for uncertain cues is not due to poor cue processing despite higher attention, as the memory for Uncertain cues was better than for Certain ones.
+
+
+# General discussion
+
+# References
+
+::: {#refs}
+:::
+
+# Appendix I
+
+The 4 sets of images from which the cues and foils displayed in the experiment were randomly selected can be seen in @fig-cues_and_foils.
+
+```{r @fig-cues_and_foils}
+#| fig-cap: Cues and foils used in Experiment 1.
+#| apa-twocolumn: true
+#apa-note: "Panel A displays the cues that can be selected for the training phase. Panel B displays the set of foils that could be selected in the tests for group VS. Panel C displays the set of foils that could be selected in the tests for group S. Panel D displays the set of foils that could be selected in the tests for group NS."
+#| out-width: 100%
+#| fig-pos: h
+knitr::include_graphics("stimuli/cues_foils.png")
+```
+
+The two images used as outcomes in these experiments can be seen in @fig-outcomes.
+
+```{r fig-outcomes}
+#| fig-cap: Outcomes used in all experiments.
+#| apa-twocolumn: true
+#| out-width: 100%
+#| fig-pos: h
+knitr::include_graphics("stimuli/outcomes.png")
+```
