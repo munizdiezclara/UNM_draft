@@ -272,7 +272,7 @@ UNM05_training <- UNM05_training %>%
                                 session == 2 ~ "S",
                                 session == 3 ~ "NS"))
 #Clean participants that did not pass check 2 and/or 3
-UNM05_training <- filter(UNM05_training, !pNum %in% UNM05_not_passed)
+UNM05_training <- filter(UNM05_training, !pNum %in% UNM05_not_passed$pNum)
 #Calculate the mean accuracy and standard error for each block, including the groups
 UNM05_MA_training <- UNM05_training %>%
   group_by(block, group) %>%
@@ -324,7 +324,7 @@ UNM05_test1 <- UNM05_test1 %>%
 UNM05_test1 <- UNM05_test1 %>%
 mutate (c_mem_score = case_when(acc == 0 ~ 0, acc == 1 ~ mem_score))
 #Clean participants that did not pass check 2 and/or 3
-UNM05_test1 <- filter(UNM05_test1, !pNum %in% UNM05_not_passed)
+UNM05_test1 <- filter(UNM05_test1, !pNum %in% UNM05_not_passed$pNum)
 #factorize the session, which is the factor that contains the group
 UNM05_test1$session <- as.factor(UNM05_test1$session)
 #Calculate the mean accuracy and standard error for each block, including the groups
@@ -364,7 +364,7 @@ bay_ANOVA_UNM05_test1_int <- bay_ANOVA_UNM05_test1[4]/bay_ANOVA_UNM05_test1[3]
 print(bay_ANOVA_UNM05_test1_int)
 ```
 
-Mean memory scores for Test1 are displayed in @fig-test1Exp1. In groups NS and S, memory score was higher for the predictive than the non-predictive cue, whereas this tendency was inverted in the VS group. Also, groups VS and S showed higher memory score than group NS. Is worth noting that these differences were very small, and according to the mixed-method ANOVA, none of the main effects or the interaction were significant, and all showed moderate Bayesian evidence for the null hypothesis (Group: `r apa(ANOVA_UNM05_test1, effect = "group")`, `r report_BF_and_error(bay_ANOVA_UNM05_test1[1])`; Predictiveness: `r apa(ANOVA_UNM05_test1, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_UNM05_test1[2])`; GroupxPredictiveness: `r apa(ANOVA_UNM05_test1, effect = "group:predictiveness")`, `r report_BF_and_error(bay_ANOVA_UNM05_test1[1])`). Thus, not only the similarity between the cues did not have an effect on memory in this test, but the test failed to show memory differences between predictive and non-predictive cues.
+Mean memory scores for Test1 are displayed in @fig-test1Exp1. In groups NS and S, memory score was higher for the predictive than the non-predictive cue, whereas this tendency was inverted in the VS group. Also, groups VS and S showed higher memory score than group NS. Is worth noting that these differences were very small, and according to the mixed-method ANOVA, none of the main effects or the interaction were significant, the main effects showing anecdotal Bayesian evidence for the null hypothesis, and the interaction, moderate (Group: `r apa(ANOVA_UNM05_test1, effect = "group")`, `r report_BF_and_error(bay_ANOVA_UNM05_test1[1])`; Predictiveness: `r apa(ANOVA_UNM05_test1, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_UNM05_test1[2])`; GroupxPredictiveness: `r apa(ANOVA_UNM05_test1, effect = "group:predictiveness")`, `r report_BF_and_error(bay_ANOVA_UNM05_test1[1])`). Thus, not only the similarity between the cues did not have an effect on memory in this test, but the test failed to show memory differences between predictive and non-predictive cues.
 
 ```{r, include = FALSE}
 UNM05_test2 <- UNM05_test2 %>%
@@ -383,7 +383,7 @@ UNM05_test2 <- UNM05_test2 %>%
          #create a memory_score
          c_mem_score = case_when(acc == 0 ~ 0, acc == 1 ~ mem_score))
 #Clean participants that did not pass check 2 and/or 3
-UNM05_test2 <- filter(UNM05_test2, !pNum %in% UNM05_not_passed)
+UNM05_test2 <- filter(UNM05_test2, !pNum %in% UNM05_not_passed$pNum)
 #Calculate the mean accuracy and standard error for each block, including the groups
 UNM05_MS_test2 <- UNM05_test2 %>%
   group_by(trial_type, group) %>%
@@ -430,7 +430,7 @@ bay_ANOVA_UNM05_test2_sxpxc <- bay_ANOVA_UNM05_test2[18]/bay_ANOVA_UNM05_test2[1
 print(bay_ANOVA_UNM05_test2_sxpxc)
 ```
 
-As can be seen in @fig-test2Exp1, mean memory scores were smaller for non-predictive than for predictive cues. This difference was more pronounced in the VS group than on the other groups. However, there were no apparent differences between the congruent trials (in which both target and foil were predictive or non-predictive) and incongruent trials (in which target and foil were one predictive and one non-predictive). A mixed methods ANOVA found that the only significant differences were due to the main effect of Predictiveness, with strong Bayesian evidence for the alternative hypothesis (`r apa(ANOVA_UNM05_test2, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_UNM05_test2[2])`). No other significant effects were found (Group: `r apa(ANOVA_UNM05_test2, effect = "group")`, Congruence: `r apa(ANOVA_UNM05_test2, effect = "congruence")`; GroupxPredictiveness `r apa(ANOVA_UNM05_test2, effect = "group:predictiveness")`; PredictivenessxCongruence: `r apa(ANOVA_UNM05_test2, effect = "predictiveness:congruence")`; GroupxCongruence: `r apa(ANOVA_UNM05_test2, effect = "group:congruence")`; GroupxPredictivenessxCongruence: `r apa(ANOVA_UNM05_test2, effect = "group:predictiveness:congruence")`), and the Bayesian evidence was moderate for the null hypothesis for all non-significant effects (Group: `r report_BF_and_error(bay_ANOVA_UNM05_test2[1])`; Congruence `r report_BF_and_error(bay_ANOVA_UNM05_test2[5])`; GroupxPredictiveness: `r report_BF_and_error(bay_ANOVA_UNM05_test2_sxp[1])`; PredictivenessxCongruence:`r report_BF_and_error(bay_ANOVA_UNM05_test2_pxc[1])`; GroupxCongruence: `r report_BF_and_error(bay_ANOVA_UNM05_test2_sxc[1])`), except for the three-way interaction, in which it was strong (`r report_BF_and_error(bay_ANOVA_UNM05_test2_sxpxc[1])`). The results indicate that, in Test2, participants showed better memory for predictive that non-predictive cues, but there were no differences due to the congruence of the test trial, nor the group.
+As can be seen in @fig-test2Exp1, mean memory scores were smaller for non-predictive than for predictive cues. This difference was more pronounced in the VS group than on the other groups. However, there were no apparent differences between the congruent trials (in which both target and foil were predictive or non-predictive) and incongruent trials (in which target and foil were one predictive and one non-predictive). A mixed methods ANOVA found that the only significant differences were due to the main effect of Predictiveness, with strong Bayesian evidence for the alternative hypothesis (`r apa(ANOVA_UNM05_test2, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_UNM05_test2[2])`). No other significant effects were found (Group: `r apa(ANOVA_UNM05_test2, effect = "group")`, Congruence: `r apa(ANOVA_UNM05_test2, effect = "congruence")`; GroupxPredictiveness `r apa(ANOVA_UNM05_test2, effect = "group:predictiveness")`; PredictivenessxCongruence: `r apa(ANOVA_UNM05_test2, effect = "predictiveness:congruence")`; GroupxCongruence: `r apa(ANOVA_UNM05_test2, effect = "group:congruence")`; GroupxPredictivenessxCongruence: `r apa(ANOVA_UNM05_test2, effect = "group:predictiveness:congruence")`), and the Bayesian evidence was moderate for the null hypothesis for all non-significant effects (Group: `r report_BF_and_error(bay_ANOVA_UNM05_test2[1])`; Congruence `r report_BF_and_error(bay_ANOVA_UNM05_test2[5])`; GroupxPredictiveness: `r report_BF_and_error(bay_ANOVA_UNM05_test2_sxp[1])`; PredictivenessxCongruence:`r report_BF_and_error(bay_ANOVA_UNM05_test2_pxc[1])`; GroupxCongruence: `r report_BF_and_error(bay_ANOVA_UNM05_test2_sxc[1])`; GroupxPredictivenessxCongruence: `r report_BF_and_error(bay_ANOVA_UNM05_test2_sxpxc[1])`). The results indicate that, in Test2, participants showed better memory for predictive that non-predictive cues, but there were no differences due to the congruence of the test trial, nor the group.
 
 ```{r, include = FALSE}
 #Calculate the mean accuracy and standard error for each block, including the groups
@@ -463,13 +463,16 @@ d <- with(UNM05_test2_NS,
         mem_score[predictiveness == "non-predictive"] - mem_score[predictiveness == "predictive"])
 # Shapiro-Wilk normality test for the differences
 shapiro.test(d)
+#ttest
 t.test_UNM05_test2_NS <- t.test(mem_score ~ predictiveness, data = UNM05_test2_NS, paired = TRUE)
 print(t.test_UNM05_test2_NS)
+#bayesian t test
 pred_UNM05_test2_NS <- subset(UNM05_test2_NS,  predictiveness == "predictive", mem_score, drop = TRUE)
 nonpred_UNM05_test2_NS <- subset(UNM05_test2_NS,  predictiveness == "non-predictive", mem_score, drop = TRUE)
 bay_t.test_UNM05_test2_NS <-  ttestBF(pred_UNM05_test2_NS, nonpred_UNM05_test2_NS, paired = TRUE)
 print(bay_t.test_UNM05_test2_NS)
-
+```
+```{r, include=FALSE}
 #t test for S
 UNM05_test2_S <- filter(UNM05_test2, group == "S") %>%
   group_by (pNum, predictiveness) %>%
@@ -485,8 +488,9 @@ pred_UNM05_test2_S <- subset(UNM05_test2_S,  predictiveness == "predictive", mem
 nonpred_UNM05_test2_S <- subset(UNM05_test2_S,  predictiveness == "non-predictive", mem_score, drop = TRUE)
 bay_t.test_UNM05_test2_S <-  ttestBF(pred_UNM05_test2_S, nonpred_UNM05_test2_S, paired = TRUE)
 print(bay_t.test_UNM05_test2_S)
-
-#t test for NS
+```
+```{r, include=FALSE}
+#t test for VS
 UNM05_test2_VS <- filter(UNM05_test2, group == "VS") %>%
   group_by (pNum, predictiveness) %>%
   summarise(mem_score = mean(c_mem_score, na.rm = TRUE))
@@ -567,11 +571,11 @@ UNM07_block8 <- filter(UNM07_training, block == 8) %>%
   summarise (mean_response = mean(prob_response, na.rm = TRUE))
 UNM07_low_acc_total <- filter(UNM07_block8, mean_response < 0.6) 
 UNM07_low_acc <- UNM07_low_acc_total$pNum
-UNM07_training <- filter(UNM07_training, !pNum %in% UNM07_not_passed & !pNum %in% UNM07_low_acc)
-UNM07_test <- filter(UNM07_test, !pNum %in% UNM07_not_passed & !pNum %in% UNM07_low_acc)
+UNM07_training <- filter(UNM07_training, !pNum %in% UNM07_not_passed$pNum & !pNum %in% UNM07_low_acc_total$pNum)
+UNM07_test <- filter(UNM07_test, !pNum %in% UNM07_not_passed$pNum & !pNum %in% UNM07_low_acc_total$pNum)
 ```
 
-Participants that failed the comprehension check before test were excluded from these analyses. `r nrow(UNM07_not_passed)` participants were excluded based on this criterion, `r length(which(UNM07_not_passed$condition == "Certain"))` in group Certain and `r length(which(UNM07_not_passed$condition == "Uncertain"))` in group Uncertain. Following Le Pelley & Mackintosh [-@lepelleyLearnedAssociabilityAssociative2003; see also @lepelleyLearnedPredictivenessInfluences2013], an additional criterion was added in this experiment due to the poor performance of some participants in the training phase, such that those that had a mean accuracy in the training phase lower than 0.6 in the final block of the training phase where removed from the analyses. This led to an exclusion of `r nrow(UNM07_low_acc)` participants, `r length(which(UNM07_low_acc_total$condition == "Certain"))` in group Certain and `r length(which(UNM07_low_acc_total$condition == "Uncertain"))` in group Uncertain. Thus, the results below are for the remaining `r nrow(UNM07_test)/24` participants.
+Participants that failed the comprehension check before test were excluded from these analyses. `r nrow(UNM07_not_passed)` participants were excluded based on this criterion, `r length(which(UNM07_not_passed$condition == "Certain"))` in group Certain and `r length(which(UNM07_not_passed$condition == "Uncertain"))` in group Uncertain. Following Le Pelley & Mackintosh [-@lepelleyLearnedAssociabilityAssociative2003; see also @lepelleyLearnedPredictivenessInfluences2013], an additional criterion was added in this experiment due to the poor performance of some participants in the training phase, such that those that had a mean accuracy in the training phase lower than 0.6 in the final block of the training phase where removed from the analyses. This led to an exclusion of `r nrow(UNM07_low_acc_total)` participants, `r length(which(UNM07_low_acc_total$condition == "Certain"))` in group Certain and `r length(which(UNM07_low_acc_total$condition == "Uncertain"))` in group Uncertain. Thus, the results below are for the remaining `r nrow(UNM07_test)/24` participants.
 
 ```{r, include = FALSE}
 #Calculate the mean accuracy and standard error for each block, including the groups
@@ -662,7 +666,7 @@ UNM07_memscore_test_interaction <- emmeans(ANOVA_UNM07_test, ~ predictiveness|co
 pairs(UNM07_memscore_test_interaction, adjust = "bon")
 ```
 
-@fig-testExp2 showed that the memory for non-predictive cues was lower than for the predictive cues in the Certain group. This difference, although in the same direction, was minimal in the Uncertain group. Also, is worth noting that the memory for the cues in the Uncertain group was lower than the memory for the predictive cues in the Certain group, but higher than for the non-predictive. A mixed-methods ANOVA showed a significant main effect of Predictiveness, with moderate Bayesian evidence (`r apa(ANOVA_UNM07_test, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_UNM07_test[2])`) and the GroupxPredictiveness interaction, with anecdotal Bayesian evidence (`r apa(ANOVA_UNM07_test, effect = "condition:predictiveness")`, `r report_BF_and_error(bay_ANOVA_UNM07_test[1])`). However, the Group effect was not significant and the evidence for the null hypothesis, moderate (`r apa(ANOVA_UNM07_test, effect = "condition")`, `r report_BF_and_error(bay_ANOVA_UNM07_test[1])`). Bonferroni-corrected pairwise comparisons showed that there was a significant difference between predictive and non-predictive cues in the Certain group (*t*(75) = 3.633, *p* \< .001), but not in the Uncertain group (*t*(75) = 0.276, *p* = .783). This indicated that the training with certain contingency produces a difference in memory for the cues depending on their predictiveness, but that difference does not follow from the uncertain training.
+@fig-testExp2 showed that the memory for non-predictive cues was lower than for the predictive cues in the Certain group. This difference, although in the same direction, was minimal in the Uncertain group. Also, is worth noting that the memory for the cues in the Uncertain group was lower than the memory for the predictive cues in the Certain group, but higher than for the non-predictive. A mixed-methods ANOVA showed a significant main effect of Predictiveness, with moderate Bayesian evidence (`r apa(ANOVA_UNM07_test, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_UNM07_test[2])`) and the GroupxPredictiveness interaction, with anecdotal Bayesian evidence (`r apa(ANOVA_UNM07_test, effect = "condition:predictiveness")`, `r report_BF_and_error(bay_ANOVA_UNM07_test_int[1])`). However, the Group effect was not significant and the evidence for the null hypothesis, moderate (`r apa(ANOVA_UNM07_test, effect = "condition")`, `r report_BF_and_error(bay_ANOVA_UNM07_test[1])`). Bonferroni-corrected pairwise comparisons showed that there was a significant difference between predictive and non-predictive cues in the Certain group (*t*(73) = 3.45, *p* = .001), but not in the Uncertain group (*t*(73) = 0.28, *p* = .781). This indicated that the training with certain contingency produces a difference in memory for the cues depending on their predictiveness, but that difference does not follow from the uncertain training.
 
 ## Discussion
 
@@ -743,11 +747,11 @@ UNM08_block6 <- filter(UNM08_training, block == 6) %>%
   summarise (mean_response = mean(prob_response, na.rm = TRUE))
 UNM08_low_acc_total <- filter(UNM08_block6, mean_response < 0.6) 
 UNM08_low_acc <- UNM08_low_acc_total$pNum
-UNM08_training <- filter(UNM08_training, !pNum %in% UNM08_not_passed & !pNum %in% UNM08_low_acc)
-UNM08_test <- filter(UNM08_test, !pNum %in% UNM08_not_passed & !pNum %in% UNM08_low_acc)
+UNM08_training <- filter(UNM08_training, !pNum %in% UNM08_not_passed$pNum & !pNum %in% UNM08_low_acc_total$pNum)
+UNM08_test <- filter(UNM08_test, !pNum %in% UNM08_not_passed$pNum & !pNum %in% UNM08_low_acc_total$pNum)
 ```
 
-As in Experiment 2, `r nrow(UNM08_not_passed)` participants were excluded on the base of failing the comprehension check before test, all in group Uncertain; `r nrow(UNM08_low_acc_total)` participants were excluded due to a low accuracy (< 0.6) at the final block (block 6) of the first training phase, `r length(which(UNM08_low_acc_total$condition == "Certain"))` in group Certain, `r length(which(UNM08_low_acc_total$condition == "Uncertain"))` in group Uncertain, and `r length(which(UNM08_low_acc_total$condition == "Certain short"))`. Thus, the results below are for the remaining `r nrow(UNM08_test)/24` participants.
+As in Experiment 2, `r nrow(UNM08_not_passed)` participants were excluded on the base of failing the comprehension check before test, all in group Uncertain; `r nrow(UNM08_low_acc_total)` participants were excluded due to a low accuracy (< 0.6) at the final block (block 6) of the first training phase, `r length(which(UNM08_low_acc_total$condition == "Certain"))` in group Certain, `r length(which(UNM08_low_acc_total$condition == "Uncertain"))` in group Uncertain, and `r length(which(UNM08_low_acc_total$condition == "Certain short"))`in group Certain short. Thus, the results below are for the remaining `r nrow(UNM08_test)/24` participants.
 
 ```{r, include = FALSE}
 #Calculate the mean accuracy and standard error for each block, including the groups and stages
@@ -786,7 +790,7 @@ ggplot(UNM08_MA_training, mapping = aes(x = block, y = mean_accuracy, group = co
 
 ```{r, include=FALSE}
 #ANOVA
-UNM08_acc <- UNM08_training %>%
+UNM08_acc <- filter(UNM08_training, condition == "Certain" | condition == "Uncertain") %>%
   group_by (pNum, block, condition) %>%
   summarise(mean_response = mean(prob_response, na.rm = TRUE))
 UNM08_acc$block <- factor(UNM08_acc$block)
@@ -807,7 +811,7 @@ pairs(resp_interaction, adjust = "bon")
 ```
 
 In @fig-trainingExp3 the mean block accuracy for each group in each stage is displayed. All subjects showed a similar increase in accuracy in stage 1, reaching an accuracy of around 0.95 on block 6. In stage 2, the group Certain showed a similar accuracy to block 6, but the Uncertain group showed a decrease in accuracy, maintaining a consistent level of around 0.8. 
-A mixed-methods ANOVA, with the between-subjects factor condition (Certain vs uncertain) and the within-subjects factor Block (1-10), did not find significant the effect of the Group, showing moderate Bayesian evidence for the null hypothesis (`r apa(ANOVA_UNM08_acc, effect = "condition")`, `r report_BF_and_error(bay_ANOVA_UNM08_acc[2])`), but found a significant effect of  Block and of the interaction, both showing extreme Bayesian evidence for the alternative hypothesis (Block: `r apa(ANOVA_UNM07_acc, effect = "block")`, `r report_BF_and_error(bay_ANOVA_UNM08_acc[1], sci_not = TRUE)`; Interaction: `r apa(ANOVA_UNM08_acc, effect = "condition:block")`, `r report_BF_and_error(bay_ANOVA_UNM08_acc_int[1])`). Bonferroni-corrected comparisons showed that the Uncertain group showed a lower accuracy on the stage 2 blocks (*t*(63) > 3.572, *p* < .001), but no differences in stage 1 blocks (*t* < 1.218, *p* > .228). 
+A mixed-methods ANOVA, with the between-subjects factor condition (Certain vs uncertain) and the within-subjects factor Block (1-10), did not find significant the effect of the Group, showing anecdotal Bayesian evidence for the null hypothesis (`r apa(ANOVA_UNM08_acc, effect = "condition")`, `r report_BF_and_error(bay_ANOVA_UNM08_acc[2])`), but found a significant effect of  Block and of the interaction, both showing extreme Bayesian evidence for the alternative hypothesis (Block: `r apa(ANOVA_UNM07_acc, effect = "block")`, `r report_BF_and_error(bay_ANOVA_UNM08_acc[1], sci_not = TRUE)`; Interaction: `r apa(ANOVA_UNM08_acc, effect = "condition:block")`, `r report_BF_and_error(bay_ANOVA_UNM08_acc_int[1])`). Bonferroni-corrected comparisons showed that the Uncertain group showed a lower accuracy on the stage 2 blocks (*t*(58) > 3.27, *p* < .002), but no differences in stage 1 blocks (*t*(58) < 1.15, *p* > .254). 
 ```{r, include=FALSE}
 #ANOVA
 UNM08_acc_stage1 <- filter(UNM08_training, stage == "stage 1") %>%
@@ -868,9 +872,12 @@ bay_ANOVA_UNM08_test <- anovaBF(formula = mem_score ~ condition*predictiveness +
 print(bay_ANOVA_UNM08_test)
 bay_ANOVA_UNM08_test_int <- bay_ANOVA_UNM08_test[4]/bay_ANOVA_UNM08_test[3]
 print(bay_ANOVA_UNM08_test_int)
+# Pairwise comparisons for the interaction analysis
+UNM08_test_interaction <- emmeans(ANOVA_UNM08_test, ~predictiveness|condition)
+pairs(UNM08_test_interaction, adjust = "bon")
 ```
 
-@fig-testExp3 showed that the memory for non-predictive cues was lower than for the predictive cues in the all groups, but this difference was minimal in the Uncertain group. Also, is worth noting that the memory for the cues in the Uncertain group was higher than in the Certain group. A mixed-methods ANOVA, including the between-subjects factor Group (Certain vs Uncertain), and the within-subjects factor Predictiveness (predictive vs non-predictive) showed a significant main effect of the Group, with anecdotal evidence for the alternative hypothesis (`r apa(ANOVA_UNM08_test, effect = "condition")`, `r report_BF_and_error(bay_ANOVA_UNM08_test[1])`) and of Predictiveness, with very strong evidence (`r apa(ANOVA_UNM08_test, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_UNM08_test[2])`), but not of the GroupxPredictiveness interaction, with anecdotal Bayesian evidence for the null hypothesis (`r apa(ANOVA_UNM08_test, effect = "condition:predictiveness")`, `r report_BF_and_error(bay_ANOVA_UNM08_test[1])`).
+@fig-testExp3 showed that the memory for non-predictive cues was lower than for the predictive cues in the all groups, but this difference was minimal in the Uncertain group. Also, is worth noting that the memory for the cues in the Uncertain group was higher than in the Certain group. A mixed-methods ANOVA, including the between-subjects factor Group (Certain vs Uncertain), and the within-subjects factor Predictiveness (predictive vs non-predictive) showed a significant main effect of the Group, with anecdotal evidence for the alternative hypothesis (`r apa(ANOVA_UNM08_test, effect = "condition")`, `r report_BF_and_error(bay_ANOVA_UNM08_test[1])`), of the Predictiveness, with strong evidence (`r apa(ANOVA_UNM08_test, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_UNM08_test[2])`), and of the GroupxPredictiveness interaction, with anecdotal evidence (`r apa(ANOVA_UNM08_test, effect = "condition:predictiveness")`, `r report_BF_and_error(bay_ANOVA_UNM08_test[1])`). Bonferroni corrected comparisons showed that memory was better for predictive than for non-predictive cues in the Certain group (*t*(58) = 3.042, *p* = .004) but not for the Uncertain group (*t*(58) = 1.025, *p* = .309).
 ```{r, include=FALSE}
 #ANOVA mem_score
 UNM08_memscore_cs <- filter(UNM08_test, condition == "Certain" | condition == "Certain short") %>%
@@ -889,15 +896,15 @@ bay_ANOVA_UNM08_test_cs_int <- bay_ANOVA_UNM08_test_cs[4]/bay_ANOVA_UNM08_test_c
 print(bay_ANOVA_UNM08_test_cs_int)
 ```
 Furthermore, lower performance in the Certain group cannot be attributed to a worsened memory due to the extended training, as a mixed-methods ANOVA comparing it with group Certain short found only significant the main effect of Predictiveness, with extreme Bayesian evidence for the alternative hypothesis (`r apa(ANOVA_UNM08_test_cs, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_UNM08_test_cs[2])`), but not the effect of Group or interaction, both showing moderate Bayesian evidence for the null hypothesis (Group: `r apa(ANOVA_UNM08_test_cs, effect = "condition")`, `r report_BF_and_error(bay_ANOVA_UNM08_test_cs[1])`; GroupxPredictiveness: `r apa(ANOVA_UNM08_test_cs, effect = "condition:predictiveness")`, `r report_BF_and_error(bay_ANOVA_UNM08_test_cs_int[1])`).
-These results indicate that memory for predictive cues was better than for non-predictive cues in all instances, and that switching participants to uncertain training after a period of certain training increased their memory for both predictive and non-predictive cues. 
+These results indicate that memory for predictive cues was better than for non-predictive cues when subjects experienced a certain training, but not when participants were switched to uncertain training. Furthermore, that switch seems to also have increased their memory for both predictive and non-predictive cues. 
 
 
 ## Discussion
 
-Experiment 3 aimed to examine the effect that uncertainty (induced by imperfect cue-outcome contingency) had in recognition memory after a period of certainty. Subjects that were exposed to this uncertainty on the second training phase, showed a higher level of recall of the cues than the subjects that received only certain training. Also, in all cases, recall was better for predictive than non-predictive cues, but this difference was smaller in the uncertain group (although not significant). 
-A difference between Experiment 2 and 3 is worth noting: uncertain group on Experiment 2 did not show a lower recall of non-predictive cues, whereas that difference was found in Experiment 3. Furthermore, in Experiment 2, Certain and Uncertain groups had a similar memory of the cues, whereas in this experiment, the Uncertain group showed a better memory. These differences can be due to the differences in the expectancy of uncertainty, as in Experiment 3, uncertainty is experienced after a period of certain training. 
+Experiment 3 aimed to examine the effect that uncertainty (induced by imperfect cue-outcome contingency) had in recognition memory after a period of certainty. Subjects that were exposed to this uncertainty on the second training phase, showed a higher level of recall of the cues than the subjects that received only certain training. Also, for those subjects that received only certain training, recall was better for predictive than non-predictive cues. A difference between Experiment 2 and 3 is worth noting: in Experiment 2, Certain and Uncertain groups had a similar memory of the cues, whereas in this experiment, the Uncertain group showed a better memory. These differences can be due to the differences in the expectancy of uncertainty, as in Experiment 3, uncertainty is experienced after a period of certain training. 
 
-These results are consistent with previous results [@beesleyUncertaintyPredictivenessDetermine2015; @easdaleOnsetUncertaintyFacilitates2019] that showed longer proportion of eye fixation (a measure of attention) to uncertain cues than to certain cues. These studies also showed a decrease in attention to non-predictive cues for the certain group, but not on the uncertain one. Although, in this experiment, a significant interaction was not found, in absolute terms, the difference between predictive and non-predictive cues was larger on the Certain than the Uncertain group. These results strengthen the idea that the worse learning found on the previous studies for uncertain cues is not due to poor cue processing despite higher attention, as the memory for Uncertain cues was better than for Certain ones.
+
+These results are consistent with previous results [@beesleyUncertaintyPredictivenessDetermine2015; @easdaleOnsetUncertaintyFacilitates2019] that showed longer proportion of eye fixation (a measure of attention) to uncertain cues than to certain cues. These studies also showed a decrease in attention to non-predictive cues for the certain group, but not on the uncertain one. In this experiment, a similar effect was found, as the difference between predictive and non-predictive cues was observed only on the Certain group. These results strengthen the idea that the worse learning found on the previous studies for uncertain cues is not due to poor cue processing despite higher attention, as the memory for Uncertain cues was better than for Certain ones.
 
 
 # General discussion
