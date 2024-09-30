@@ -452,7 +452,7 @@ UNM05_MS_test2 <- UNM05_test2 %>%
 ```{r}
 #| label: fig-test2Exp1
 #| fig-cap: Memory scores during Test 2 of Experiment 1.
-#| apa-note: "Mean memory scores (±SEM) on Test 2 of Experiment 1 in the High, Medium and Low similarity groups. The four bars per group represent the four types of trials: trials in which a non-predictive target was presented with a non-predictive foil (NP-Con), trials in which a non-predictive target was presented with a predictive foil (NP-Incon), trials in which a predictive target was presented with a non-predictive foil (P-InCon), and trials in which a predictive target was presented with a predictive foil (P-Con)."
+#| apa-note: "Mean memory scores (±SEM) on Test 2 of Experiment 1 in the High, Medium and Low similarity groups. The four bars per group represent the four types of trials: trials in which a non-predictive target was presented with a non-predictive foil (NP-Con), trials in which a non-predictive target was presented with a predictive foil (NP-Incon), trials in which a predictive target was presented with a non-predictive foil (P-Incon), and trials in which a predictive target was presented with a predictive foil (P-Con)."
 #| fig-height: 4
 ggplot(UNM05_MS_test2, mapping = aes(x = factor(group, levels = c("High", "Medium", "Low")), y = mean_mem_score, fill = trial_type)) +
   geom_col(position = position_dodge2()) +
