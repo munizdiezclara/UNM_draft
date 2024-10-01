@@ -49,7 +49,7 @@ author-note:
     # Example: This study was registered at X (Identifier Y).
     study-registration: ~
     # Acknowledge and cite data/materials to be shared.
-    data-sharing: "The programs of the experiments presented here, the data and the full code for the writting this manuscript are freely available on www.github.com/munizdiezclara/UNM_draft."
+    data-sharing: "The programs of the experiments presented here, the data and the full code for the writing this manuscript are freely available on www.github.com/munizdiezclara/UNM_draft."
     # Example: This article is based on data published in [Reference].
     # Example: This article is based on the dissertation completed by [citation].  
     related-report: ~
