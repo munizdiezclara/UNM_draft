@@ -56,7 +56,11 @@ author-note:
     # Example: [Author name] has been a paid consultant for Corporation X, which funded this study.
     conflict-of-interest: ~
     # Example: This study was supported by Grant [Grant Number] from [Funding Source].
+<<<<<<< HEAD
     financial-support: "This work was supported by the ESRC grant Known unknowns
+=======
+    financial-support: "This study was supported by the ESRC grant Known unknowns
+>>>>>>> 9fe9910d3e42d4f79cdb32899cf0ad7272afb920
 and unknown unknowns (ES/W013215/1)." 
     # Example: The authors are grateful to [Person] for [Reason].
     gratitude: ~
