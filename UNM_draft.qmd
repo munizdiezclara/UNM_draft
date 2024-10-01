@@ -49,14 +49,15 @@ author-note:
     # Example: This study was registered at X (Identifier Y).
     study-registration: ~
     # Acknowledge and cite data/materials to be shared.
-    data-sharing: ~
+    data-sharing: "The programs of the experiments presented here, the data and the full code for the writting this manuscript are freely available on www.github.com/munizdiezclara/UNM_draft."
     # Example: This article is based on data published in [Reference].
     # Example: This article is based on the dissertation completed by [citation].  
     related-report: ~
     # Example: [Author name] has been a paid consultant for Corporation X, which funded this study.
     conflict-of-interest: ~
     # Example: This study was supported by Grant [Grant Number] from [Funding Source].
-    financial-support: ~
+    financial-support: "This study was supported by the ESRC grant Known unknowns
+and unknown unknowns (ES/W013215/1)." 
     # Example: The authors are grateful to [Person] for [Reason].
     gratitude: ~
     # Example. Because the authors are equal contributors, order of authorship was determined by a fair coin toss.
@@ -160,7 +161,7 @@ The second way in which learning can modify the attention paid to stimuli is the
 
 [^1]: It should be noted that this result has proved difficult to reproduce (see Le Pelley et al., 2016).
 
-At face value, these two principles seem to be incompatible or contradictory: the predictiveness principle states we focus resources on cues that we know about, whilst the uncertainty principle states that we focus resources on cues we are less sure about. However, it is quite possible that both principles operate and describe changes in the allocation of attention, depending on the experienced contingencies. In fact, a number of  hybrid models of learning and attention have tried to reconcile the evidence in favour of both principles [e.g., @esberReconcilingInfluencePredictiveness2011; @lepelleyRoleAssociativeHistory2004; @pearceTwoTheoriesAttention2010], and some of them propose that the predictiveness and the uncertainty principles may have different functions [e.g., @kerstenTwoCompetingAttentional1998; @lepelleyRoleAssociativeHistory2004]. The predictiveness principle leads to a prioritization of information in situations in which outcome events are reliable. However, when outcome events are less stable, it is less advantageous to invest cognitive resources in exploiting what is known. Under these circumstances it might be more advantageous to explore other sources of information, in order to attempt to reduce the uncertainty in the environment. For example, a teacher can easily identify students that might need extra help, solely focusing on their grades on the exams. However, there might be students who pass those exams, but show other, less reliable signs of a need for extra help, such as poor class engagement or absenteeism. For this reason, if the teacher wants to better understand the needs of their students, they might explore new signals in order to reduce uncertainty.
+At face value, these two principles seem to be incompatible or contradictory: the predictiveness principle states we focus resources on cues that we know about, whilst the uncertainty principle states that we focus resources on cues we are less sure about. However, it is quite possible that both principles operate and describe changes in the allocation of attention, depending on the experienced contingencies. In fact, a number of hybrid models of learning and attention have tried to reconcile the evidence in favour of both principles [e.g., @esberReconcilingInfluencePredictiveness2011; @lepelleyRoleAssociativeHistory2004; @pearceTwoTheoriesAttention2010], and some of them propose that the predictiveness and the uncertainty principles may have different functions [e.g., @kerstenTwoCompetingAttentional1998; @lepelleyRoleAssociativeHistory2004]. The predictiveness principle leads to a prioritization of information in situations in which outcome events are reliable. However, when outcome events are less stable, it is less advantageous to invest cognitive resources in exploiting what is known. Under these circumstances it might be more advantageous to explore other sources of information, in order to attempt to reduce the uncertainty in the environment. For example, a teacher can easily identify students that might need extra help, solely focusing on their grades on the exams. However, there might be students who pass those exams, but show other, less reliable signs of a need for extra help, such as poor class engagement or absenteeism. For this reason, if the teacher wants to better understand the needs of their students, they might explore new signals in order to reduce uncertainty.
 
 There is a growing body of evidence that points towards both principles operating in parallel in human contingency learning tasks [@koenigRewardDrawsEye2017; @luquePredictionUncertaintyAssociative2017; @torrents-rodasEvidenceTwoAttentional2021]. Beesley et al. [-@beesleyUncertaintyPredictivenessDetermine2015], for example, adapted the learned predictiveness design of Le Pelley and McLaren [-@lepelleyLearnedAssociabilityAssociative2003] to manipulate both predictiveness and uncertainty within the same procedure. In this study, each compound of cues had either a certain contingency with the outcome (i.e., it was consistently followed by the same outcome), or an uncertain contingency (i.e., it was probabilistically related to the outcomes, with one outcome occurring on 70% of trials, and the other on 30% of trials). Measuring participants eye gaze, this study showed that on “uncertain trials”, all cues (both predictive and non-predictive) received more attention than the cues did on “certain trials”. However, a predictiveness effect was also evident, with higher attention to predictive than to non-predictive cues, although this effect was only evident for cues. Thus, this study showed that attention is both determined by the uncertainty principle, since there was higher attention when uncertainty was high, as well as by the predictiveness principle, since within each compound, attention was devoted more to predictive over non-predictive cues.
 
@@ -170,39 +171,33 @@ Torrent-Rodas et al. [-@torrents-rodasEffectPredictionError2023] also examined t
 
 A critical question arises from this paradox: do uncertain conditions result in an increase in cognitive processing? Pearce and Hall [-@pearceModelPavlovianLearning1980] thought so, suggesting that stimuli which are part of an unfamiliar (i.e. unlearned) task undergo more controlled processing (Pearce and Hall, 1980, p 549) and only transition to more automatic processing once the task is familiar. Consequently, we might expect that uncertainty should not only increase just the associative learning pertaining to these stimuli (i.e., “learning rate”), but also the memory of the stimulus representation itself [@chunInteractionsAttentionMemory2007]. For example, Otten et al. [-@ottenBrainActivityEvent2006] have shown that neural activity associated with a cue to semantically process an upcoming stimulus predicts the successful later retrieval of that stimulus at test; deeper processing tasks encourage richer encoding.
 
-In the current study, three experiments were conducted with the design employed by Beesley et al. [-@beesleyUncertaintyPredictivenessDetermine2015], in which the predictiveness and the uncertainty of the cues were manipulated. Based on the notion that greater stimulus processing is associated with superior memory recall [@craikLevelsProcessingFramework1972; @craikDepthProcessingRetention1975; @fletcherFunctionalRolesPrefrontal1998].  Stimulus processing was measured by means of a recognition memory test for the cues at the end of the task. Experiment 1 developed a suitably sensitive recognition memory test that could adequately detect variations in recognition memory for predictive and non-predictive stimuli within a learned predictiveness design. Experiment 2 assessed the memory for predictive and non-predictive cues trained either under certain or expected uncertain cues, and Experiment 3 contrasted the effect of expected and unexpected uncertainty.
-
-
+In the current study, three experiments were conducted with the design employed by Beesley et al. [-@beesleyUncertaintyPredictivenessDetermine2015], in which the predictiveness and the uncertainty of the cues were manipulated. Based on the notion that greater stimulus processing is associated with superior memory recall [@craikLevelsProcessingFramework1972; @craikDepthProcessingRetention1975; @fletcherFunctionalRolesPrefrontal1998]. Stimulus processing was measured by means of a recognition memory test for the cues at the end of the task. Experiment 1 developed a suitably sensitive recognition memory test that could adequately detect variations in recognition memory for predictive and non-predictive stimuli within a learned predictiveness design. Experiment 2 assessed the memory for predictive and non-predictive cues trained either under certain or expected uncertain cues, and Experiment 3 contrasted the effect of expected and unexpected uncertainty.
 
 # Experiment 1
-
-
 
 The aim of Experiment 1 was to develop a recognition memory test that was sensitive to detecting differences in the predictive validity of cues. All participants undertook the same training with the first phase of a “learned predictiveness” design (see Table 1). In this design, cues A and B are perfectly predictive of the outcomes that follow them, while cues X and Y are non-predictive. This learning phase was followed by two recognition memory tests. In both tests, two images were presented side-by-side, with one image being a cue presented in the training phase and the other image being a variation of one of the cues (hereafter, the “foil”). In Test 1, the foil had the same shape as the target but there was variation in its colours. In Test 2, the foil was a variation of one of the other cues. There were two different types of test trial in Test 2: congruent trials, in which the target and the foil were of the same predictiveness, and incongruent trials, in which the target and foil differed in their predictiveness. There were three between-subject groups, which differed in terms of the similarity that the foils had to the cues: High, Medium and Low similarity (see @fig-foil_example). The design of Experiment 1 can be seen in @tbl-exp1. Note that during the training stage cues A, B, X and Y were all presented equally frequently and equivalently recently to the recognition memory tests. Other things being equal, then, their memory traces should be equivalent. Thus, if recognition scores differ between these stimuli, it would indicate a difference in the level of processing that the cues underwent during training.
 
 ::: {#tbl-exp1 apa-note="Uppercase letters A, B, X, and Y represent the cues presented during training. O1 and O2 represent the outcomes presented in training. Lowercase letters *a*, *b*, *x*, and *y* represent the foils that are similar to their respective (uppercase letter) cues presented in the training phase." apa-twocolumn="true"}
-+------------+------------+--------------------------+----------------------------+
-| Training   | Test 1     | Test2 - congruent trials | Test2 - incongruent trials |
-+:==========:+:==========:+:========================:+:==========================:+
-| AX-O1      | A vs *a*   | A vs *b*                 | A vs *x* or *y*            |
-+------------+------------+--------------------------+----------------------------+
-| AY-O1      | B vs *b*   | B vs *a*                 | B vs *x* or *y*            |
-+------------+------------+--------------------------+----------------------------+
-| BX-O2      | X vs *x*   | X vs *y*                 | X vs *a* or *b*            |
-+------------+------------+--------------------------+----------------------------+
-| BY-O2      | Y vs *y*   | Y vs *x*                 | Y vs *a* or *b*            |
-+------------+------------+--------------------------+----------------------------+
++-------------+-------------+--------------------------+----------------------------+
+| Training    | Test 1      | Test2 - congruent trials | Test2 - incongruent trials |
++:===========:+:===========:+:========================:+:==========================:+
+| AX-O1       | A vs *a*    | A vs *b*                 | A vs *x* or *y*            |
++-------------+-------------+--------------------------+----------------------------+
+| AY-O1       | B vs *b*    | B vs *a*                 | B vs *x* or *y*            |
++-------------+-------------+--------------------------+----------------------------+
+| BX-O2       | X vs *x*    | X vs *y*                 | X vs *a* or *b*            |
++-------------+-------------+--------------------------+----------------------------+
+| BY-O2       | Y vs *y*    | Y vs *x*                 | Y vs *a* or *b*            |
++-------------+-------------+--------------------------+----------------------------+
 
 Design of Experiment 1
 :::
-
-
 
 ## Methods
 
 ### Transparency and openness statement
 
-In this study we detail the processes for identifying any data to be excluded, any data exclusions and all measures in the study. Statistical analyses were conducted using RStudio [-@positteamRStudio2024], with R version 4.3.3 [@rcoreteamLanguageEnvironmentStatistical2023]. All experiments were built with the open-source software PsychoPy [v. 2022.2.4; @peircePsychoPy2ExperimentsBehavior2019], and all experiments were run on Pavlovia. Participants were recruited through Prolific. The design and analysis of the experiments were based on previously published manuscripts but were not preregistered. Materials and data are freely available at: www.github.com/munizdiezclara/UNM_draft. All the experiments reported in this paper received ethical approval by the Ethics Committee at the School of Psychology, Lancaster University, UK.
+In this study we detail the processes for identifying any data to be excluded, any data exclusions and all measures in the study. Statistical analyses were conducted using RStudio [-@positteamRStudio2024], with R version 4.3.3 [@rcoreteamLanguageEnvironmentStatistical2023]. All experiments were built with the open-source software PsychoPy [v. 2022.2.4, @peircePsychoPy2ExperimentsBehavior2019], and all experiments were run on Pavlovia. Participants were recruited through Prolific. The design and analysis of the experiments were based on previously published manuscripts but were not preregistered. Materials and data are freely available at: www.github.com/munizdiezclara/UNM_draft. All the experiments reported in this paper received ethical approval by the Ethics Committee at the School of Psychology, Lancaster University, UK.
 
 ### Participants
 
@@ -216,11 +211,11 @@ UNM05_test2 <- test2
 UNM05_not_passed <- not_passed_pNum
 ```
 
-`r nrow(UNM05_demographics)` participants were recruited through Prolific. The sample consisted of `r length(which(UNM05_demographics$gender == "female"))` women, `r length(which(UNM05_demographics$gender == "male"))` men and one non-binary person, with `r n_distinct(UNM05_demographics$Nationality)` different nationalities. The mean age was `r format(mean(UNM05_demographics$age, na.rm = TRUE), digits = 3)` for the `r nrow(UNM05_demographics) - sum(is.na(UNM05_demographics$age))` participants that reported their age, being  (range `r min(UNM05_demographics$age, na.rm = TRUE)` - `r max(UNM05_demographics$age, na.rm = TRUE)`. Pre-screening of participants in Prolific ensured that they had normal or corrected to normal vision, fluency in English language, and had not participated in previous studies from our lab. Participants were rewarded with £2.70 for their participation in the study. Participants were randomly allocated to each of the three groups, according to the foil-to-cue similarity during the memory tests (High, Medium and Low). Six participants were excluded, as they failed at least one of the comprehension checks before the memory tests, resulting on `r length(which(UNM05_demographics$session == 1)) - length(which(UNM05_not_passed$session == 1))` in group High, `r length(which(UNM05_demographics$session == 2)) - length(which(UNM05_not_passed$session == 2))` in group Medium, and `r length(which(UNM05_demographics$session == 3)) - length(which(UNM05_not_passed$session == 3))` in group Low. Post-hoc calculations using G\*Power 3.1 [@faulStatisticalPowerAnalyses2007] revealed that the resulting sample size of `r nrow(UNM05_demographics) - nrow(UNM05_not_passed)` had a power of .99 to detect an effect size of η~p~^2^ = .06 that was observed for the predictiveness main effect reported in @fig-test2Exp1.
+`r nrow(UNM05_demographics)` participants were recruited through Prolific. The sample consisted of `r length(which(UNM05_demographics$gender == "female"))` women, `r length(which(UNM05_demographics$gender == "male"))` men and one non-binary person, with `r n_distinct(UNM05_demographics$Nationality)` different nationalities. The mean age was `r format(mean(UNM05_demographics$age, na.rm = TRUE), digits = 3)` for the `r nrow(UNM05_demographics) - sum(is.na(UNM05_demographics$age))` participants that reported their age, being (range `r min(UNM05_demographics$age, na.rm = TRUE)` - `r max(UNM05_demographics$age, na.rm = TRUE)`. Pre-screening of participants in Prolific ensured that they had normal or corrected to normal vision, fluency in English language, and had not participated in previous studies from our lab. Participants were rewarded with £2.70 for their participation in the study. Participants were randomly allocated to each of the three groups, according to the foil-to-cue similarity during the memory tests (High, Medium and Low). Six participants were excluded, as they failed at least one of the comprehension checks before the memory tests, resulting on `r length(which(UNM05_demographics$session == 1)) - length(which(UNM05_not_passed$session == 1))` in group High, `r length(which(UNM05_demographics$session == 2)) - length(which(UNM05_not_passed$session == 2))` in group Medium, and `r length(which(UNM05_demographics$session == 3)) - length(which(UNM05_not_passed$session == 3))` in group Low. Post-hoc calculations using G\*Power 3.1 [@faulStatisticalPowerAnalyses2007] revealed that the resulting sample size of `r nrow(UNM05_demographics) - nrow(UNM05_not_passed)` had a power of .99 to detect an effect size of η~p~^2^ = .06 that was observed for the predictiveness main effect reported in @fig-test2Exp1.
 
 ### Apparatus and stimuli
 
-Participants were presented with a task built in PsychoPy [v. 2022.2.4; @peircePsychoPy2ExperimentsBehavior2019] and hosted in Pavlovia. The task was designed so it could only be run on a computer, but not on mobile devices. The screen background colour was grey (RGB: 128, 128, 128) and all stimuli and instructions were presented against this background. The four cues presented to each participant (A, B, X and Y) were randomly selected from a set of eight images, representing imaginary chemical compounds made of three red circles and three blue circles connected with black lines. Each cue was 945 x 945 pixels, automatically re-scaled to 0.4 x 0.4 of the window height. The outcomes (O1 and O2) were two images displaying a mutant creature, black with yellow details. Each was 332 x 664 pixels, automatically re-scaled to 0.16 x 0.2 of the window height.
+Participants were presented with a task built in PsychoPy [v. 2022.2.4, @peircePsychoPy2ExperimentsBehavior2019] and hosted in Pavlovia. The task was designed so it could only be run on a computer, but not on mobile devices. The screen background colour was grey (RGB: 128, 128, 128) and all stimuli and instructions were presented against this background. The four cues presented to each participant (A, B, X and Y) were randomly selected from a set of eight images, representing imaginary chemical compounds made of three red circles and three blue circles connected with black lines. Each cue was 945 x 945 pixels, automatically re-scaled to 0.4 x 0.4 of the window height. The outcomes (O1 and O2) were two images displaying a mutant creature, black with yellow details. Each was 332 x 664 pixels, automatically re-scaled to 0.16 x 0.2 of the window height.
 
 Examples of the cue images are shown in @fig-foil_example. The foils used in the tests were colour-modifications of the original cues: for the High similarity group, the colours of one red and one blue circle were switched (four remained unchanged); for the Medium similarity group, the colours of two red and two blue circles were switched (two remained unchanged); and for the Low similarity group, the colours of all circles were switched. All of the images used in the experiment are presented in Appendix I.
 
@@ -232,7 +227,6 @@ Examples of the cue images are shown in @fig-foil_example. The foils used in the
 #| fig-pos: h
 knitr::include_graphics("images/foil_example.png")
 ```
-
 
 ### Design
 
@@ -260,7 +254,6 @@ All the trials in the training phase started with a 0.5 second blank screen. Aft
 knitr::include_graphics("images/trainexample.png")
 ```
 
-
 Once participants had completed the training phase, the instructions for Test 1 were displayed, telling participants that they were about to see two similar chemicals on each trial, and only one of them had appeared in the previous task. They had to select that chemical and then rate their confidence on a scale from 1 to 10 (see below). No feedback on response accuracy was provided. After the instructions, a comprehension check was included, presented only once and participants continued to the test, irrespective of the response given.
 
 All test trials started with a 0.5 second blank screen. After that, the images of a target (a cue presented in the training phase), and a foil were presented in the top half of the screen. These images had the same size and position as in the training phase. Participants had to click on the image they thought they had seen in the previous phase, after which a rating scale was displayed for them to give a confidence rating. Above this rating scale, the question *How confident are you of your response?* was displayed. The rating scale had 10 points, with the labels *I am guessing* on the left end (point 1), and *I am certain* on the right end (point 10), and a red dot in the middle. Participants had to click on the rating scale to move the red dot to give their confidence rating. After this, a button with the word *CONTINUE* appeared. All responses in the test phase had no time limit and participants could advance to the next test trial at their own pace.
@@ -276,8 +269,6 @@ Once participants had completed Test 1, the instructions for Test 2 were display
 #| fig-pos: h
 knitr::include_graphics("images/testexample.png")
 ```
-
-
 
 ## Results
 
@@ -302,7 +293,7 @@ UNM05_MA_training <- UNM05_training %>%
 
 The dependent variable during training was the proportion of responses on a block in which participants selected the correct outcome. In @fig-trainingExp1 the mean accuracy for each similarity group is displayed across the four blocks of training. All groups showed a similar increase in responding across blocks, reaching an approximate accuracy of 0.85 in the final block of the experiment.
 
-```{r}
+```{r, echo = FALSE, warning=FALSE}
 #| label: fig-trainingExp1
 #| fig-cap: Accuracy during the training phase of Experiment 1.
 #| apa-note: "Proportion of accurate responses (±SEM) on the training phase of Experiment 1, plotted against the four blocks of trials, for each similarity group."
@@ -317,6 +308,7 @@ ggplot(UNM05_MA_training, mapping = aes(x = block, y = mean_accuracy, group = fa
   scale_y_continuous(name = "Accuracy", limits = c(NA, 1))+
   theme_apa()
 ```
+
 ```{r, include=FALSE}
 #ANOVA
 UNM05_acc <- UNM05_training %>%
@@ -336,7 +328,6 @@ print(bay_ANOVA_UNM05_acc)
 bay_ANOVA_UNM05_acc_int <- bay_ANOVA_UNM05_acc[4]/bay_ANOVA_UNM05_acc[3]
 print(bay_ANOVA_UNM05_acc_int)
 ```
-
 
 This was confirmed by a mixed model Analysis of Variance (ANOVA) with the within-subjects factor *block* (1-4), and the between-subjects factor *similarity* (High, Medium, and Low). Degrees of freedom were corrected by Greenhouse-Geisser when necessary. This analysis found a significant main effect of the *block*, with extreme Bayesian evidence for the alternative hypothesis, `r apa(ANOVA_UNM05_acc, effect = "block")`, `r report_BF_and_error(bay_ANOVA_UNM05_acc[1], sci_not = TRUE)`. There was no main effect of *similarity*, `r apa(ANOVA_UNM05_acc, effect = "group")`, `r report_BF_and_error(bay_ANOVA_UNM05_acc[2])` nor an interaction effect, `r apa(ANOVA_UNM05_acc, effect = "group:block")`, `r report_BF_and_error(bay_ANOVA_UNM05_acc_int[1])`, with both showing moderate Bayesian evidence for the null hypothesis. These results indicate that the training was equally effective for the three similarity groups, all of them increasing their performance as the phase progressed.
 
@@ -359,6 +350,7 @@ UNM05_MS_test1 <- UNM05_test1 %>%
     summarise(mean_mem_score = mean(c_mem_score, na.rm = TRUE), 
             se_mem_score = sd(c_mem_score, na.rm = TRUE)/sqrt(length(c_mem_score)))
 ```
+
 ```{r, include = FALSE}
 UNM05_test2 <- UNM05_test2 %>%
   #add a group variable
@@ -368,6 +360,7 @@ UNM05_test2 <- UNM05_test2 %>%
 #Clean participants that did not pass check 2 and/or 3
 UNM05_test2 <- filter(UNM05_test2, !pNum %in% UNM05_not_passed$pNum)
 ```
+
 ```{r, include=FALSE}
 UNM05_memscore_test1 <- UNM05_test1 %>%
   group_by (pNum, group, predictiveness) %>%
@@ -378,6 +371,7 @@ print(UNM05_cor_test1)
 UNM05_BFcor_test1 <- correlationBF(UNM05_memscore_test1$acc, UNM05_memscore_test1$mem_score)
 print(UNM05_BFcor_test1)
 ```
+
 ```{r, include=FALSE}
 UNM05_memscore_test2 <- UNM05_test2 %>%
   group_by (pNum, group, predictiveness) %>%
@@ -391,7 +385,7 @@ print(UNM05_BFcor_test2)
 
 For the test data, we calculated a “memory score” for each trial by multiplying by 1 the confidence rating given by participants on the trials in which the target was selected (correct responses), and by 0 on the trials in which the foil was selected (incorrect responses). These two measures, accuracy and confidence rating, were significantly correlated in both memory tests: `r apa(UNM05_cor_test1)`, `r report_BF_and_error(UNM05_BFcor_test1, sci_not = TRUE)` in Test 1, and `r apa(UNM05_test2_cor)`, `r report_BF_and_error(UNM05_BFcor_test2, sci_not = TRUE)` in Test 2. Mean memory scores for Test 1 are displayed in @fig-test1Exp1. In groups Low and Medium similarity, memory score was higher for the predictive than the non-predictive cue, whereas this tendency was inverted in the High group. Also, groups Low and Medium showed higher memory score than group Low.
 
-```{r}
+```{r, echo = FALSE, warning=FALSE}
 #| label: fig-test1Exp1
 #| fig-cap: Memory scores during Test 1 of Experiment 1.
 #| apa-note: "Mean memory scores (±SEM) on Test 1 of Experiment 1 for predictive and non-predictive trials in the High, Medium and Low similarity groups."
@@ -405,6 +399,7 @@ ggplot(UNM05_MS_test1, mapping = aes(x = factor(group, levels = c("High", "Mediu
   #scale_fill_grey(start = 0.33) +
   theme_apa()
 ```
+
 ```{r, include=FALSE}
 #ANOVA mem_score
 UNM05_memscore_test1 <- UNM05_test1 %>%
@@ -423,7 +418,6 @@ print(bay_ANOVA_UNM05_test1)
 bay_ANOVA_UNM05_test1_int <- bay_ANOVA_UNM05_test1[4]/bay_ANOVA_UNM05_test1[3]
 print(bay_ANOVA_UNM05_test1_int)
 ```
-
 
 These differences, however, were very small, and a mixed model ANOVA of the memory scores revealed none of the main effects or the interaction were significant: *similarity*: `r apa(ANOVA_UNM05_test1, effect = "group")`, `r report_BF_and_error(bay_ANOVA_UNM05_test1[1])`; *predictiveness*: `r apa(ANOVA_UNM05_test1, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_UNM05_test1[2])`; *similarity x predictiveness*: `r apa(ANOVA_UNM05_test1, effect = "group:predictiveness")`, `r report_BF_and_error(bay_ANOVA_UNM05_test1[1])`. Of note, there was moderate evidence for a null-effect of predictiveness, suggesting that Test 1 failed to reveal any differences in cue-processing between predictive and non-predictive cues.
 
@@ -449,7 +443,7 @@ UNM05_MS_test2 <- UNM05_test2 %>%
 
 @fig-test2Exp1 shows the data from Test 2. Overall, mean memory scores were lower for the non-predictive than for the predictive cues. This difference was more pronounced in the High group than in the other groups. However, there were no apparent differences between the congruent trials (in which target and foil were either both predictive or both non-predictive) and incongruent trials (in which the target and foil differed in their predictiveness).
 
-```{r}
+```{r, echo = FALSE, warning=FALSE}
 #| label: fig-test2Exp1
 #| fig-cap: Memory scores during Test 2 of Experiment 1.
 #| apa-note: "Mean memory scores (±SEM) on Test 2 of Experiment 1 in the High, Medium and Low similarity groups. The four bars per group represent the four types of trials: trials in which a non-predictive target was presented with a non-predictive foil (NP-Con), trials in which a non-predictive target was presented with a predictive foil (NP-Incon), trials in which a predictive target was presented with a non-predictive foil (P-Incon), and trials in which a predictive target was presented with a predictive foil (P-Con)."
@@ -463,6 +457,7 @@ ggplot(UNM05_MS_test2, mapping = aes(x = factor(group, levels = c("High", "Mediu
   scale_fill_discrete(type = c("#7B3294", "#C2A5CF", "#008837", "#A6DBA0"))+
   theme_apa()
 ```
+
 ```{r, include=FALSE}
 #ANOVA mem_score
 UNM05_memscore_test2 <- UNM05_test2 %>%
@@ -489,7 +484,6 @@ bay_ANOVA_UNM05_test2_sxpxc <- bay_ANOVA_UNM05_test2[18]/bay_ANOVA_UNM05_test2[1
 print(bay_ANOVA_UNM05_test2_sxpxc)
 ```
 
-
 These data were analysed using a mixed ANOVA of memory scores with the factors of *predictiveness* (predictive vs. non-predictive target cue), *congruence* (target and foil same predictiveness or not), and *similarity* (High, Medium, Low). This analysis found that the only significant differences were due to the main effect of *predictiveness*, with strong Bayesian evidence for the alternative hypothesis, `r apa(ANOVA_UNM05_test2, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_UNM05_test2[2])`. No other significant effects were found, and the Bayesian evidence was moderate for the null hypothesis for all of them: *similarity*: `r apa(ANOVA_UNM05_test2, effect = "group")`, `r report_BF_and_error(bay_ANOVA_UNM05_test2[1])`; *congruence*: `r apa(ANOVA_UNM05_test2, effect = "congruence")`, `r report_BF_and_error(bay_ANOVA_UNM05_test2[5])`; *similarity x predictiveness*: `r apa(ANOVA_UNM05_test2, effect = "group:predictiveness")`, `r report_BF_and_error(bay_ANOVA_UNM05_test2_sxp[1])`; *predictiveness x congruence*: `r apa(ANOVA_UNM05_test2, effect = "predictiveness:congruence")`, `r report_BF_and_error(bay_ANOVA_UNM05_test2_pxc[1])`; *similarity x congruence*: `r apa(ANOVA_UNM05_test2, effect = "group:congruence")`, `r report_BF_and_error(bay_ANOVA_UNM05_test2_sxc[1])`; *similarity x predictiveness x congruence*: `r apa(ANOVA_UNM05_test2, effect = "group:predictiveness:congruence")`, `r report_BF_and_error(bay_ANOVA_UNM05_test2_sxpxc[1])`. The results indicate that, in Test 2, participants showed better memory for predictive than non-predictive cues, but there were no differences due to the congruence of the test trial, nor the similarity of the foils to the training stimuli.
 
 ```{r, include = FALSE}
@@ -511,6 +505,7 @@ print(bay_ANOVA_UNM05_test2_L)
 bay_ANOVA_UNM05_test2_L_int <- bay_ANOVA_UNM05_test2_L[4]/bay_ANOVA_UNM05_test2_L[3]
 print(bay_ANOVA_UNM05_test2_L_int)
 ```
+
 ```{r, include = FALSE}
 UNM05_test2_M <- filter(UNM05_test2, group == "Medium") %>%
   group_by (pNum, predictiveness, congruence) %>%
@@ -530,6 +525,7 @@ print(bay_ANOVA_UNM05_test2_M)
 bay_ANOVA_UNM05_test2_M_int <- bay_ANOVA_UNM05_test2_M[4]/bay_ANOVA_UNM05_test2_M[3]
 print(bay_ANOVA_UNM05_test2_M_int)
 ```
+
 ```{r, include = FALSE}
 UNM05_test2_H <- filter(UNM05_test2, group == "High") %>%
   group_by (pNum, predictiveness, congruence) %>%
@@ -552,51 +548,43 @@ print(bay_ANOVA_UNM05_test2_H_int)
 
 Despite there being no meaningful effects of similarity, and since the aim of this experiment was to determine the most sensitive way of testing participants’ memory, exploratory analyses were conducted on the data from each similarity group separately. For each, we conducted a within-subjects ANOVA with the factors *predictiveness* (predictive vs non-predictive) and *congruence* (congruent vs incongruent). In group Low, there was no main effect of *predictiveness*, `r apa(ANOVA_UNM05_test2_L, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_UNM05_test2_L[1])`, nor of *congruence*, `r apa(ANOVA_UNM05_test2_L, effect = "congruence")`, `r report_BF_and_error(bay_ANOVA_UNM05_test2_L[2])` and no interaction, `r apa(ANOVA_UNM05_test2_L, effect = "group:predictiveness")`, `r report_BF_and_error(bay_ANOVA_UNM05_test2_L_int[1])`. For group Medium, there was also no effect of *predictiveness*: `r apa(ANOVA_UNM05_test2_M, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_UNM05_test2_M[1])`, *congruence*: `r apa(ANOVA_UNM05_test2_M, effect = "congruence")`, `r report_BF_and_error(bay_ANOVA_UNM05_test2_M[2])`, and no interaction *group x predictiveness*: `r apa(ANOVA_UNM05_test2_M, effect = "group:predictiveness")`, `r report_BF_and_error(bay_ANOVA_UNM05_test2_M_int[1])`). However, for group High there was a significant effect of *predictiveness*, `r apa(ANOVA_UNM05_test2_H, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_UNM05_test2_H[1])`, but no effect of *congruence*, `r apa(ANOVA_UNM05_test2_H, effect = "congruence")`, `r report_BF_and_error(bay_ANOVA_UNM05_test2_H[2])`, and no interaction, `r apa(ANOVA_UNM05_test2_H, effect = "predictiveness:congruence")`, `r report_BF_and_error(bay_ANOVA_UNM05_test2_H_int[1])`. These results indicate that the only group that had a better memory for predictive stimuli over non-predictive stimuli was the High similarity group, irrespective of the congruence between foil and target in test.
 
-
-
 ## Discussion
 
-Experiment 1 aimed to find an effective method for examining memory cues which had been established as either predictive or non-predictive of an outcome during a previous learning task. Two different tests were used, both involving the presentation of a target (a previously trained cue) and a foil (a novel cue), which had the colours of some its elements swapped. In Test 1, the foil was the same shape as the target while in  Test 2, the foil was derived from a different cue from the target. Three groups of participants received different levels of foil-to-cue similarity. Test 1 revealed no differences in memory due to predictiveness nor due to the foil-to-cue similarity. Test 2 showed better memory for predictive than non-predictive cues, and, although there was no significant effect of, nor any interaction with, the factor of the similarity, further analysis showed that only the High similarity group (in which the colours changed in two out of the six circles) showed an effect of cue-predictiveness on recognition memory.
+Experiment 1 aimed to find an effective method for examining memory cues which had been established as either predictive or non-predictive of an outcome during a previous learning task. Two different tests were used, both involving the presentation of a target (a previously trained cue) and a foil (a novel cue), which had the colours of some its elements swapped. In Test 1, the foil was the same shape as the target while in Test 2, the foil was derived from a different cue from the target. Three groups of participants received different levels of foil-to-cue similarity. Test 1 revealed no differences in memory due to predictiveness nor due to the foil-to-cue similarity. Test 2 showed better memory for predictive than non-predictive cues, and, although there was no significant effect of, nor any interaction with, the factor of the similarity, further analysis showed that only the High similarity group (in which the colours changed in two out of the six circles) showed an effect of cue-predictiveness on recognition memory.
 
-To the best of our knowledge only one other study has investigated the relationship between the predictive validity  of cues and recognition memory. Griffiths and Mitchell [-@griffithsSelectiveAttentionHuman2008] also used a recognition memory test as a measure of cue processing and in Experiment 4 of their study used a learned predictiveness design adapted from Le Pelley and McLaren [-@lepelleyLearnedAssociabilityAssociative2003], and similar in nature to the design of Experiment 1. However, Griffiths and Mitchell [-@griffithsSelectiveAttentionHuman2008] did not observe differences in the recognition performance for predictive and non-predictive cues. There are two main procedural differences between the current Experiment 1 and Experiment 4 of Griffiths and Mitchell [-@griffithsSelectiveAttentionHuman2008]. First, their experimental task involved learning about predictive and non-predictive categories of stimuli, with each exemplar within each category being presented only once during training, whereas in our task, the same set of four stimuli was repeatedly presented during training. Second, their learned predictiveness task consisted of two phases: the first phase was similar to the training phase of the present study, but this was followed by a second phase in which all the categories were predictive of new outcomes. The memory test followed this second phase. The addition of this second phase is certainly the most likely reason for the differences in the findings: the established cue-processing bias that is established in phase 1 of the design is likely to be considerably attenuated by the second phase in which all cues were established as valid predictors of the outcomes.
+To the best of our knowledge only one other study has investigated the relationship between the predictive validity of cues and recognition memory. Griffiths and Mitchell [-@griffithsSelectiveAttentionHuman2008] also used a recognition memory test as a measure of cue processing and in Experiment 4 of their study used a learned predictiveness design adapted from Le Pelley and McLaren [-@lepelleyLearnedAssociabilityAssociative2003], and similar in nature to the design of Experiment 1. However, Griffiths and Mitchell [-@griffithsSelectiveAttentionHuman2008] did not observe differences in the recognition performance for predictive and non-predictive cues. There are two main procedural differences between the current Experiment 1 and Experiment 4 of Griffiths and Mitchell [-@griffithsSelectiveAttentionHuman2008]. First, their experimental task involved learning about predictive and non-predictive categories of stimuli, with each exemplar within each category being presented only once during training, whereas in our task, the same set of four stimuli was repeatedly presented during training. Second, their learned predictiveness task consisted of two phases: the first phase was similar to the training phase of the present study, but this was followed by a second phase in which all the categories were predictive of new outcomes. The memory test followed this second phase. The addition of this second phase is certainly the most likely reason for the differences in the findings: the established cue-processing bias that is established in phase 1 of the design is likely to be considerably attenuated by the second phase in which all cues were established as valid predictors of the outcomes.
 
 Somewhat surprisingly there was no effect of foil-to-cue congruence in the data, with the predictiveness effect being observed both when the pairs of stimuli were congruent in their predictiveness (i.e., P-Con; NP-Con) and incongruent (i.e., P-Incon; NP-Incon). This is surprising, because there are seemingly different sources of memory that might contribute to these two trial types. Take for example the two trial types where the NP cue is the target stimulus. On NP-Con trials, the participant must rely on their memory of only NP cues to make a response, while on “NP-Incon” trials, the participant should be able to use their (presumably better) memory about P cues to detect the P foil. In principle, this should lead to better performance on the NP-Incon trials compared to NP-Con trials: this was clearly not the case. The critical factor in determining memory scores is whether the “P cue” was the target or the foil on the given trial: “P-Incon” trials are performed better than “NP-Incon” trials. It is possible that there is strong generalisation from the P cue to the presented P foil, and this is mistakenly identified as the target stimulus (especially so in the case of the High similarity condition). What is clear is that the only variable that affected memory scores was the predictiveness of the target stimulus, and so Test 2 represents a useful measure of recognition memory for stimuli in the task.
 
-
-
 # Experiment 2
-
-
 
 The purpose of Experiment 2 was to examine differences in recognition memory in a learned predictiveness procedure under certain and uncertain cue-outcome contingency conditions. Two groups were trained, one with a perfect contingency between the predictive cues and their paired outcome (Group Certain) - replicating the training from Experiment 1 - and one with a contingency of 0.8 between the predictive cues and their paired outcome (Group Uncertain). After this training, we tested the memory for cues in both groups using the memory test procedure that was most successful in Experiment 1, namely Test 2 (where targets were paired with foils from different cues). We also used the “High” similarity stimuli from Experiment 1, since it was only using these stimuli that a difference in memory performance between predictive and non-predictive stimuli was established.
 
 The design of Experiment 2 is shown in @tbl-exp2. Previous experiments have established that for uncertain contingencies, participants spend longer attending to (looking at) all cues compared to attention to cues in certain contingencies [@beesleyUncertaintyPredictivenessDetermine2015; @easdaleOnsetUncertaintyFacilitates2019; @walkerProtectionUncertaintyExploration2022]. Experiment 2 therefore aimed to test whether uncertain contingencies, where it is well established that there is a high level of attention to cues, result in an improvement in the processing of these stimuli. As such, we predicted that memory would be better, overall, for the cues in group Uncertain compared to group Certain. Finally, on the basis of the results of Experiment 1, we anticipate seeing superior memory scores for the predictive than the non-predictive cues in group Certain.
 
 ::: {#tbl-exp2 apa-note="Uppercase letters A, B, X, and Y represent the cues presented during training. O1 and O2 represent the outcomes presented in training. Lowercase letters a, b, x, and y represent the foils that are similar to the (corresponding upper-case letter) cues presented in the training phase. The numbers before the trials define the proportion of trials of that type that were presented." apa-twocolumn="true"}
-+--------------+---------------------------+------------------+
-| Group        | Training                  | Test             |
-+==============+:=========================:+:================:+
-| Certain      | AX - O1                   | A vs *b*/*x*/*y* |
-|              |                           |                  |
-|              | AY - O1                   | B vs *a*/*x*/*y* |
-|              |                           |                  |
-|              | BX - O2                   | X vs *a*/*b*/*y* |
-|              |                           |                  |
-|              | BY - O2                   | Y vs *a*/*b*/*x* |
-+--------------+---------------------------+------------------+
-| Uncertain    | 0.8 AX - O1 / 0.2 AX - O2 | A vs *b*/*x*/*y* |
-|              |                           |                  |
-|              | 0.8 AY - O1 / 0.2 AY - O2 | B vs *a*/*x*/*y* |
-|              |                           |                  |
-|              | 0.8 BX - O2 / 0.2 BX - O1 | X vs *a*/*b*/*y* |
-|              |                           |                  |
-|              | 0.8 BY - O2 / 0.2 BY - O1 | Y vs *a*/*b*/*x* |
-+--------------+---------------------------+------------------+
++---------------+---------------------------+------------------+
+| Group         | Training                  | Test             |
++===============+:=========================:+:================:+
+| Certain       | AX - O1                   | A vs *b*/*x*/*y* |
+|               |                           |                  |
+|               | AY - O1                   | B vs *a*/*x*/*y* |
+|               |                           |                  |
+|               | BX - O2                   | X vs *a*/*b*/*y* |
+|               |                           |                  |
+|               | BY - O2                   | Y vs *a*/*b*/*x* |
++---------------+---------------------------+------------------+
+| Uncertain     | 0.8 AX - O1 / 0.2 AX - O2 | A vs *b*/*x*/*y* |
+|               |                           |                  |
+|               | 0.8 AY - O1 / 0.2 AY - O2 | B vs *a*/*x*/*y* |
+|               |                           |                  |
+|               | 0.8 BX - O2 / 0.2 BX - O1 | X vs *a*/*b*/*y* |
+|               |                           |                  |
+|               | 0.8 BY - O2 / 0.2 BY - O1 | Y vs *a*/*b*/*x* |
++---------------+---------------------------+------------------+
 
 Design of Experiment 2
 :::
-
-
 
 ## Methods
 
@@ -610,6 +598,7 @@ UNM07_training <- training
 UNM07_test <- test
 UNM07_not_passed <- not_passed_pNum
 ```
+
 ```{r, include = FALSE}
 #create the PPR measure
 UNM07_training <- UNM07_training %>%
@@ -628,8 +617,7 @@ UNM07_training <- filter(UNM07_training, !pNum %in% UNM07_not_passed$pNum & !pNu
 UNM07_test <- filter(UNM07_test, !pNum %in% UNM07_not_passed$pNum & !pNum %in% UNM07_low_acc_total$pNum)
 ```
 
-`r nrow(UNM07_demographics)` participants were recruited through Prolific. The sample consisted of `r length(which(UNM07_demographics$gender == "female"))` women, `r length(which(UNM07_demographics$gender == "male"))` men and one non-binary person, with `r n_distinct(UNM07_demographics$Nationality)` different nationalities. The mean age was `r format(mean(UNM07_demographics$age, na.rm = TRUE), digits = 3)` calculated for the `r nrow(UNM07_demographics) - sum(is.na(UNM07_demographics$age))` participants that reported their age (range `r min(UNM07_demographics$age, na.rm = TRUE)` - `r max(UNM07_demographics$age, na.rm = TRUE)`). Pre-screening of participants in Prolific ensured that they had normal or corrected to normal vision, fluency in English language, and had not participated in previous studies from our lab. Participants were rewarded with £2.70 for their participation in the study. Participants were randomly allocated to either the Certain or Uncertain condition. Four participants were excluded due to failing the comprehension check before the test (three in group Certain and one in group Uncertain). Following a criterion similar to Le Pelley & McLaren [2003; see also @lepelleyLearnedPredictivenessInfluences2013], an additional criterion was added in this experiment due to the poor performance of some participants in the training phase, such that those that had an accuracy lower than 0.6 in the final block of the training phase were removed from the analyses. This led to the exclusion of `r nrow(UNM07_low_acc_total)` participants, seven in group Certain and `r length(which(UNM07_low_acc_total$condition == "Uncertain"))` in group Uncertain. This resulted in a final sample of `r nrow(UNM07_test)/24` participants, `r length(which(UNM07_test$condition == "Certain"))/24` in group Certain and `r length(which(UNM07_test$condition == "Uncertain"))/24` in group Uncertain[^2]. 
-Post-hoc calculations using G\*Power 3.1 [@faulStatisticalPowerAnalyses2007] revealed that this sample size had a power of .99 to detect an effect size of η~p~^2^ = .06 that was observed for the *group x predictiveness* interaction reported in @fig-testExp2.
+`r nrow(UNM07_demographics)` participants were recruited through Prolific. The sample consisted of `r length(which(UNM07_demographics$gender == "female"))` women, `r length(which(UNM07_demographics$gender == "male"))` men and one non-binary person, with `r n_distinct(UNM07_demographics$Nationality)` different nationalities. The mean age was `r format(mean(UNM07_demographics$age, na.rm = TRUE), digits = 3)` calculated for the `r nrow(UNM07_demographics) - sum(is.na(UNM07_demographics$age))` participants that reported their age (range `r min(UNM07_demographics$age, na.rm = TRUE)` - `r max(UNM07_demographics$age, na.rm = TRUE)`). Pre-screening of participants in Prolific ensured that they had normal or corrected to normal vision, fluency in English language, and had not participated in previous studies from our lab. Participants were rewarded with £2.70 for their participation in the study. Participants were randomly allocated to either the Certain or Uncertain condition. Four participants were excluded due to failing the comprehension check before the test (three in group Certain and one in group Uncertain). Following a criterion similar to Le Pelley & McLaren [-@lepelleyLearnedAssociabilityAssociative2003; @lepelleyLearnedPredictivenessInfluences2013], an additional criterion was added in this experiment due to the poor performance of some participants in the training phase, such that those that had an accuracy lower than 0.6 in the final block of the training phase were removed from the analyses. This led to the exclusion of `r nrow(UNM07_low_acc_total)` participants, seven in group Certain and `r length(which(UNM07_low_acc_total$condition == "Uncertain"))` in group Uncertain. This resulted in a final sample of `r nrow(UNM07_test)/24` participants, `r length(which(UNM07_test$condition == "Certain"))/24` in group Certain and `r length(which(UNM07_test$condition == "Uncertain"))/24` in group Uncertain[^2]. Post-hoc calculations using G\*Power 3.1 [@faulStatisticalPowerAnalyses2007] revealed that this sample size had a power of .99 to detect an effect size of η~p~^2^ = .06 that was observed for the *group x predictiveness* interaction reported in @fig-testExp2.
 
 [^2]: The critical interaction effect reported in the results section is significant without the application of this exclusion criterion.
 
@@ -645,8 +633,6 @@ The design of Experiment 2 is shown in @tbl-exp2. The Certain group employed the
 
 The procedure for both the training and test phases was identical to those described in Experiment 1.
 
-
-
 ## Results
 
 For the training phase, it was necessary to calculate response performance in a different manner in this experiment, since participants in the uncertain condition received trials in which the “correct” outcome was switched on 20% of the trials. Thus, even if participants in group Uncertain were to always select the most probable outcome (O1 when A is present and O2 when B is present), it would result in an accuracy score of 80%. Thus, we calculated the proportion of probable responses (PPR): for the Uncertain group, on each trial, the score was 0 when participants chose the less probable outcome (i.e., O2 for A and O1 for B) and 1 when they chose the most probable outcome (i.e., O1 for A and O2 for B). For the certain condition, this equates to a standard accuracy score.
@@ -661,7 +647,7 @@ UNM07_MA_training <- UNM07_training %>%
 
 @fig-trainingExp2 shows the mean PPR across blocks for each group. Participants in the Certain group showed higher PPR through training than the Uncertain group, reaching a PPR of 0.92 on block 8. The Uncertain group showed a slower increase in their PPR that reached 0.77 in block 8.
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, warning=FALSE}
 #| label: fig-trainingExp2
 #| fig-cap: PPR on the training phase of Experiment 2.
 #| apa-note: "Mean proportion of probable responses (±SEM) during the training phase of Experiment 2, for groups trained with certain and uncertain contingencies."
@@ -677,6 +663,7 @@ ggplot(UNM07_MA_training, mapping = aes(x = block, y = mean_accuracy, group = co
   scale_y_continuous(name = "PPR", limits = c(NA, 1))+
   theme_apa()
 ```
+
 ```{r, include=FALSE}
 #ANOVA
 UNM07_acc <- UNM07_training %>%
@@ -697,7 +684,6 @@ bay_ANOVA_UNM07_acc_int <- bay_ANOVA_UNM07_acc[4]/bay_ANOVA_UNM07_acc[3]
 print(bay_ANOVA_UNM07_acc_int)
 ```
 
-
 A mixed model ANOVA of individual PPR scores found significant both main effects, of *group*, `r apa(ANOVA_UNM07_acc, effect = "condition")`, `r report_BF_and_error(bay_ANOVA_UNM07_acc[2])`, and of *block*, `r apa(ANOVA_UNM07_acc, effect = "block")`, `r report_BF_and_error(bay_ANOVA_UNM07_acc[1], sci_not = TRUE)`. There was no interaction effect between these factors, `r apa(ANOVA_UNM07_acc, effect = "condition:block")`, with the Bayesian analysis providing strong evidence for the null hypothesis, `r report_BF_and_error(bay_ANOVA_UNM07_acc_int[1])`. These results indicate that the training increased the PPR for both groups, as the effect of block was significant, with the Certain group showing a consistently higher PPR than Uncertain group.
 
 ```{r, include = FALSE}
@@ -713,7 +699,7 @@ UNM07_MS_test <- UNM07_test %>%
 
 @fig-testExp2 shows the results from the recognition memory test. memory scores were calculated in the same manner as for Experiment 1. The memory for non-predictive cues was lower than for the predictive cues in the Certain group. This difference was notably attenuated in in the Uncertain group, and there was no indication of higher memory scores in the uncertain group relative to the Certain group.
 
-```{r}
+```{r, echo = FALSE, warning=FALSE}
 #| label: fig-testExp2
 #| fig-cap: Memory scores during the Test of Experiment 2.
 #| apa-note: "Mean memory scores (±SEM) during the Test phase of Experiment 2 for predictive and non-predictive trials in the Certain and Uncertain groups."
@@ -727,6 +713,7 @@ ggplot(UNM07_MS_test, mapping = aes(x = factor(condition, level=c('Uncertain', '
   #scale_fill_grey(start = 0.33) +
   theme_apa()
 ```
+
 ```{r, include=FALSE}
 #ANOVA mem_score
 UNM07_memscore_test <- UNM07_test %>%
@@ -745,6 +732,7 @@ print(bay_ANOVA_UNM07_test)
 bay_ANOVA_UNM07_test_int <- bay_ANOVA_UNM07_test[4]/bay_ANOVA_UNM07_test[3]
 print(bay_ANOVA_UNM07_test_int)
 ```
+
 ```{r, include = FALSE}
 # Pairwise comparisons between group levels
 #interaction analysis
@@ -763,10 +751,7 @@ UNM07_memscore_test_interaction_pred <- emmeans(ANOVA_UNM07_test, ~ condition|pr
 pairs(UNM07_memscore_test_interaction_pred, adjust = "bon")
 ```
 
-
 A mixed model ANOVA of memory scores revealed a significant main effect of *predictiveness*, with moderate Bayesian evidence, `r apa(ANOVA_UNM07_test, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_UNM07_test[2])` and a significant *group x predictiveness* interaction, with anecdotal Bayesian evidence, `r apa(ANOVA_UNM07_test, effect = "condition:predictiveness")`, `r report_BF_and_error(bay_ANOVA_UNM07_test_int[1])`. However, the *group* effect was not significant and the evidence for the null hypothesis was moderate, `r apa(ANOVA_UNM07_test, effect = "condition")`, `r report_BF_and_error(bay_ANOVA_UNM07_test[1])`. Bonferroni-corrected pairwise comparisons showed that there was a significant difference between predictive and non-predictive cues in the Certain group, *t*(73) = 3.45, *p* = .001, `r report_BF_and_error(bay_t.test_UNM07_int_certain[1])`, but not in the Uncertain group, *t*(73) = 0.28, *p* = .781, `r report_BF_and_error(bay_t.test_UNM07_int_uncertain[1])`. This indicated that the training with certain contingency produces a difference in memory for the cues depending on their predictiveness, but that difference does not emerge during uncertain training.
-
-
 
 ## Discussion
 
@@ -774,11 +759,7 @@ Experiment 2 aimed to examine the effect of uncertainty on recognition memory fo
 
 A central distinction made in Easdale et al. [-@easdaleOnsetUncertaintyFacilitates2019] was that between *expected-* and *unexpected-uncertainty*. In those experiments, participants who experienced a sustained period with uncertain compounds (as is the case in our “uncertain group” in Experiment 2) learnt more slowly about new contingencies, compared to a group that received a sudden and unexpected change in the contingencies. Thus, it may be the case that the current uncertain condition does not promote higher recognition memory, overall, because participants have come to expect a certain level of uncertainty and are no longer engaging in an exploratory mode of cue-processing. Of course, the expected levels of high attention to cues under these uncertain conditions presents a paradox for learning and attention research: why does a high level of attention not translate to better learning and memory for those cues? We return to this point in the general discussion. Nevertheless, this analysis of the findings in terms of expected and unexpected uncertainty suggests that a more acute period of uncertainty may (re)engage a mode of exploratory attentional processing for the cues, which would result in better memory of those cues. Experiment 3 tested this hypothesis.
 
-
-
 # Experiment 3
-
-
 
 Experiment 3 aimed to examine whether the introduction of uncertainty, following a period of certain training (i.e., unexpected uncertainty), would lead to an increase in cue-processing (better recognition memory). The design of Experiment 3 can be seen in @tbl-exp3. The experiment consisted of three groups. Groups Certain Long and Certain Short received training that was similar to the Certain condition from Experiment 2, experiencing a protracted period of certain contingencies between the cue compounds and the outcomes throughout the training phase, differing only in the amount of training trials experienced by each of them. Group Uncertain first experienced the same certain contingencies experienced by Group Certain Long, before the contingencies were changed to uncertain for a short period before the recognition memory test. Our prediction was that, if the introduction of unexpected uncertainty promotes greater levels of exploratory attention, then we should see better recognition memory performance in this uncertain condition, compared to the certain condition.
 
@@ -814,11 +795,7 @@ Experiment 3 aimed to examine whether the introduction of uncertainty, following
 Design of Experiment 3
 :::
 
-
-
 We also included a third condition, group Certain Short, which received the same certain contingencies as the other two conditions in Stage 1 but did not experience Stage 2; they received a shorter training phase than the other two conditions. If the onset of the uncertainty leads to greater cue-processing, then we should also see better cue-memory in the Uncertain condition compared to the Certain Short condition. The inclusion of this condition is important because longer training with the certain contingencies in the “Certain Long” condition could *decrease* cue processing, which would be an alternative explanation of any difference in cue processing we observe between Group Uncertain and Group Certain Long. If this is the case, we should see equivalent recognition memory in the Certain Short and Uncertain conditions, and poorer recognition memory in the Certain Long condition. Therefore, the addition of this third condition allowed us to make stronger inferences about the causal relationship between the onset of uncertainty and cue-processing.
-
-
 
 ## Methods
 
@@ -832,6 +809,7 @@ UNM08_training <- rbind(stage1, stage2)
 UNM08_test <- test
 UNM08_not_passed <- not_passed_pNum
 ```
+
 ```{r, include = FALSE}
 #create the PPR measure
 UNM08_training <- UNM08_training %>%
@@ -866,8 +844,6 @@ The experiment used a mixed design (as seen in @tbl-exp3), with three groups: Ce
 
 All the details about the procedure were identical to Experiment 2.
 
-
-
 ## Results
 
 ```{r, include = FALSE}
@@ -892,7 +868,7 @@ UNM08_MA_training <- UNM08_MA_training %>%
 
 @fig-trainingExp3 shows the mean PPR for each group across the four blocks of training. All participants showed a similar increase in PPR in stage 1, reaching a PPR of around 0.93 on block 6. In Stage 2, group Certain showed a similar PPR to block 6, but the Uncertain group showed a decrease in PPR to a level of around 0.85.
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, warning=FALSE}
 #| label: fig-trainingExp3
 #| fig-cap: PPR on the training phase of Experiment 3.
 #| apa-note: "Mean proportion of probable responses (±SEM) during the training phase of Experiment 3, plotted against the ten blocks of trials, for each Group."
@@ -908,6 +884,7 @@ ggplot(UNM08_MA_training, mapping = aes(x = block, y = mean_accuracy, group = co
   scale_y_continuous(name = "PPR", limits = c(0.5, 1))+
   theme_apa()
 ```
+
 ```{r, include=FALSE}
 #ANOVA
 UNM08_acc_stage1 <- filter(UNM08_training, stage == "stage 1") %>%
@@ -927,7 +904,6 @@ print(bay_ANOVA_UNM08_acc_stage1)
 bay_ANOVA_UNM08_acc_stage1_int <- bay_ANOVA_UNM08_acc_stage1[4]/bay_ANOVA_UNM08_acc_stage1[3]
 print(bay_ANOVA_UNM08_acc_stage1_int)
 ```
-
 
 The Stage 1 data were analysed with a mixed-model ANOVA (with the degrees of freedom corrected by Greenhouse-Geisser when the sphericity assumption was not fulfilled), with the between-subjects factor of *group* (Certain Long, Certain Short, and Uncertain), and the within-subjects factor of *block* (1-6). This revealed a significant effect of block, with extreme Bayesian evidence for the alternative hypothesis, `r apa(ANOVA_UNM08_acc_stage1, effect = "block")`, `r report_BF_and_error(bay_ANOVA_UNM08_acc_stage1[1], sci_not = TRUE)`. There was no effect of *group*, with strong evidence for the null hypothesis, `r apa(ANOVA_UNM08_acc_stage1, effect = "condition")`, `r report_BF_and_error(bay_ANOVA_UNM08_acc_stage1[2])`, and no interaction effect, with extreme evidence for the null hypothesis, `r apa(ANOVA_UNM08_acc_stage1, effect = "condition:block")`, `r report_BF_and_error(bay_ANOVA_UNM08_acc_stage1_int[1])`.
 
@@ -950,6 +926,7 @@ print(bay_ANOVA_UNM08_acc)
 bay_ANOVA_UNM08_acc_int <- bay_ANOVA_UNM08_acc[4]/bay_ANOVA_UNM08_acc[3]
 print(bay_ANOVA_UNM08_acc_int)
 ```
+
 ```{r, include=FALSE}
 # Pairwise comparisons for the interaction analysis
 resp_interaction <- emmeans(ANOVA_UNM08_acc, ~condition|block)
@@ -1023,7 +1000,7 @@ UNM08_MS_test <- UNM08_test %>%
 
 @fig-testExp3 shows the recognition memory data for the three conditions. Memory for non-predictive cues was lower than for predictive cues in all groups, but this difference was notably attenuated in the Uncertain group. Interestingly, the memory for the cues in the Uncertain group was higher, overall, than in the Certain Long and Certain Short groups.
 
-```{r}
+```{r, echo = FALSE, warning=FALSE}
 #| label: fig-testExp3
 #| fig-cap: Memory scores on the Test of Experiment 3.
 #| apa-note: "Mean memory scores (±SEM) during the Test of Experiment 2 for predictive and non-predictive trials across the three groups."
@@ -1037,6 +1014,7 @@ ggplot(UNM08_MS_test, mapping = aes(x = factor(condition, level=c('Uncertain', '
   #scale_fill_grey(start = 0.33) +
   theme_apa()
 ```
+
 ```{r, include=FALSE}
 #ANOVA mem_score
 UNM08_memscore_test <- UNM08_test %>%
@@ -1071,12 +1049,9 @@ bay_t.test_UNM08_test_certs <-  ttestBF(UNM08_test_cert, UNM08_test_cert_s)
 print(bay_t.test_UNM08_test_certs)
 ```
 
-
 A mixed model ANOVA, including the between-subjects factor *group* (Certain Long, Certain Short, Uncertain), and the within-subjects factor *predictiveness* (predictive vs non-predictive) showed a significant main effect of the *group*, with moderate evidence for the alternative hypothesis, `r apa(ANOVA_UNM08_test, effect = "condition")`, `r report_BF_and_error(bay_ANOVA_UNM08_test[1])` and a main effect of *predictiveness*, with extreme Bayesian evidence for the alternative hypothesis,, `r apa(ANOVA_UNM08_test, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_UNM08_test[2])`. However, the *group x predictiveness* interaction failed to reach significance, showing anecdotal Bayesian evidence for the null hypothesis, `r apa(ANOVA_UNM08_test, effect = "condition:predictiveness")`, `r report_BF_and_error(bay_ANOVA_UNM08_test_int[1])`. Bonferroni corrected post-hoc comparisons on the factor of group showed that group Uncertain differed significantly from the average of the Certain groups, *t*(87) = 1.18, *p* = .004, `r report_BF_and_error(bay_t.test_UNM08_int_uncer_vs_certs)`, but memory scores for the two Certain groups did not differ the one from the other, *t*(87) = 0.188, *p* = 1, `r report_BF_and_error(bay_t.test_UNM08_test_certs)`, with the Bayesian evidence suggesting that memory performance was the same in these two groups.
 
 These results indicate that memory for predictive cues was better than for non-predictive cues independently of the contingencies that were presented at training. However, those participants that experienced an unexpected period of uncertainty showed generally better memory than the Certain groups.
-
-
 
 ## Discussion
 
@@ -1084,11 +1059,7 @@ Experiment 3 examined the effect of unexpected uncertainty on recognition memory
 
 These results suggest that introducing a period of unexpected uncertainty results in enhanced cue processing and are consistent with previous results [@easdaleOnsetUncertaintyFacilitates2019] that showed that unexpected uncertainty enhanced learning. Easdale et al. used a training phase with participants learning about either certain or uncertain contingencies. Participants showed better attention to uncertain cues. However, when those cues were subsequently trained under new contingencies, it was participants in the certain condition that learned about these more rapidly, compared to those participants in the uncertain condition. Easdale et al. suggested that the transition from certain to uncertain contingencies brought about a state of “unexpected uncertainty” which promoted new learning. Experiment 3 shows more directly that a period of unexpected uncertainty leads to superior cue processing and stronger memory representations.
 
-
-
 # General discussion
-
-
 
 Three experiments explored the processing of cues under different conditions of certainty and uncertainty during a contingency learning task. In Experiment 1 we established a recognition memory task that could reveal differences in the level of processing for the different cues used during the preceding learning task. Participants were first required to learn the relationships between compounds of cues and outcomes in a task in which each compound contained a cue that was perfectly predictive and a cue that was non-predictive of the outcome. In a subsequent two-alternative forced-choice recognition test, each trained cue was presented alongside a variation of another cue and participants were asked to select the stimulus that they had experienced during training. Participants were asked to rate their confidence in these judgments and the combination of this score with their accuracy on each trial created a “memory score”. Memory scores were higher for the predictive than for the non-predictive cues. This result aligns with the well-established attentional bias that is observed for predictive over non-predictive cues in these designs [e.g., @lepelleyOvertAttentionPredictiveness2011].
 
@@ -1116,7 +1087,7 @@ The results of Experiment 3 suggest that unexpected uncertainty returns particip
 
 According to the uncertainty principle, the increased levels of attention to cues associated with uncertainty operates as a mechanism to discover new cue-outcome relationships. This process has been referred to as “exploratory attention” [e.g., @beesleyUncertaintyPredictivenessDetermine2015; @easdaleOnsetUncertaintyFacilitates2019] or “attention for learning” [e.g., Hall & Rodríguez, -@hallAttentionPerceiveLearn2019a]. Thus, it is an attempt to resolve the prediction errors that are experienced by learning new and valid signals for the outcomes. In Experiment 3, it is possible that the non-predictive cues have greater “capacity” for learning, or perhaps offer a more plausible signal, given an association already exists between the predictive cues and the outcomes from the early certain phase. This exploratory process will be short lived in this procedure, since the uncertainty that is experienced cannot be resolved by learning new associations. Indeed, in the procedure of Easdale et al. [-@easdaleOnsetUncertaintyFacilitates2019], participants could resolve the uncertainty in a second stage by learning about the meaningful associations pertaining to the previously non-predictive cues. In this situation increased attentional processing of the non-predictive cues was observed.
 
-This characterisation of the effect as one driven primarily by changes in processing for non-predictive cues is also consistent with the theory protection account proposed by Spicer and colleagues [-@spicerTheoryProtectionAssociative2020; -@spicerTheoryProtectionHumans2022]. According to this account, participants tend to protect existing associations as much as possible. When prediction errors are experienced during learning, rather than adjust those associations that result in the largest error, the learning system will instead direct resources to learning about cues that are not already strongly associated with outcomes. In line with this proposed property of human learning,  it is possible that, in Experiment 3, participants in group Uncertain directed their attention more towards non-predictive cues than predictive cues at the onset of the unexpected uncertainty,  since the predictive cues had already been established as reliable predictors of the outcomes in the first stage of training (in which the relationship between the predictive cues and the outcomes was perfect). Further studies will be necessary to confirm if theory protection offers an accurate account of the manner in which attentional resources are allocated during uncertainty. 
+This characterisation of the effect as one driven primarily by changes in processing for non-predictive cues is also consistent with the theory protection account proposed by Spicer and colleagues [-@spicerTheoryProtectionAssociative2020; -@spicerTheoryProtectionHumans2022]. According to this account, participants tend to protect existing associations as much as possible. When prediction errors are experienced during learning, rather than adjust those associations that result in the largest error, the learning system will instead direct resources to learning about cues that are not already strongly associated with outcomes. In line with this proposed property of human learning, it is possible that, in Experiment 3, participants in group Uncertain directed their attention more towards non-predictive cues than predictive cues at the onset of the unexpected uncertainty, since the predictive cues had already been established as reliable predictors of the outcomes in the first stage of training (in which the relationship between the predictive cues and the outcomes was perfect). Further studies will be necessary to confirm if theory protection offers an accurate account of the manner in which attentional resources are allocated during uncertainty.
 
 The current results provide a stark warning about the interpretation of eye-gaze as a proxy for attentional processing. While we have not collected eye-gaze in the current tasks (since they were conducted online), we have substantial evidence that uncertain conditions lead to higher levels of both absolute dwell times on cues, and a higher proportion of the response time spent on cues [@beesleyUncertaintyPredictivenessDetermine2015; @easdaleOnsetUncertaintyFacilitates2019; @walkerRoleUncertaintyAttentional2019; @walkerProtectionUncertaintyExploration2022]. The finding that higher overt attention doesn’t lead to faster learning [@beesleyUncertaintyPredictivenessDetermine2015; @easdaleOnsetUncertaintyFacilitates2019; @torrents-rodasEffectPredictionError2023] and, in the current studies, that it doesn’t lead to greater cue-processing, is problematic for the use of eye-data in constraining attentional models of associative learning. Of course, this concern of the apparent disconnect between overt attention and active stimulus engagement stretches beyond the field of human learning. As has been noted in other literatures, most notably in the case of inattentional blindness [e.g., @simonsGorillasOurMidst1999]; looking does not always reflect an active and engaged attentional process.
 
@@ -1140,7 +1111,6 @@ The four sets of images from which the cues and foils displayed in the experimen
 #| fig-pos: h
 knitr::include_graphics("images/cues_foils.png")
 ```
-
 
 The two images used as outcomes in these experiments can be seen in @fig-outcomes.
 
