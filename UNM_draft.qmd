@@ -423,7 +423,7 @@ bay_ANOVA_UNM05_test1_int <- bay_ANOVA_UNM05_test1[4]/bay_ANOVA_UNM05_test1[3]
 print(bay_ANOVA_UNM05_test1_int)
 ```
 
-These differences, however, were very small, and a mixed model ANOVA of the memory scores revealed none of the main effects or the interaction were significant: *similarity*: `r apa(ANOVA_UNM05_test1, effect = "group")`, `r report_BF_and_error(bay_ANOVA_UNM05_test1[1])`; *predictiveness*: `r apa(ANOVA_UNM05_test1, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_UNM05_test1[2])`; *similarity x predictiveness*: `r apa(ANOVA_UNM05_test1, effect = "group:predictiveness")`, `r report_BF_and_error(bay_ANOVA_UNM05_test1[1])`. Of note, there was moderate evidence for a null-effect of predictiveness, suggesting that Test 1 failed to reveal any differences in cue-processing between predictive and non-predictive cues.
+These differences, however, were very small, and a mixed model ANOVA of the memory scores revealed none of the main effects or the interaction were significant: *similarity*: `r apa(ANOVA_UNM05_test1, effect = "group")`, `r report_BF_and_error(bay_ANOVA_UNM05_test1[1])`; *predictiveness*: `r apa(ANOVA_UNM05_test1, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_UNM05_test1[2])`; *similarity x predictiveness*: `r apa(ANOVA_UNM05_test1, effect = "group:predictiveness")`, `r report_BF_and_error(bay_ANOVA_UNM05_test1_int[1])`. Of note, there was moderate evidence for a null-effect of predictiveness, suggesting that Test 1 failed to reveal any differences in cue-processing between predictive and non-predictive cues.
 
 ```{r, include = FALSE}
 UNM05_test2 <- UNM05_test2 %>%
@@ -1009,7 +1009,7 @@ UNM08_MS_test <- UNM08_test %>%
 #| fig-cap: Memory scores on the Test of Experiment 3.
 #| apa-note: "Mean memory scores (±SEM) during the Test of Experiment 2 for predictive and non-predictive trials across the three groups."
 #| fig-height: 4
-ggplot(UNM08_MS_test, mapping = aes(x = factor(condition, level=c('Uncertain', 'Certain Long', 'Certain Short')), y = mean_mem_score, fill = predictiveness)) +
+ggplot(UNM08_MS_test, mapping = aes(x = factor(condition, level=c('Uncertain', 'Certain Short', 'Certain Long')), y = mean_mem_score, fill = predictiveness)) +
   geom_col(position = position_dodge2()) +
   geom_errorbar(aes(ymin = mean_mem_score - se_mem_score, ymax = mean_mem_score + se_mem_score), width=.2, position=position_dodge(0.9)) +
   scale_x_discrete (name = "Group") +
@@ -1036,7 +1036,7 @@ bay_ANOVA_UNM08_test <- anovaBF(formula = mem_score ~ condition + predictiveness
 print(bay_ANOVA_UNM08_test)
 bay_ANOVA_UNM08_test_int <- bay_ANOVA_UNM08_test[4]/bay_ANOVA_UNM08_test[3]
 print(bay_ANOVA_UNM08_test_int)
-# Pairwise comparisons for the interaction analysis
+# Pairwise comparisons for the main effect of condition
 UNM08_test_interaction <- emmeans(ANOVA_UNM08_test, ~condition)
 contrast(UNM08_test_interaction, adjust = "bon", "trt.vs.ctrl", ref = c(1,2))
 
@@ -1081,13 +1081,13 @@ In view of the analysis provided in the context of the Pearce and Hall model, it
 options(scipen = 999)
 SME_UNM08_memscore_condition <- UNM08_memscore_test %>%
   group_by(predictiveness) %>%
-  anova_test(mem_score ~ condition) %>%
+  anova_test(mem_score ~ condition, effect.size = "pes") %>%
   get_anova_table() %>%
   adjust_pvalue(method = "bonferroni")
 print(SME_UNM08_memscore_condition)
 ```
 
-The results of Experiment 3 suggest that unexpected uncertainty returns participants to an exploratory mode of processing. To what extent was this directed more towards predictive or non-predictive cues? The analysis of the memory scores in Experiment 3 found an overall main effect of group and no significant interaction effect between group and cue-predictiveness with the Bayesian ANOVA indicating anecdotal evidence for the null hypothesis, `r apa(ANOVA_UNM08_test, effect = "condition:predictiveness")`, `r report_BF_and_error(bay_ANOVA_UNM08_test_int[1])`. Thus, our analysis of the simple main effects is entirely exploratory, but this found a significant effect of group on the memory scores for non-predictive cues, *F*(2, 87) = 6.75, *p* = .004, but not for the predictive cues, *F* (2, 87) = 1.13, *p* = .328. Thus, there is a suggestion that the elevated levels of recognition memory seen for the unexpected uncertain condition in Experiment 3 was primarily driven by increases in cue-processing for the non-predictive cues.
+The results of Experiment 3 suggest that unexpected uncertainty returns participants to an exploratory mode of processing. To what extent was this directed more towards predictive or non-predictive cues? The analysis of the memory scores in Experiment 3 found an overall main effect of group and no significant interaction effect between group and cue-predictiveness with the Bayesian ANOVA indicating anecdotal evidence for the null hypothesis, `r apa(ANOVA_UNM08_test, effect = "condition:predictiveness")`, `r report_BF_and_error(bay_ANOVA_UNM08_test_int[1])`. Thus, our analysis of the simple main effects is entirely exploratory, but this found a significant effect of group on the memory scores for non-predictive cues, *F*(2, 87) = 6.75, *p* = .004,$\\eta^2_p$ = .134, but not for the predictive cues, *F*(2, 87) = 1.13, *p* = .656, $\\eta^2_p$ = .025. Thus, there is a suggestion that the elevated levels of recognition memory seen for the unexpected uncertain condition in Experiment 3 was primarily driven by increases in cue-processing for the non-predictive cues.
 
 According to the uncertainty principle, the increased levels of attention to cues associated with uncertainty operates as a mechanism to discover new cue-outcome relationships. This process has been referred to as “exploratory attention” [e.g., @beesleyUncertaintyPredictivenessDetermine2015; @easdaleOnsetUncertaintyFacilitates2019] or “attention for learning” [e.g., Hall & Rodríguez, -@hallAttentionPerceiveLearn2019a]. Thus, it is an attempt to resolve the prediction errors that are experienced by learning new and valid signals for the outcomes. In Experiment 3, it is possible that the non-predictive cues have greater “capacity” for learning, or perhaps offer a more plausible signal, given an association already exists between the predictive cues and the outcomes from the early certain phase. This exploratory process will be short lived in this procedure, since the uncertainty that is experienced cannot be resolved by learning new associations. Indeed, in the procedure of Easdale et al. [-@easdaleOnsetUncertaintyFacilitates2019], participants could resolve the uncertainty in a second stage by learning about the meaningful associations pertaining to the previously non-predictive cues. In this situation increased attentional processing of the non-predictive cues was observed.
 
