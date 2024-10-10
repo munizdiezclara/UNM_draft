@@ -99,14 +99,14 @@ ANOVA_acc_test1 <- aov_car(formula = acc ~ group + Error(pNum*predictiveness), d
 print(ANOVA_acc_test1)
 ```
 
-```{r}
+```{r, include=FALSE}
 bay_ANOVA_acc_test1 <- anovaBF(formula = acc ~ group*predictiveness + pNum,
         data = data.frame(acc_test1),
         whichRandom = "pNum")
 print(bay_ANOVA_acc_test1)
 ```
 
-```{r}
+```{r, include=FALSE}
 bay_ANOVA_acc_test1_int <- bay_ANOVA_acc_test1[4]/bay_ANOVA_acc_test1[3]
 print(bay_ANOVA_acc_test1_int)
 ```
@@ -365,8 +365,8 @@ For group High there was a significant effect of *predictiveness*, `r apa(ANOVA_
 
 ```{r, include=FALSE}
 load("UNM07_proc_data.RData")
-UNM07_training <- filter(training, !pNum %in% not_passed_pNum)
-UNM07_test <- filter(test, !pNum %in% not_passed_pNum)
+UNM07_training <- filter(training, !pNum %in% not_passed_pNum$pNum)
+UNM07_test <- filter(test, !pNum %in% not_passed_pNum$pNum)
 
 #create the PPR measure
 UNM07_training <- UNM07_training %>%
@@ -375,12 +375,26 @@ UNM07_training <- UNM07_training %>%
                                    (cue1 == 2 | cue1 == 4) & response == "o1_image" ~ 0,
                                    (cue1 == 2 | cue1 == 4) & response == "o2_image" ~ 1))
 
-#detect and clean participants that had an PPR lower than 0.6 in the final block or not passed the test comprehension check
+#detect participants that had an PPR lower than 0.6 in the final block
 UNM07_block8 <- filter(UNM07_training, block == 8) %>%
   group_by(pNum, condition) %>%
   summarise (mean_response = mean(prob_response, na.rm = TRUE))
-UNM07_low_acc_total <- filter(UNM07_block8, mean_response < 0.6) 
+UNM07_low_acc <- filter(UNM07_block8, mean_response < 0.6) 
+#create a frequencies table for each condition
+frequencies_UNM07_low_acc <- UNM07_low_acc %>%
+  group_by(condition) %>%
+  summarise(participant_count = n_distinct(pNum)) %>%
+  ungroup()
+#check which one is the highest frequency in that table
+max_UNM07_low_acc <- max(frequencies_UNM07_low_acc$participant_count)
+# Select participants with the lowest accuracy in each condition, as many as the maximum frequency in the frequency table
+UNM07_low_acc_total <- UNM07_block8 %>%
+  group_by(condition) %>%
+  slice_min(order_by = mean_response, n = max_UNM07_low_acc, with_ties = FALSE) %>%
+  ungroup()
+#get just the participant numbers
 UNM07_low_acc <- UNM07_low_acc_total$pNum
+#exclude those participants
 UNM07_training <- filter(UNM07_training, !pNum %in% UNM07_low_acc_total$pNum)
 UNM07_test <- filter(UNM07_test, !pNum %in% UNM07_low_acc_total$pNum)
 ```
@@ -492,8 +506,10 @@ In this first test, there was no significant effect of the *group*, `r apa(ANOVA
 
 ```{r, include=FALSE}
 load("UNM08_proc_data.RData")
-UNM08_training <- filter(training, !pNum %in% not_passed_pNum)
-UNM08_test <- filter(test, !pNum %in% not_passed_pNum)
+UNM08_training <- rbind(stage1, stage2)
+UNM08_training <- filter(UNM08_training, !pNum %in% not_passed_pNum$pNum)
+UNM08_test <- filter(test, !pNum %in% not_passed_pNum$pNum)
+
 
 #create the PPR measure
 UNM08_training <- UNM08_training %>%
@@ -506,8 +522,22 @@ UNM08_training <- UNM08_training %>%
 UNM08_block6 <- filter(UNM08_training, block == 6) %>%
   group_by(pNum, condition) %>%
   summarise (mean_response = mean(prob_response, na.rm = TRUE))
-UNM08_low_acc_total <- filter(UNM08_block6, mean_response < 0.6) 
+UNM08_low_acc <- filter(UNM08_block6, mean_response < 0.6) 
+#create a frequencies table for each condition
+frequencies_UNM08_low_acc <- UNM08_low_acc %>%
+  group_by(condition) %>%
+  summarise(participant_count = n_distinct(pNum)) %>%
+  ungroup()
+#check which one is the highest frequency in that table
+max_UNM08_low_acc <- max(frequencies_UNM08_low_acc$participant_count)
+# Select participants with the lowest accuracy in each condition, as many as the maximum frequency in the frequency table
+UNM08_low_acc_total <- UNM08_block6 %>%
+  group_by(condition) %>%
+  slice_min(order_by = mean_response, n = max_UNM08_low_acc, with_ties = FALSE) %>%
+  ungroup()
+#create a vecto with the exluced pNum
 UNM08_low_acc <- UNM08_low_acc_total$pNum
+#exclude from dataframe
 UNM08_training <- filter(UNM08_training, !pNum %in% UNM08_low_acc_total$pNum)
 UNM08_test <- filter(UNM08_test, !pNum %in% UNM08_low_acc_total$pNum)
 ```
