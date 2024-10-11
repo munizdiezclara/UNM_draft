@@ -1,0 +1,407 @@
+---
+title: "acc&rat_with_congruence"
+format: docx
+editor: visual
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(afex)
+library(BayesFactor)
+library(apa)
+library(emmeans)
+library(rstatix)
+library("writexl")
+
+# function to force scientific formatting of numbers (used for large BFs)
+changeSciNot <- function(n) {
+  output <- format(n, scientific = TRUE, digits = 2) #Transforms the number into scientific notation even if small
+  output <- sub("e", "x10^", output) #Replace e with 10^
+  output <- sub("\\+0?", "", output) #Remove + symbol and leading zeros on exponent, if > 1
+  output <- sub("-0?", "-", output) #Leaves - symbol but removes leading zeros on exponent, if < 1
+  output <- paste0(output,"^")
+  # output = strsplit(output, "^", fixed = TRUE)
+  # output = paste0(output[[1]][1],"^", output[[1]][2], "^")
+  output
+}
+# function to extract and report BFs with error %s
+report_BF_and_error <- function(BF_in, sci_not = FALSE, hyp = "alt"){
+  
+  if (hyp == "alt") {
+    BF_notation = "BF~10~ = "
+  } else if (hyp == "null") {
+    BF_notation = "BF~01~ = "
+  }
+  
+  if (sci_not == TRUE) {
+    BF_value = changeSciNot(extractBF(BF_in)$bf) # change to sci notation
+  } else {
+    BF_value = round(extractBF(BF_in)$bf,2) # otherwise round
+  }
+  
+  paste0(BF_notation, 
+         BF_value, 
+         " &plusmn; ", 
+         round(100*extractBF(BF_in)$error,2), 
+         "%")
+}
+```
+
+# Exp 2
+
+## Accuracy
+
+```{r, include=FALSE}
+load("UNM07_proc_data.RData")
+UNM07_training <- filter(training, !pNum %in% not_passed_pNum$pNum)
+UNM07_test <- filter(test, !pNum %in% not_passed_pNum$pNum)
+
+UNM07_test <- UNM07_test %>%
+  mutate(trial_type = case_when((target == 1 & distractor == 2) | (target == 2 & distractor == 1) | (target == 3 & distractor == 4) | (target == 4 & distractor == 3) ~ "P-Con" ,
+                                (target == 5 & distractor == 6) | (target == 6 & distractor == 5) |  (target == 7 & distractor == 8) | (target == 8 & distractor == 7)~ "NP-Con",
+                                (target == 1 & (distractor == 5 | distractor == 6)) | (target == 2 & (distractor == 5 | distractor == 6)) | (target == 3 & (distractor == 7 | distractor == 8)) | (target == 4 & (distractor == 7 | distractor == 8)) ~ "P-Incon",
+                                  (target == 5 & (distractor == 1 | distractor == 2)) | (target == 6 & (distractor == 1 | distractor == 2)) | (target == 7 & (distractor == 3 | distractor == 4)) | (target == 8 & (distractor == 3 | distractor == 4)) ~  "NP-Incon"),
+         #add a congruence variable
+         congruence = case_when ((trial_type == "P-Con") | (trial_type == "NP-Con") ~ "congruent",
+                                 (trial_type == "P-Incon") | (trial_type == "NP-Incon") ~ "incongruent"))
+
+#create the PPR measure
+UNM07_training <- UNM07_training %>%
+  mutate(prob_response = case_when((cue1 == 1 | cue1 == 3) & response == "o1_image" ~ 1,
+                                   (cue1 == 1 | cue1 == 3) & response == "o2_image" ~ 0, 
+                                   (cue1 == 2 | cue1 == 4) & response == "o1_image" ~ 0,
+                                   (cue1 == 2 | cue1 == 4) & response == "o2_image" ~ 1))
+
+#detect participants that had an PPR lower than 0.6 in the final block
+UNM07_block8 <- filter(UNM07_training, block == 8) %>%
+  group_by(pNum, condition) %>%
+  summarise (mean_response = mean(prob_response, na.rm = TRUE))
+UNM07_low_acc <- filter(UNM07_block8, mean_response < 0.6) 
+#create a frequencies table for each condition
+frequencies_UNM07_low_acc <- UNM07_low_acc %>%
+  group_by(condition) %>%
+  summarise(participant_count = n_distinct(pNum)) %>%
+  ungroup()
+#check which one is the highest frequency in that table
+max_UNM07_low_acc <- max(frequencies_UNM07_low_acc$participant_count)
+# Select participants with the lowest accuracy in each condition, as many as the maximum frequency in the frequency table
+UNM07_low_acc_total <- UNM07_block8 %>%
+  group_by(condition) %>%
+  slice_min(order_by = mean_response, n = max_UNM07_low_acc, with_ties = FALSE) %>%
+  ungroup()
+#get just the participant numbers
+UNM07_low_acc <- UNM07_low_acc_total$pNum
+#exclude those participants
+UNM07_training <- filter(UNM07_training, !pNum %in% UNM07_low_acc_total$pNum)
+UNM07_test <- filter(UNM07_test, !pNum %in% UNM07_low_acc_total$pNum)
+```
+```{r, include=FALSE}
+#Calculate the mean accuracy and standard error for each block, including the groups
+MA_test <- UNM07_test %>%
+  group_by(condition, trial_type) %>%
+    summarise(mean_acc = mean(acc, na.rm = TRUE), 
+            se_acc = sd(acc, na.rm = TRUE)/sqrt(length(acc)))
+```
+```{r, echo=FALSE, message=FALSE}
+ggplot(data = MA_test, mapping = aes(x = factor(condition, level=c('Uncertain', 'Certain')), y = mean_acc, fill = trial_type)) +
+  geom_col(position = position_dodge2()) +
+  geom_errorbar(aes(y= mean_acc, ymin = mean_acc - se_acc, ymax = mean_acc + se_acc), width = .2, position = position_dodge(0.9)) +
+  coord_cartesian(ylim = c(0, 1))+
+  scale_x_discrete (name = "Type of test") +
+  scale_y_continuous(name = "Accuracy") +
+  coord_cartesian(ylim = c(0.5, 1)) +
+  scale_fill_discrete(type = c("#7B3294", "#C2A5CF", "#008837", "#A6DBA0"))
+```
+
+```{r, include=FALSE}
+#ANOVA accuracy
+acc_UNM07_test <- UNM07_test %>%
+  group_by (pNum, condition, predictiveness, congruence) %>%
+  summarise(acc = mean(acc, na.rm = TRUE))
+acc_UNM07_test$predictiveness <- factor(acc_UNM07_test$predictiveness)
+acc_UNM07_test$condition <- factor(acc_UNM07_test$condition)
+acc_UNM07_test$pNum <- factor(acc_UNM07_test$pNum)
+acc_UNM07_test$congruence<- factor(acc_UNM07_test$congruence)
+ANOVA_acc_UNM07_test <- aov_car(formula = acc ~ condition + Error(pNum*predictiveness*congruence), data = acc_UNM07_test)
+print(ANOVA_acc_UNM07_test)
+
+bay_ANOVA_acc_UNM07_test <- anovaBF(formula = acc ~ condition*predictiveness*congruence + pNum,
+        data = data.frame(acc_UNM07_test),
+        whichRandom = "pNum")
+print(bay_ANOVA_acc_UNM07_test)
+
+bay_ANOVA_acc_UNM07_test_gxp <- bay_ANOVA_acc_UNM07_test[4]/bay_ANOVA_acc_UNM07_test[3]
+print(bay_ANOVA_acc_UNM07_test_gxp)
+bay_ANOVA_acc_UNM07_test_pxc <- bay_ANOVA_acc_UNM07_test[13]/bay_ANOVA_acc_UNM07_test[7]
+print(bay_ANOVA_acc_UNM07_test_pxc)
+bay_ANOVA_acc_UNM07_test_sxc <- bay_ANOVA_acc_UNM07_test[10]/bay_ANOVA_acc_UNM07_test[6]
+print(bay_ANOVA_acc_UNM07_test_sxc)
+bay_ANOVA_acc_UNM07_test_gxpxc <- bay_ANOVA_acc_UNM07_test[18]/bay_ANOVA_acc_UNM07_test[17]
+print(bay_ANOVA_acc_UNM07_test_gxpxc)
+```
+
+There were no significant differences, *group*: `r apa(ANOVA_acc_UNM07_test, effect = "condition")`, `r report_BF_and_error(bay_ANOVA_acc_UNM07_test[1])`; *predictiveness*: `r apa(ANOVA_acc_UNM07_test, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_acc_UNM07_test[2])`; *congruence*: `r apa(ANOVA_acc_UNM07_test, effect ="congruence")`, `r report_BF_and_error(bay_ANOVA_acc_UNM07_test[5])`; *group x predictiveness*, `r apa(ANOVA_acc_UNM07_test, effect = "condition:predictiveness")`, `r report_BF_and_error(bay_ANOVA_acc_UNM07_test_gxp[1])`; *predictiveness x congruence*: `r apa(ANOVA_acc_UNM07_test, effect = "predictiveness:congruence")`, `r report_BF_and_error(bay_ANOVA_acc_UNM07_test_pxc[1])`; *group x congruence*: `r apa(ANOVA_acc_UNM07_test, effect = "condition:congruence")`, `r report_BF_and_error(bay_ANOVA_acc_UNM07_test_sxc[1])`; *group x predictiveness x congruence*: `r apa(ANOVA_acc_UNM07_test, effect = "condition:predictiveness:congruence")`, `r report_BF_and_error(bay_ANOVA_acc_UNM07_test_gxpxc[1])`.
+
+## Just correct ratings
+
+```{r, include=FALSE}
+#plot test mem_score but take out the errors
+M_rat_UNM07_test <- filter(UNM07_test, acc == 1) %>%
+  group_by(trial_type, condition) %>%
+  summarise(mean_mem_score = mean(mem_score, na.rm = TRUE), 
+            se_mem_score = sd(mem_score, na.rm = TRUE)/sqrt(length(mem_score)))
+```
+```{r, echo=FALSE, message=FALSE}
+ggplot(data = M_rat_UNM07_test, mapping = aes(x = factor(condition, levels = c("Uncertain", "Certain")), y = mean_mem_score, fill = trial_type)) +
+  geom_col(position = position_dodge2()) +
+  geom_errorbar(aes(ymin = mean_mem_score - se_mem_score, ymax = mean_mem_score + se_mem_score), width=.2, position=position_dodge(0.9)) +
+  scale_x_discrete (name = "Similarity") +
+  scale_y_continuous(name = "Ratings") +
+  scale_fill_discrete(type = c("#7B3294", "#C2A5CF", "#008837", "#A6DBA0"))
+```
+```{r, include=FALSE}
+#ANOVA mem_score
+rat_UNM07_test <- filter(UNM07_test, acc == 1) %>%
+  group_by (pNum, condition, predictiveness, congruence) %>%
+  summarise(rat = mean(mem_score, na.rm = TRUE))
+rat_UNM07_test$predictiveness <- factor(rat_UNM07_test$predictiveness)
+rat_UNM07_test$condition <- factor(rat_UNM07_test$condition)
+rat_UNM07_test$pNum <- factor(rat_UNM07_test$pNum)
+rat_UNM07_test$congruence <- factor(rat_UNM07_test$congruence)
+ANOVA_rat_UNM07_test <- aov_car(formula = rat ~ condition + Error(pNum*predictiveness*congruence), data = rat_UNM07_test)
+print(ANOVA_rat_UNM07_test)
+```
+```{r, include=FALSE}
+bay_ANOVA_rat_UNM07_test <- anovaBF(formula = rat ~ condition*predictiveness*congruence + pNum,
+        data = data.frame(rat_UNM07_test),
+        whichRandom = "pNum")
+print(bay_ANOVA_rat_UNM07_test)
+
+```
+```{r, include=FALSE}
+bay_ANOVA_rat_UNM07_test_gxp <- bay_ANOVA_rat_UNM07_test[4]/bay_ANOVA_rat_UNM07_test[3]
+print(bay_ANOVA_rat_UNM07_test_gxp)
+bay_ANOVA_rat_UNM07_test_pxc <- bay_ANOVA_rat_UNM07_test[13]/bay_ANOVA_rat_UNM07_test[7]
+print(bay_ANOVA_rat_UNM07_test_pxc)
+bay_ANOVA_rat_UNM07_test_sxc <- bay_ANOVA_rat_UNM07_test[10]/bay_ANOVA_rat_UNM07_test[6]
+print(bay_ANOVA_rat_UNM07_test_sxc)
+bay_ANOVA_rat_UNM07_test_gxpxc <- bay_ANOVA_rat_UNM07_test[18]/bay_ANOVA_rat_UNM07_test[17]
+print(bay_ANOVA_rat_UNM07_test_gxpxc)
+```
+```{r, include = FALSE}
+# SME
+#calculate the simple main effect of congruence
+sme_rat_UNM07_test_condition <- rat_UNM07_test %>%
+  group_by(predictiveness) %>%
+  anova_test(rat ~ condition, effect.size = "pes") %>%
+  get_anova_table() %>%
+  adjust_pvalue(method = "bonferroni")
+sme_rat_UNM07_test_condition #Call the output table
+#calculate the simple main effect of predictiveness
+rat_UNM07_test_pred <- rat_UNM07_test %>%
+  group_by(condition) %>%
+  anova_test(rat ~ predictiveness, effect.size = "pes") %>%
+  get_anova_table() %>%
+  adjust_pvalue(method = "bonferroni")
+rat_UNM07_test_pred #Call the output table
+```
+
+There was a significant effect of *predictiveness*: `r apa(ANOVA_rat_UNM07_test, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_rat_UNM07_test[2])`, and a marginally significant effect of the *group x predictiveness* interaction, `r apa(ANOVA_rat_UNM07_test, effect = "condition:predictiveness")`, `r report_BF_and_error(bay_ANOVA_rat_UNM07_test_gxp[1])` but no other significant differences, *group*: `r apa(ANOVA_rat_UNM07_test, effect = "condition")`, `r report_BF_and_error(bay_ANOVA_rat_UNM07_test[1])`; *congruence*: `r apa(ANOVA_rat_UNM07_test, effect ="congruence")`, `r report_BF_and_error(bay_ANOVA_rat_UNM07_test[5])`; ; *predictiveness x congruence*: `r apa(ANOVA_rat_UNM07_test, effect = "predictiveness:congruence")`, `r report_BF_and_error(bay_ANOVA_rat_UNM07_test_pxc[1])`; *group x congruence*: `r apa(ANOVA_rat_UNM07_test, effect = "condition:congruence")`, `r report_BF_and_error(bay_ANOVA_rat_UNM07_test_sxc[1])`; *group x predictiveness x congruence*: `r apa(ANOVA_rat_UNM07_test, effect = "condition:predictiveness:congruence")`, `r report_BF_and_error(bay_ANOVA_rat_UNM07_test_gxpxc[1])`. Simple main effects indicate a marginal effect of predictiveness in group Certain, *F* (1, 127) = 5.151, *p* = .05, $\\eta^2_p$ = .039, but not in group Uncertain, *F* (1, 138) = .029, *p* = 1, $\\eta^2_p$ > .001. 
+
+# Exp 3
+
+## Accuracy
+
+```{r, include=FALSE}
+load("UNM08_proc_data.RData")
+UNM08_training <- rbind(stage1, stage2)
+UNM08_training <- filter(UNM08_training, !pNum %in% not_passed_pNum$pNum)
+UNM08_test <- filter(test, !pNum %in% not_passed_pNum$pNum)
+
+UNM08_test <- UNM08_test %>%
+  mutate(trial_type = case_when((target == 1 & distractor == 2) | (target == 2 & distractor == 1) | (target == 3 & distractor == 4) | (target == 4 & distractor == 3) ~ "P-Con" ,
+                                (target == 5 & distractor == 6) | (target == 6 & distractor == 5) |  (target == 7 & distractor == 8) | (target == 8 & distractor == 7)~ "NP-Con",
+                                (target == 1 & (distractor == 5 | distractor == 6)) | (target == 2 & (distractor == 5 | distractor == 6)) | (target == 3 & (distractor == 7 | distractor == 8)) | (target == 4 & (distractor == 7 | distractor == 8)) ~ "P-Incon",
+                                  (target == 5 & (distractor == 1 | distractor == 2)) | (target == 6 & (distractor == 1 | distractor == 2)) | (target == 7 & (distractor == 3 | distractor == 4)) | (target == 8 & (distractor == 3 | distractor == 4)) ~  "NP-Incon"),
+         #add a congruence variable
+         congruence = case_when ((trial_type == "P-Con") | (trial_type == "NP-Con") ~ "congruent",
+                                 (trial_type == "P-Incon") | (trial_type == "NP-Incon") ~ "incongruent"))
+
+#create the PPR measure
+UNM08_training <- UNM08_training %>%
+  mutate(prob_response = case_when((cue1 == 1 | cue1 == 3) & response == "o1_image" ~ 1,
+                                   (cue1 == 1 | cue1 == 3) & response == "o2_image" ~ 0, 
+                                   (cue1 == 2 | cue1 == 4) & response == "o1_image" ~ 0,
+                                   (cue1 == 2 | cue1 == 4) & response == "o2_image" ~ 1))
+
+#detect and clean participants that had an PPR lower than 0.6 in the final block or not passed the test comprehension check
+UNM08_block6 <- filter(UNM08_training, block == 6) %>%
+  group_by(pNum, condition) %>%
+  summarise (mean_response = mean(prob_response, na.rm = TRUE))
+UNM08_low_acc <- filter(UNM08_block6, mean_response < 0.6) 
+#create a frequencies table for each condition
+frequencies_UNM08_low_acc <- UNM08_low_acc %>%
+  group_by(condition) %>%
+  summarise(participant_count = n_distinct(pNum)) %>%
+  ungroup()
+#check which one is the highest frequency in that table
+max_UNM08_low_acc <- max(frequencies_UNM08_low_acc$participant_count)
+# Select participants with the lowest accuracy in each condition, as many as the maximum frequency in the frequency table
+UNM08_low_acc_total <- UNM08_block6 %>%
+  group_by(condition) %>%
+  slice_min(order_by = mean_response, n = max_UNM08_low_acc, with_ties = FALSE) %>%
+  ungroup()
+#create a vecto with the exluced pNum
+UNM08_low_acc <- UNM08_low_acc_total$pNum
+#exclude from dataframe
+UNM08_training <- filter(UNM08_training, !pNum %in% UNM08_low_acc_total$pNum)
+UNM08_test <- filter(UNM08_test, !pNum %in% UNM08_low_acc_total$pNum)
+```
+```{r, include=FALSE}
+#Calculate the mean accuracy and standard error for each block, including the groups
+MA_UNM08_test <- UNM08_test %>%
+  group_by(trial_type, condition) %>%
+    summarise(mean_acc = mean(acc, na.rm = TRUE), 
+            se_acc = sd(acc, na.rm = TRUE)/sqrt(length(acc)))
+```
+```{r, echo=FALSE, message=FALSE}
+ggplot(data = MA_UNM08_test, mapping = aes(x = factor(condition, level=c('Uncertain', 'Certain Short','Certain Long')), y = mean_acc, fill = trial_type)) +
+  geom_col(position = position_dodge2()) +
+  geom_errorbar(aes(y= mean_acc, ymin = mean_acc - se_acc, ymax = mean_acc + se_acc), width = .2, position = position_dodge(0.9)) +
+  coord_cartesian(ylim = c(0, 1))+
+  scale_x_discrete (name = "Type of test") +
+  scale_y_continuous(name = "Accuracy") +
+  coord_cartesian(ylim = c(0.5, 1)) +
+  scale_fill_discrete(type = c("#7B3294", "#C2A5CF", "#008837", "#A6DBA0"))
+```
+```{r, include=FALSE}
+#ANOVA accuracy
+acc_UNM08_test <- UNM08_test %>%
+  group_by (pNum, condition, predictiveness, congruence) %>%
+  summarise(acc = mean(acc, na.rm = TRUE))
+acc_UNM08_test$predictiveness <- factor(acc_UNM08_test$predictiveness)
+acc_UNM08_test$condition <- factor(acc_UNM08_test$condition)
+acc_UNM08_test$pNum <- factor(acc_UNM08_test$pNum)
+acc_UNM08_test$congruence <- factor(acc_UNM08_test$congruence)
+ANOVA_acc_UNM08_test <- aov_car(formula = acc ~ condition + Error(pNum*predictiveness*congruence), data = acc_UNM08_test)
+print(ANOVA_acc_UNM08_test)
+
+bay_ANOVA_acc_UNM08_test <- anovaBF(formula = acc ~ condition*predictiveness*congruence + pNum,
+        data = data.frame(acc_UNM08_test),
+        whichRandom = "pNum")
+print(bay_ANOVA_acc_UNM08_test)
+
+bay_ANOVA_acc_UNM08_test_gxp <- bay_ANOVA_acc_UNM08_test[4]/bay_ANOVA_acc_UNM08_test[3]
+print(bay_ANOVA_acc_UNM08_test_gxp)
+bay_ANOVA_acc_UNM08_test_pxc <- bay_ANOVA_acc_UNM08_test[13]/bay_ANOVA_acc_UNM08_test[7]
+print(bay_ANOVA_acc_UNM08_test_pxc)
+bay_ANOVA_acc_UNM08_test_sxc <- bay_ANOVA_acc_UNM08_test[10]/bay_ANOVA_acc_UNM08_test[6]
+print(bay_ANOVA_acc_UNM08_test_sxc)
+bay_ANOVA_acc_UNM08_test_gxpxc <- bay_ANOVA_acc_UNM08_test[18]/bay_ANOVA_acc_UNM08_test[17]
+print(bay_ANOVA_acc_UNM08_test_gxpxc)
+```
+```{r, include=FALSE}
+# Pairwise comparisons for the main effect of condition
+acc_UNM08_test_interaction <- emmeans(ANOVA_acc_UNM08_test, ~condition)
+contrast(acc_UNM08_test_interaction, adjust = "bon", "trt.vs.ctrl", ref = c(1,2))
+
+acc_UNM08_test_certs <- subset(acc_UNM08_test, (condition == "Certain Long") | (condition == "Certain Short"), acc, drop = TRUE)
+acc_UNM08_test_uncert <- subset(acc_UNM08_test, condition == "Uncertain", acc, drop = TRUE)
+bay_t.test_acc_UNM08_int_uncer_vs_certs <-  ttestBF(acc_UNM08_test_certs, acc_UNM08_test_uncert)
+print(bay_t.test_acc_UNM08_int_uncer_vs_certs)
+
+pairs(acc_UNM08_test_interaction, adjust = "bon")
+
+acc_UNM08_test_cert <- subset(acc_UNM08_test, condition == "Certain Long", acc, drop = TRUE)
+acc_UNM08_test_cert_s <- subset(acc_UNM08_test, condition == "Certain Short", acc, drop = TRUE)
+bay_t.test_acc_UNM08_test_certs <-  ttestBF(acc_UNM08_test_cert, acc_UNM08_test_cert_s)
+print(bay_t.test_acc_UNM08_test_certs)
+```
+```{r, include = FALSE}
+# SME
+#calculate the simple main effect of congruence
+sme_acc_UNM08_test_congruence <- acc_UNM08_test %>%
+  group_by(predictiveness) %>%
+  anova_test(acc ~ congruence + Error(pNum/congruence), effect.size = "pes") %>%
+  get_anova_table() %>%
+  adjust_pvalue(method = "bonferroni")
+sme_acc_UNM08_test_congruence #Call the output table
+#calculate the simple main effect of predictiveness
+sme_acc_UNM08_test_pred <- acc_UNM08_test %>%
+  group_by(congruence) %>%
+  anova_test(acc ~ predictiveness + Error(pNum/predictiveness), effect.size = "pes") %>%
+  get_anova_table() %>%
+  adjust_pvalue(method = "bonferroni")
+sme_acc_UNM08_test_pred #Call the output table
+```
+
+There are significant differences due to the *group*: `r apa(ANOVA_acc_UNM08_test, effect = "condition")`, `r report_BF_and_error(bay_ANOVA_acc_UNM08_test[1])`, *predictiveness*: `r apa(ANOVA_acc_UNM08_test, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_acc_UNM08_test[2])`, and of the *predictiveness x congruence* interaction, `r apa(ANOVA_acc_UNM08_test, effect = "predictiveness:congruence")`, `r report_BF_and_error(bay_ANOVA_acc_UNM08_test_pxc[1])`. All other effects and interactions were non significant: *congruence*: `r apa(ANOVA_acc_UNM08_test, effect ="congruence")`, `r report_BF_and_error(bay_ANOVA_acc_UNM08_test[5])`; *group x predictiveness*, `r apa(ANOVA_acc_UNM08_test, effect = "condition:predictiveness")`, `r report_BF_and_error(bay_ANOVA_acc_UNM08_test_gxp[1])`;  *group x congruence*: `r apa(ANOVA_acc_UNM08_test, effect = "condition:congruence")`, `r report_BF_and_error(bay_ANOVA_acc_UNM08_test_sxc[1])`; *group x predictiveness x congruence*: `r apa(ANOVA_acc_UNM08_test, effect = "condition:predictiveness:congruence")`, `r report_BF_and_error(bay_ANOVA_acc_UNM08_test_gxpxc[1])`. Pairwise comparisons of the effect of condition show differences of the Uncertain group with the Certain groups, *t* (73) = 3.019, *p* = .003, `r report_BF_and_error(bay_t.test_acc_UNM08_int_uncer_vs_certs)`, but not between them, *t* (73) = .069, *p* = 1, `r report_BF_and_error(bay_t.test_acc_UNM08_test_certs)`. The simple main effects showed an effect in predictiveness in the incongruent trials, *F* (1, 75) = .044, *p* = 1, $\\eta^2_p$ = .001, but not on the congruent trials, *F* (1, 75) = 13.459, *p* = 1, $\\eta^2_p$ = .001. 
+
+
+
+## Just correct ratings
+
+```{r, include=FALSE}
+#plot test mem_score but take out the errors
+M_rat_UNM08_test <- filter(UNM08_test, acc == 1) %>%
+  group_by(trial_type, condition) %>%
+  summarise(mean_mem_score = mean(mem_score, na.rm = TRUE), 
+            se_mem_score = sd(mem_score, na.rm = TRUE)/sqrt(length(mem_score)))
+```
+```{r, echo=FALSE, message=FALSE}
+ggplot(data = M_rat_UNM08_test, mapping = aes(x = factor(condition, levels = c("Uncertain", "Certain Short", "Certain Long")), y = mean_mem_score, fill = trial_type)) +
+  geom_col(position = position_dodge2()) +
+  geom_errorbar(aes(ymin = mean_mem_score - se_mem_score, ymax = mean_mem_score + se_mem_score), width=.2, position=position_dodge(0.9)) +
+  scale_x_discrete (name = "Similarity") +
+  scale_y_continuous(name = "Ratings") +
+  scale_fill_discrete(type = c("#7B3294", "#C2A5CF", "#008837", "#A6DBA0"))
+```
+
+```{r, include=FALSE}
+#ANOVA mem_score
+rat_UNM08_test <- filter(UNM08_test, acc == 1) %>%
+  group_by (pNum, condition, predictiveness, congruence) %>%
+  summarise(rat = mean(mem_score, na.rm = TRUE))
+rat_UNM08_test$predictiveness <- factor(rat_UNM08_test$predictiveness)
+rat_UNM08_test$condition <- factor(rat_UNM08_test$condition)
+rat_UNM08_test$pNum <- factor(rat_UNM08_test$pNum)
+rat_UNM08_test$congruence <- factor(rat_UNM08_test$congruence)
+ANOVA_rat_UNM08_test <- aov_car(formula = rat ~ condition + Error(pNum*predictiveness*congruence), data = rat_UNM08_test)
+print(ANOVA_rat_UNM08_test)
+```
+```{r, include=FALSE}
+bay_ANOVA_rat_UNM08_test <- anovaBF(formula = rat ~ condition*predictiveness*congruence + pNum,
+        data = data.frame(rat_UNM08_test),
+        whichRandom = "pNum")
+print(bay_ANOVA_rat_UNM08_test)
+```
+```{r, include=FALSE}
+bay_ANOVA_rat_UNM08_test_gxp <- bay_ANOVA_rat_UNM08_test[4]/bay_ANOVA_rat_UNM08_test[3]
+print(bay_ANOVA_rat_UNM08_test_gxp)
+bay_ANOVA_rat_UNM08_test_pxc <- bay_ANOVA_rat_UNM08_test[13]/bay_ANOVA_rat_UNM08_test[7]
+print(bay_ANOVA_rat_UNM08_test_pxc)
+bay_ANOVA_rat_UNM08_test_sxc <- bay_ANOVA_rat_UNM08_test[10]/bay_ANOVA_rat_UNM08_test[6]
+print(bay_ANOVA_rat_UNM08_test_sxc)
+bay_ANOVA_rat_UNM08_test_gxpxc <- bay_ANOVA_rat_UNM08_test[18]/bay_ANOVA_rat_UNM08_test[17]
+print(bay_ANOVA_rat_UNM08_test_gxpxc)
+```
+```{r, include = FALSE}
+# SME
+#calculate the simple main effect of condition
+sme_rat_UNM08_test_condition <- rat_UNM08_test %>%
+  group_by(predictiveness) %>%
+  anova_test(rat ~ condition, effect.size = "pes") %>%
+  get_anova_table() %>%
+  adjust_pvalue(method = "bonferroni")
+sme_rat_UNM08_test_condition #Call the output table
+#calculate the simple main effect of predictiveness
+sme_rat_UNM08_test_pred <- rat_UNM08_test %>%
+  group_by(condition) %>%
+  anova_test(rat ~ predictiveness + Error(pNum/predictiveness*congruence), effect.size = "pes") %>%
+  get_anova_table() %>%
+  adjust_pvalue(method = "bonferroni")
+sme_rat_UNM08_test_pred #Call the output table
+```
+
+There was a significant effect *predictiveness*, `r apa(ANOVA_rat_UNM08_test, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_rat_UNM08_test[2])`, and of the *group x predictiveness* interaction, `r apa(ANOVA_rat_UNM08_test, effect = "condition:predictiveness")`, `r report_BF_and_error(bay_ANOVA_rat_UNM08_test_gxp[1])`, but no significant effect of the *group*, `r apa(ANOVA_rat_UNM08_test, effect = "condition")`, `r report_BF_and_error(bay_ANOVA_rat_UNM08_test[1])`. A simple main effects analysis showed a significant effect of *predictiveness* on the Certain Short group, *F* (1, 20) = 10.672, *p* = .036, $\\eta^2_p$ = .348, marginally significant on the Certain Long group, *F*(1, 20) = 9.134, *p* = .063, $\\eta^2_p$ = .314, but not significant on the Uncertain group, *F* (1, 29) = 0.167, *p* = 1, $\\eta^2_p$ = .006. No other effect was significant, *congruence*: `r apa(ANOVA_acc_UNM08_test, effect ="congruence")`, `r report_BF_and_error(bay_ANOVA_acc_UNM08_test[5])`; *predictiveness x congruence* interaction, `r apa(ANOVA_acc_UNM08_test, effect = "predictiveness:congruence")`, `r report_BF_and_error(bay_ANOVA_acc_UNM08_test_pxc[1])`; *group x predictiveness*, `r apa(ANOVA_acc_UNM08_test, effect = "condition:predictiveness")`, `r report_BF_and_error(bay_ANOVA_acc_UNM08_test_gxp[1])`;  *group x congruence*: `r apa(ANOVA_acc_UNM08_test, effect = "condition:congruence")`, `r report_BF_and_error(bay_ANOVA_acc_UNM08_test_sxc[1])`; *group x predictiveness x congruence*: `r apa(ANOVA_acc_UNM08_test, effect = "condition:predictiveness:congruence")`, `r report_BF_and_error(bay_ANOVA_acc_UNM08_test_gxpxc[1])`. 
