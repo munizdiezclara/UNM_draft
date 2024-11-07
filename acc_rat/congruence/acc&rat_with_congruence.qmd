@@ -53,7 +53,7 @@ report_BF_and_error <- function(BF_in, sci_not = FALSE, hyp = "alt"){
 ## Accuracy
 
 ```{r, include=FALSE}
-load("UNM07_proc_data.RData")
+load("../../UNM07_proc_data.RData")
 UNM07_training <- filter(training, !pNum %in% not_passed_pNum$pNum)
 UNM07_test <- filter(test, !pNum %in% not_passed_pNum$pNum)
 
@@ -96,6 +96,7 @@ UNM07_low_acc <- UNM07_low_acc_total$pNum
 UNM07_training <- filter(UNM07_training, !pNum %in% UNM07_low_acc_total$pNum)
 UNM07_test <- filter(UNM07_test, !pNum %in% UNM07_low_acc_total$pNum)
 ```
+
 ```{r, include=FALSE}
 #Calculate the mean accuracy and standard error for each block, including the groups
 MA_test <- UNM07_test %>%
@@ -103,6 +104,7 @@ MA_test <- UNM07_test %>%
     summarise(mean_acc = mean(acc, na.rm = TRUE), 
             se_acc = sd(acc, na.rm = TRUE)/sqrt(length(acc)))
 ```
+
 ```{r, echo=FALSE, message=FALSE}
 ggplot(data = MA_test, mapping = aes(x = factor(condition, level=c('Uncertain', 'Certain')), y = mean_acc, fill = trial_type)) +
   geom_col(position = position_dodge2()) +
@@ -152,6 +154,7 @@ M_rat_UNM07_test <- filter(UNM07_test, acc == 1) %>%
   summarise(mean_mem_score = mean(mem_score, na.rm = TRUE), 
             se_mem_score = sd(mem_score, na.rm = TRUE)/sqrt(length(mem_score)))
 ```
+
 ```{r, echo=FALSE, message=FALSE}
 ggplot(data = M_rat_UNM07_test, mapping = aes(x = factor(condition, levels = c("Uncertain", "Certain")), y = mean_mem_score, fill = trial_type)) +
   geom_col(position = position_dodge2()) +
@@ -160,6 +163,7 @@ ggplot(data = M_rat_UNM07_test, mapping = aes(x = factor(condition, levels = c("
   scale_y_continuous(name = "Ratings") +
   scale_fill_discrete(type = c("#7B3294", "#C2A5CF", "#008837", "#A6DBA0"))
 ```
+
 ```{r, include=FALSE}
 #ANOVA mem_score
 rat_UNM07_test <- filter(UNM07_test, acc == 1) %>%
@@ -172,6 +176,7 @@ rat_UNM07_test$congruence <- factor(rat_UNM07_test$congruence)
 ANOVA_rat_UNM07_test <- aov_car(formula = rat ~ condition + Error(pNum*predictiveness*congruence), data = rat_UNM07_test)
 print(ANOVA_rat_UNM07_test)
 ```
+
 ```{r, include=FALSE}
 bay_ANOVA_rat_UNM07_test <- anovaBF(formula = rat ~ condition*predictiveness*congruence + pNum,
         data = data.frame(rat_UNM07_test),
@@ -179,6 +184,7 @@ bay_ANOVA_rat_UNM07_test <- anovaBF(formula = rat ~ condition*predictiveness*con
 print(bay_ANOVA_rat_UNM07_test)
 
 ```
+
 ```{r, include=FALSE}
 bay_ANOVA_rat_UNM07_test_gxp <- bay_ANOVA_rat_UNM07_test[4]/bay_ANOVA_rat_UNM07_test[3]
 print(bay_ANOVA_rat_UNM07_test_gxp)
@@ -189,32 +195,107 @@ print(bay_ANOVA_rat_UNM07_test_sxc)
 bay_ANOVA_rat_UNM07_test_gxpxc <- bay_ANOVA_rat_UNM07_test[18]/bay_ANOVA_rat_UNM07_test[17]
 print(bay_ANOVA_rat_UNM07_test_gxpxc)
 ```
+
 ```{r, include = FALSE}
 # SME
+SME_rat_UNM07_test_gxp <- filter(UNM07_test, acc == 1) %>%
+  group_by (pNum, condition, predictiveness) %>%
+  summarise(rat = mean(mem_score, na.rm = TRUE))
 #calculate the simple main effect of congruence
-sme_rat_UNM07_test_condition <- rat_UNM07_test %>%
+sme_rat_UNM07_test_condition <- SME_rat_UNM07_test_gxp %>%
   group_by(predictiveness) %>%
   anova_test(rat ~ condition, effect.size = "pes") %>%
   get_anova_table() %>%
   adjust_pvalue(method = "bonferroni")
 sme_rat_UNM07_test_condition #Call the output table
 #calculate the simple main effect of predictiveness
-rat_UNM07_test_pred <- rat_UNM07_test %>%
+rat_UNM07_test_pred <- SME_rat_UNM07_test_gxp %>%
   group_by(condition) %>%
-  anova_test(rat ~ predictiveness, effect.size = "pes") %>%
+  anova_test(rat ~ predictiveness + Error(pNum/predictiveness), effect.size = "pes") %>%
   get_anova_table() %>%
   adjust_pvalue(method = "bonferroni")
 rat_UNM07_test_pred #Call the output table
 ```
 
-There was a significant effect of *predictiveness*: `r apa(ANOVA_rat_UNM07_test, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_rat_UNM07_test[2])`, and a marginally significant effect of the *group x predictiveness* interaction, `r apa(ANOVA_rat_UNM07_test, effect = "condition:predictiveness")`, `r report_BF_and_error(bay_ANOVA_rat_UNM07_test_gxp[1])` but no other significant differences, *group*: `r apa(ANOVA_rat_UNM07_test, effect = "condition")`, `r report_BF_and_error(bay_ANOVA_rat_UNM07_test[1])`; *congruence*: `r apa(ANOVA_rat_UNM07_test, effect ="congruence")`, `r report_BF_and_error(bay_ANOVA_rat_UNM07_test[5])`; ; *predictiveness x congruence*: `r apa(ANOVA_rat_UNM07_test, effect = "predictiveness:congruence")`, `r report_BF_and_error(bay_ANOVA_rat_UNM07_test_pxc[1])`; *group x congruence*: `r apa(ANOVA_rat_UNM07_test, effect = "condition:congruence")`, `r report_BF_and_error(bay_ANOVA_rat_UNM07_test_sxc[1])`; *group x predictiveness x congruence*: `r apa(ANOVA_rat_UNM07_test, effect = "condition:predictiveness:congruence")`, `r report_BF_and_error(bay_ANOVA_rat_UNM07_test_gxpxc[1])`. Simple main effects indicate a marginal effect of predictiveness in group Certain, *F* (1, 127) = 5.151, *p* = .05, $\\eta^2_p$ = .039, but not in group Uncertain, *F* (1, 138) = .029, *p* = 1, $\\eta^2_p$ > .001. 
+There was a significant effect of *predictiveness*: `r apa(ANOVA_rat_UNM07_test, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_rat_UNM07_test[2])`, and a marginally significant effect of the *group x predictiveness* interaction, `r apa(ANOVA_rat_UNM07_test, effect = "condition:predictiveness")`, `r report_BF_and_error(bay_ANOVA_rat_UNM07_test_gxp[1])` but no other significant differences, *group*: `r apa(ANOVA_rat_UNM07_test, effect = "condition")`, `r report_BF_and_error(bay_ANOVA_rat_UNM07_test[1])`; *congruence*: `r apa(ANOVA_rat_UNM07_test, effect ="congruence")`, `r report_BF_and_error(bay_ANOVA_rat_UNM07_test[5])`; ; *predictiveness x congruence*: `r apa(ANOVA_rat_UNM07_test, effect = "predictiveness:congruence")`, `r report_BF_and_error(bay_ANOVA_rat_UNM07_test_pxc[1])`; *group x congruence*: `r apa(ANOVA_rat_UNM07_test, effect = "condition:congruence")`, `r report_BF_and_error(bay_ANOVA_rat_UNM07_test_sxc[1])`; *group x predictiveness x congruence*: `r apa(ANOVA_rat_UNM07_test, effect = "condition:predictiveness:congruence")`, `r report_BF_and_error(bay_ANOVA_rat_UNM07_test_gxpxc[1])`. Simple main effects indicate a no effect of predictiveness in group Certain, *F* (`r rat_UNM07_test_pred[1,3]`, `r rat_UNM07_test_pred[1,4]`) = `r rat_UNM07_test_pred[1,5]`, *p* = `r rat_UNM07_test_pred[1,9]`5, $\\eta^2_p$ = `r rat_UNM07_test_pred[1,8]`, nor in group Uncertain, *F* (`r rat_UNM07_test_pred[2,3]`, `r rat_UNM07_test_pred[2,4]`) = `r rat_UNM07_test_pred[2,5]`, *p* = `r rat_UNM07_test_pred[2,9]`5, $\\eta^2_p$ = `r rat_UNM07_test_pred[2,8]`.
+
+## Memory score
+
+```{r, include=FALSE}
+#plot test mem_score but take out the errors
+M_mem_UNM07_test <- UNM07_test %>%
+  group_by(trial_type, condition) %>%
+  summarise(mean_mem_score = mean(c_mem_score, na.rm = TRUE), 
+            se_mem_score = sd(mem_score, na.rm = TRUE)/sqrt(length(mem_score)))
+```
+
+```{r, echo=FALSE, message=FALSE}
+ggplot(data = M_mem_UNM07_test, mapping = aes(x = factor(condition, levels = c("Uncertain", "Certain")), y = mean_mem_score, fill = trial_type)) +
+  geom_col(position = position_dodge2()) +
+  geom_errorbar(aes(ymin = mean_mem_score - se_mem_score, ymax = mean_mem_score + se_mem_score), width=.2, position=position_dodge(0.9)) +
+  scale_x_discrete (name = "Group") +
+  scale_y_continuous(name = "Memory score") +
+  scale_fill_discrete(type = c("#7B3294", "#C2A5CF", "#008837", "#A6DBA0"))
+```
+
+```{r, include=FALSE}
+#ANOVA mem_score
+mem_UNM07_test <- UNM07_test %>%
+  group_by (pNum, condition, predictiveness, congruence) %>%
+  summarise(mem = mean(c_mem_score, na.rm = TRUE))
+mem_UNM07_test$predictiveness <- factor(mem_UNM07_test$predictiveness)
+mem_UNM07_test$condition <- factor(mem_UNM07_test$condition)
+mem_UNM07_test$pNum <- factor(mem_UNM07_test$pNum)
+mem_UNM07_test$congruence <- factor(mem_UNM07_test$congruence)
+ANOVA_mem_UNM07_test <- aov_car(formula = mem ~ condition + Error(pNum*predictiveness*congruence), data = mem_UNM07_test)
+print(ANOVA_mem_UNM07_test)
+```
+```{r, include=FALSE}
+bay_ANOVA_mem_UNM07_test <- anovaBF(formula = mem ~ condition*predictiveness*congruence + pNum,
+        data = data.frame(mem_UNM07_test),
+        whichRandom = "pNum")
+print(bay_ANOVA_mem_UNM07_test)
+
+```
+```{r, include=FALSE}
+bay_ANOVA_mem_UNM07_test_gxp <- bay_ANOVA_mem_UNM07_test[4]/bay_ANOVA_mem_UNM07_test[3]
+print(bay_ANOVA_mem_UNM07_test_gxp)
+bay_ANOVA_mem_UNM07_test_pxc <- bay_ANOVA_mem_UNM07_test[13]/bay_ANOVA_mem_UNM07_test[7]
+print(bay_ANOVA_mem_UNM07_test_pxc)
+bay_ANOVA_mem_UNM07_test_sxc <- bay_ANOVA_mem_UNM07_test[10]/bay_ANOVA_mem_UNM07_test[6]
+print(bay_ANOVA_mem_UNM07_test_sxc)
+bay_ANOVA_mem_UNM07_test_gxpxc <- bay_ANOVA_mem_UNM07_test[18]/bay_ANOVA_mem_UNM07_test[17]
+print(bay_ANOVA_mem_UNM07_test_gxpxc)
+```
+```{r, include = FALSE}
+# SME of the condition:predictiveness interaction
+SME_mem_UNM07_test <- UNM07_test %>%
+  group_by (pNum, condition, predictiveness) %>%
+  summarise(mem = mean(c_mem_score, na.rm = TRUE))
+#calculate the simple main effect of condition
+sme_mem_UNM07_test_condition <- SME_mem_UNM07_test %>%
+  group_by(predictiveness) %>%
+  anova_test(mem ~ condition, effect.size = "pes") %>%
+  get_anova_table() %>%
+  adjust_pvalue(method = "bonferroni")
+sme_mem_UNM07_test_condition #Call the output table
+#calculate the simple main effect of predictiveness
+sme_mem_UNM07_test_pred <- SME_mem_UNM07_test %>%
+  group_by(condition) %>%
+  anova_test(mem ~ predictiveness + Error(pNum/predictiveness), effect.size = "pes") %>%
+  get_anova_table() %>%
+  adjust_pvalue(method = "bonferroni")
+sme_mem_UNM07_test_pred #Call the output table
+```
+
+There was a significant effect of *predictiveness*, `r apa(ANOVA_mem_UNM07_test, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_mem_UNM07_test[2])`, and a significant *group x predictiveness* interaction, `r apa(ANOVA_mem_UNM07_test, effect = "condition:predictiveness")`, `r report_BF_and_error(bay_ANOVA_mem_UNM07_test_gxp[1])`. There were no other significant effects or interactions, *group*: `r apa(ANOVA_mem_UNM07_test, effect = "condition")`, `r report_BF_and_error(bay_ANOVA_mem_UNM07_test[1])`; *congruence*: `r apa(ANOVA_mem_UNM07_test, effect ="congruence")`, `r report_BF_and_error(bay_ANOVA_mem_UNM07_test[5])`; *predictiveness x congruence*: `r apa(ANOVA_mem_UNM07_test, effect = "predictiveness:congruence")`, `r report_BF_and_error(bay_ANOVA_mem_UNM07_test_pxc[1])`; *group x congruence*: `r apa(ANOVA_mem_UNM07_test, effect = "condition:congruence")`, `r report_BF_and_error(bay_ANOVA_mem_UNM07_test_sxc[1])`; *group x predictiveness x congruence*: `r apa(ANOVA_mem_UNM07_test, effect = "condition:predictiveness:congruence")`, `r report_BF_and_error(bay_ANOVA_mem_UNM07_test_gxpxc[1])`. Simple main effects showed a significant effect of *predictiveness* on Certain group, *F*(`r sme_mem_UNM07_test_pred[1,3]`, `r sme_mem_UNM07_test_pred[1,4]`) = `r sme_mem_UNM07_test_pred[1,5]`, *p* = `r sme_mem_UNM07_test_pred[1,9]`, $\\eta^2_p$ = `r sme_mem_UNM07_test_pred[1,8]`, but not on group Uncertain, *F*(`r sme_mem_UNM07_test_pred[2,3]`, `r sme_mem_UNM07_test_pred[2,4]`) = `r sme_mem_UNM07_test_pred[2,5]`, *p* = `r sme_mem_UNM07_test_pred[2,9]`, $\\eta^2_p$ = `r sme_mem_UNM07_test_pred[2,8]`.
 
 # Exp 3
 
 ## Accuracy
 
 ```{r, include=FALSE}
-load("UNM08_proc_data.RData")
+load("../../UNM08_proc_data.RData")
 UNM08_training <- rbind(stage1, stage2)
 UNM08_training <- filter(UNM08_training, !pNum %in% not_passed_pNum$pNum)
 UNM08_test <- filter(test, !pNum %in% not_passed_pNum$pNum)
@@ -258,6 +339,7 @@ UNM08_low_acc <- UNM08_low_acc_total$pNum
 UNM08_training <- filter(UNM08_training, !pNum %in% UNM08_low_acc_total$pNum)
 UNM08_test <- filter(UNM08_test, !pNum %in% UNM08_low_acc_total$pNum)
 ```
+
 ```{r, include=FALSE}
 #Calculate the mean accuracy and standard error for each block, including the groups
 MA_UNM08_test <- UNM08_test %>%
@@ -265,6 +347,7 @@ MA_UNM08_test <- UNM08_test %>%
     summarise(mean_acc = mean(acc, na.rm = TRUE), 
             se_acc = sd(acc, na.rm = TRUE)/sqrt(length(acc)))
 ```
+
 ```{r, echo=FALSE, message=FALSE}
 ggplot(data = MA_UNM08_test, mapping = aes(x = factor(condition, level=c('Uncertain', 'Certain Short','Certain Long')), y = mean_acc, fill = trial_type)) +
   geom_col(position = position_dodge2()) +
@@ -275,6 +358,7 @@ ggplot(data = MA_UNM08_test, mapping = aes(x = factor(condition, level=c('Uncert
   coord_cartesian(ylim = c(0.5, 1)) +
   scale_fill_discrete(type = c("#7B3294", "#C2A5CF", "#008837", "#A6DBA0"))
 ```
+
 ```{r, include=FALSE}
 #ANOVA accuracy
 acc_UNM08_test <- UNM08_test %>%
@@ -301,6 +385,7 @@ print(bay_ANOVA_acc_UNM08_test_sxc)
 bay_ANOVA_acc_UNM08_test_gxpxc <- bay_ANOVA_acc_UNM08_test[18]/bay_ANOVA_acc_UNM08_test[17]
 print(bay_ANOVA_acc_UNM08_test_gxpxc)
 ```
+
 ```{r, include=FALSE}
 # Pairwise comparisons for the main effect of condition
 acc_UNM08_test_interaction <- emmeans(ANOVA_acc_UNM08_test, ~condition)
@@ -318,17 +403,21 @@ acc_UNM08_test_cert_s <- subset(acc_UNM08_test, condition == "Certain Short", ac
 bay_t.test_acc_UNM08_test_certs <-  ttestBF(acc_UNM08_test_cert, acc_UNM08_test_cert_s)
 print(bay_t.test_acc_UNM08_test_certs)
 ```
+
 ```{r, include = FALSE}
 # SME
+SME_acc_UNM08_test <- UNM08_test %>%
+  group_by (pNum, predictiveness, congruence) %>%
+  summarise(acc = mean(acc, na.rm = TRUE))
 #calculate the simple main effect of congruence
-sme_acc_UNM08_test_congruence <- acc_UNM08_test %>%
+sme_acc_UNM08_test_congruence <- SME_acc_UNM08_test %>%
   group_by(predictiveness) %>%
   anova_test(acc ~ congruence + Error(pNum/congruence), effect.size = "pes") %>%
   get_anova_table() %>%
   adjust_pvalue(method = "bonferroni")
 sme_acc_UNM08_test_congruence #Call the output table
 #calculate the simple main effect of predictiveness
-sme_acc_UNM08_test_pred <- acc_UNM08_test %>%
+sme_acc_UNM08_test_pred <- SME_acc_UNM08_test %>%
   group_by(congruence) %>%
   anova_test(acc ~ predictiveness + Error(pNum/predictiveness), effect.size = "pes") %>%
   get_anova_table() %>%
@@ -336,9 +425,7 @@ sme_acc_UNM08_test_pred <- acc_UNM08_test %>%
 sme_acc_UNM08_test_pred #Call the output table
 ```
 
-There are significant differences due to the *group*: `r apa(ANOVA_acc_UNM08_test, effect = "condition")`, `r report_BF_and_error(bay_ANOVA_acc_UNM08_test[1])`, *predictiveness*: `r apa(ANOVA_acc_UNM08_test, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_acc_UNM08_test[2])`, and of the *predictiveness x congruence* interaction, `r apa(ANOVA_acc_UNM08_test, effect = "predictiveness:congruence")`, `r report_BF_and_error(bay_ANOVA_acc_UNM08_test_pxc[1])`. All other effects and interactions were non significant: *congruence*: `r apa(ANOVA_acc_UNM08_test, effect ="congruence")`, `r report_BF_and_error(bay_ANOVA_acc_UNM08_test[5])`; *group x predictiveness*, `r apa(ANOVA_acc_UNM08_test, effect = "condition:predictiveness")`, `r report_BF_and_error(bay_ANOVA_acc_UNM08_test_gxp[1])`;  *group x congruence*: `r apa(ANOVA_acc_UNM08_test, effect = "condition:congruence")`, `r report_BF_and_error(bay_ANOVA_acc_UNM08_test_sxc[1])`; *group x predictiveness x congruence*: `r apa(ANOVA_acc_UNM08_test, effect = "condition:predictiveness:congruence")`, `r report_BF_and_error(bay_ANOVA_acc_UNM08_test_gxpxc[1])`. Pairwise comparisons of the effect of condition show differences of the Uncertain group with the Certain groups, *t* (73) = 3.019, *p* = .003, `r report_BF_and_error(bay_t.test_acc_UNM08_int_uncer_vs_certs)`, but not between them, *t* (73) = .069, *p* = 1, `r report_BF_and_error(bay_t.test_acc_UNM08_test_certs)`. The simple main effects showed an effect in predictiveness in the incongruent trials, *F* (1, 75) = .044, *p* = 1, $\\eta^2_p$ = .001, but not on the congruent trials, *F* (1, 75) = 13.459, *p* = 1, $\\eta^2_p$ = .001. 
-
-
+There are significant differences due to the *group*: `r apa(ANOVA_acc_UNM08_test, effect = "condition")`, `r report_BF_and_error(bay_ANOVA_acc_UNM08_test[1])`, *predictiveness*: `r apa(ANOVA_acc_UNM08_test, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_acc_UNM08_test[2])`, and of the *predictiveness x congruence* interaction, `r apa(ANOVA_acc_UNM08_test, effect = "predictiveness:congruence")`, `r report_BF_and_error(bay_ANOVA_acc_UNM08_test_pxc[1])`. All other effects and interactions were non significant: *congruence*: `r apa(ANOVA_acc_UNM08_test, effect ="congruence")`, `r report_BF_and_error(bay_ANOVA_acc_UNM08_test[5])`; *group x predictiveness*, `r apa(ANOVA_acc_UNM08_test, effect = "condition:predictiveness")`, `r report_BF_and_error(bay_ANOVA_acc_UNM08_test_gxp[1])`; *group x congruence*: `r apa(ANOVA_acc_UNM08_test, effect = "condition:congruence")`, `r report_BF_and_error(bay_ANOVA_acc_UNM08_test_sxc[1])`; *group x predictiveness x congruence*: `r apa(ANOVA_acc_UNM08_test, effect = "condition:predictiveness:congruence")`, `r report_BF_and_error(bay_ANOVA_acc_UNM08_test_gxpxc[1])`. Pairwise comparisons of the effect of condition show differences of the Uncertain group with the Certain groups, *t* (73) = 3.019, *p* = .003, `r report_BF_and_error(bay_t.test_acc_UNM08_int_uncer_vs_certs)`, but not between them, *t* (73) = .069, *p* = 1, `r report_BF_and_error(bay_t.test_acc_UNM08_test_certs)`. The simple main effects showed an effect in predictiveness in the incongruent trials, *F* (`r sme_acc_UNM08_test_pred[1,3]`, `r sme_acc_UNM08_test_pred[1,4]`) = `r sme_acc_UNM08_test_pred[1,5]`, *p* = `r sme_acc_UNM08_test_pred[1,9]`, $\\eta^2_p$ = `r sme_acc_UNM08_test_pred[1,8]`, but not on the congruent trials, *F* (`r sme_acc_UNM08_test_pred[2,3]`, `r sme_acc_UNM08_test_pred[2,4]`) = `r sme_acc_UNM08_test_pred[2,5]`, *p* = `r sme_acc_UNM08_test_pred[2,9]`, $\\eta^2_p$ = `r sme_acc_UNM08_test_pred[2,8]`.
 
 ## Just correct ratings
 
@@ -349,6 +436,7 @@ M_rat_UNM08_test <- filter(UNM08_test, acc == 1) %>%
   summarise(mean_mem_score = mean(mem_score, na.rm = TRUE), 
             se_mem_score = sd(mem_score, na.rm = TRUE)/sqrt(length(mem_score)))
 ```
+
 ```{r, echo=FALSE, message=FALSE}
 ggplot(data = M_rat_UNM08_test, mapping = aes(x = factor(condition, levels = c("Uncertain", "Certain Short", "Certain Long")), y = mean_mem_score, fill = trial_type)) +
   geom_col(position = position_dodge2()) +
@@ -370,12 +458,14 @@ rat_UNM08_test$congruence <- factor(rat_UNM08_test$congruence)
 ANOVA_rat_UNM08_test <- aov_car(formula = rat ~ condition + Error(pNum*predictiveness*congruence), data = rat_UNM08_test)
 print(ANOVA_rat_UNM08_test)
 ```
+
 ```{r, include=FALSE}
 bay_ANOVA_rat_UNM08_test <- anovaBF(formula = rat ~ condition*predictiveness*congruence + pNum,
         data = data.frame(rat_UNM08_test),
         whichRandom = "pNum")
 print(bay_ANOVA_rat_UNM08_test)
 ```
+
 ```{r, include=FALSE}
 bay_ANOVA_rat_UNM08_test_gxp <- bay_ANOVA_rat_UNM08_test[4]/bay_ANOVA_rat_UNM08_test[3]
 print(bay_ANOVA_rat_UNM08_test_gxp)
@@ -386,22 +476,116 @@ print(bay_ANOVA_rat_UNM08_test_sxc)
 bay_ANOVA_rat_UNM08_test_gxpxc <- bay_ANOVA_rat_UNM08_test[18]/bay_ANOVA_rat_UNM08_test[17]
 print(bay_ANOVA_rat_UNM08_test_gxpxc)
 ```
+
 ```{r, include = FALSE}
 # SME
+SME_rat_UNM08_test <- filter(UNM08_test, acc == 1) %>%
+  group_by (pNum, condition, predictiveness) %>%
+  summarise(rat = mean(mem_score, na.rm = TRUE))
 #calculate the simple main effect of condition
-sme_rat_UNM08_test_condition <- rat_UNM08_test %>%
+sme_rat_UNM08_test_condition <- SME_rat_UNM08_test %>%
   group_by(predictiveness) %>%
   anova_test(rat ~ condition, effect.size = "pes") %>%
   get_anova_table() %>%
   adjust_pvalue(method = "bonferroni")
 sme_rat_UNM08_test_condition #Call the output table
 #calculate the simple main effect of predictiveness
-sme_rat_UNM08_test_pred <- rat_UNM08_test %>%
+sme_rat_UNM08_test_pred <- SME_rat_UNM08_test %>%
   group_by(condition) %>%
-  anova_test(rat ~ predictiveness + Error(pNum/predictiveness*congruence), effect.size = "pes") %>%
+  anova_test(rat ~ predictiveness + Error(pNum/predictiveness), effect.size = "pes") %>%
   get_anova_table() %>%
   adjust_pvalue(method = "bonferroni")
 sme_rat_UNM08_test_pred #Call the output table
 ```
 
-There was a significant effect *predictiveness*, `r apa(ANOVA_rat_UNM08_test, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_rat_UNM08_test[2])`, and of the *group x predictiveness* interaction, `r apa(ANOVA_rat_UNM08_test, effect = "condition:predictiveness")`, `r report_BF_and_error(bay_ANOVA_rat_UNM08_test_gxp[1])`, but no significant effect of the *group*, `r apa(ANOVA_rat_UNM08_test, effect = "condition")`, `r report_BF_and_error(bay_ANOVA_rat_UNM08_test[1])`. A simple main effects analysis showed a significant effect of *predictiveness* on the Certain Short group, *F* (1, 20) = 10.672, *p* = .036, $\\eta^2_p$ = .348, marginally significant on the Certain Long group, *F*(1, 20) = 9.134, *p* = .063, $\\eta^2_p$ = .314, but not significant on the Uncertain group, *F* (1, 29) = 0.167, *p* = 1, $\\eta^2_p$ = .006. No other effect was significant, *congruence*: `r apa(ANOVA_acc_UNM08_test, effect ="congruence")`, `r report_BF_and_error(bay_ANOVA_acc_UNM08_test[5])`; *predictiveness x congruence* interaction, `r apa(ANOVA_acc_UNM08_test, effect = "predictiveness:congruence")`, `r report_BF_and_error(bay_ANOVA_acc_UNM08_test_pxc[1])`; *group x predictiveness*, `r apa(ANOVA_acc_UNM08_test, effect = "condition:predictiveness")`, `r report_BF_and_error(bay_ANOVA_acc_UNM08_test_gxp[1])`;  *group x congruence*: `r apa(ANOVA_acc_UNM08_test, effect = "condition:congruence")`, `r report_BF_and_error(bay_ANOVA_acc_UNM08_test_sxc[1])`; *group x predictiveness x congruence*: `r apa(ANOVA_acc_UNM08_test, effect = "condition:predictiveness:congruence")`, `r report_BF_and_error(bay_ANOVA_acc_UNM08_test_gxpxc[1])`. 
+There was a significant effect *predictiveness*, `r apa(ANOVA_rat_UNM08_test, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_rat_UNM08_test[2])`, and of the *group x predictiveness* interaction, `r apa(ANOVA_rat_UNM08_test, effect = "condition:predictiveness")`, `r report_BF_and_error(bay_ANOVA_rat_UNM08_test_gxp[1])`, but no significant effect of the *group*, `r apa(ANOVA_rat_UNM08_test, effect = "condition")`, `r report_BF_and_error(bay_ANOVA_rat_UNM08_test[1])`. A simple main effects analysis showed a significant effect of *predictiveness* on the Certain Long group, *F* (`r sme_rat_UNM08_test_pred[1,3]`, `r sme_rat_UNM08_test_pred[1,4]`) = `r sme_rat_UNM08_test_pred[1,5]`, *p* = `r sme_rat_UNM08_test_pred[1,9]`, $\\eta^2_p$ = `r sme_rat_UNM08_test_pred[1,8]`, and on the Certain Short group, *F* (`r sme_rat_UNM08_test_pred[2,3]`, `r sme_rat_UNM08_test_pred[2,4]`) = `r sme_rat_UNM08_test_pred[2,5]`, *p* = `r sme_rat_UNM08_test_pred[2,9]`, $\\eta^2_p$ = `r sme_rat_UNM08_test_pred[2,8]`, but not significant on the Uncertain group, *F* (`r sme_rat_UNM08_test_pred[3,3]`, `r sme_rat_UNM08_test_pred[3,4]`) = `r sme_rat_UNM08_test_pred[3,5]`, *p* = `r sme_rat_UNM08_test_pred[3,9]`, $\\eta^2_p$ = `r sme_rat_UNM08_test_pred[3,8]`. No other effect was significant, *congruence*: `r apa(ANOVA_acc_UNM08_test, effect ="congruence")`, `r report_BF_and_error(bay_ANOVA_acc_UNM08_test[5])`; *predictiveness x congruence* interaction, `r apa(ANOVA_acc_UNM08_test, effect = "predictiveness:congruence")`, `r report_BF_and_error(bay_ANOVA_acc_UNM08_test_pxc[1])`; *group x predictiveness*, `r apa(ANOVA_acc_UNM08_test, effect = "condition:predictiveness")`, `r report_BF_and_error(bay_ANOVA_acc_UNM08_test_gxp[1])`; *group x congruence*: `r apa(ANOVA_acc_UNM08_test, effect = "condition:congruence")`, `r report_BF_and_error(bay_ANOVA_acc_UNM08_test_sxc[1])`; *group x predictiveness x congruence*: `r apa(ANOVA_acc_UNM08_test, effect = "condition:predictiveness:congruence")`, `r report_BF_and_error(bay_ANOVA_acc_UNM08_test_gxpxc[1])`.
+
+## Memory score
+
+```{r, include=FALSE}
+#plot test mem_score but take out the errors
+M_mem_UNM08_test <- UNM08_test %>%
+  group_by(trial_type, condition) %>%
+  summarise(mean_mem_score = mean(c_mem_score, na.rm = TRUE), 
+            se_mem_score = sd(mem_score, na.rm = TRUE)/sqrt(length(mem_score)))
+```
+
+```{r, echo=FALSE, message=FALSE}
+ggplot(data = M_mem_UNM08_test, mapping = aes(x = factor(condition, levels = c("Uncertain", "Certain Long", "Certain Short")), y = mean_mem_score, fill = trial_type)) +
+  geom_col(position = position_dodge2()) +
+  geom_errorbar(aes(ymin = mean_mem_score - se_mem_score, ymax = mean_mem_score + se_mem_score), width=.2, position=position_dodge(0.9)) +
+  scale_x_discrete (name = "Group") +
+  scale_y_continuous(name = "Memory Score") +
+  scale_fill_discrete(type = c("#7B3294", "#C2A5CF", "#008837", "#A6DBA0"))
+```
+
+```{r, include=FALSE}
+#ANOVA mem_score
+mem_UNM08_test <- UNM08_test %>%
+  group_by (pNum, condition, predictiveness, congruence) %>%
+  summarise(mem = mean(c_mem_score, na.rm = TRUE))
+mem_UNM08_test$predictiveness <- factor(mem_UNM08_test$predictiveness)
+mem_UNM08_test$condition <- factor(mem_UNM08_test$condition)
+mem_UNM08_test$pNum <- factor(mem_UNM08_test$pNum)
+mem_UNM08_test$congruence <- factor(mem_UNM08_test$congruence)
+ANOVA_mem_UNM08_test <- aov_car(formula = mem ~ condition + Error(pNum*predictiveness*congruence), data = mem_UNM08_test)
+print(ANOVA_mem_UNM08_test)
+```
+```{r, include=FALSE}
+bay_ANOVA_mem_UNM08_test <- anovaBF(formula = mem ~ condition*predictiveness*congruence + pNum,
+        data = data.frame(mem_UNM08_test),
+        whichRandom = "pNum")
+print(bay_ANOVA_mem_UNM08_test)
+
+```
+```{r, include=FALSE}
+bay_ANOVA_mem_UNM08_test_gxp <- bay_ANOVA_mem_UNM08_test[4]/bay_ANOVA_mem_UNM08_test[3]
+print(bay_ANOVA_mem_UNM08_test_gxp)
+bay_ANOVA_mem_UNM08_test_pxc <- bay_ANOVA_mem_UNM08_test[13]/bay_ANOVA_mem_UNM08_test[7]
+print(bay_ANOVA_mem_UNM08_test_pxc)
+bay_ANOVA_mem_UNM08_test_sxc <- bay_ANOVA_mem_UNM08_test[10]/bay_ANOVA_mem_UNM08_test[6]
+print(bay_ANOVA_mem_UNM08_test_sxc)
+bay_ANOVA_mem_UNM08_test_gxpxc <- bay_ANOVA_mem_UNM08_test[18]/bay_ANOVA_mem_UNM08_test[17]
+print(bay_ANOVA_mem_UNM08_test_gxpxc)
+```
+```{r, include = FALSE}
+# SME of the condition:predictiveness interaction
+SME_mem_UNM08_test <- UNM08_test %>%
+  group_by (pNum, condition, predictiveness) %>%
+  summarise(mem = mean(c_mem_score, na.rm = TRUE))
+#calculate the simple main effect of condition
+sme_mem_UNM08_test_condition <- SME_mem_UNM08_test %>%
+  group_by(predictiveness) %>%
+  anova_test(mem ~ condition, effect.size = "pes") %>%
+  get_anova_table() %>%
+  adjust_pvalue(method = "bonferroni")
+sme_mem_UNM08_test_condition #Call the output table
+#calculate the simple main effect of predictiveness
+sme_mem_UNM08_test_pred <- SME_mem_UNM08_test %>%
+  group_by(condition) %>%
+  anova_test(mem ~ predictiveness + Error(pNum/predictiveness), effect.size = "pes") %>%
+  get_anova_table() %>%
+  adjust_pvalue(method = "bonferroni")
+sme_mem_UNM08_test_pred #Call the output table
+# SME of the predictiveness:congruence interaction
+SME_mem_UNM08_test <- UNM08_test %>%
+  group_by (pNum, congruence, predictiveness) %>%
+  summarise(mem = mean(c_mem_score, na.rm = TRUE))
+#calculate the simple main effect of congruence
+sme_mem_UNM08_test_congruence <- SME_mem_UNM08_test %>%
+  group_by(predictiveness) %>%
+  anova_test(mem ~ congruence + Error(pNum/congruence), effect.size = "pes") %>%
+  get_anova_table() %>%
+  adjust_pvalue(method = "bonferroni")
+sme_mem_UNM08_test_congruence #Call the output table
+#calculate the simple main effect of predictiveness
+sme_mem_UNM08_test_predxc <- SME_mem_UNM08_test %>%
+  group_by(congruence) %>%
+  anova_test(mem ~ predictiveness + Error(pNum/predictiveness), effect.size = "pes") %>%
+  get_anova_table() %>%
+  adjust_pvalue(method = "bonferroni")
+sme_mem_UNM08_test_predxc #Call the output table
+```
+
+There was a significant main effect of *group* , `r apa(ANOVA_mem_UNM08_test, effect = "condition")`, `r report_BF_and_error(bay_ANOVA_mem_UNM08_test[1])`, and of *predictiveness*, `r apa(ANOVA_mem_UNM08_test, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_mem_UNM08_test[2])`, as well as a *predictiveness x congruence* interaction, `r apa(ANOVA_mem_UNM08_test, effect = "predictiveness:congruence")`, `r report_BF_and_error(bay_ANOVA_mem_UNM08_test_pxc[1])`. The significant *group x predictiveness* interaction was marginally significant, `r apa(ANOVA_mem_UNM08_test, effect = "condition:predictiveness")`, `r report_BF_and_error(bay_ANOVA_mem_UNM08_test_gxp[1])`. No other effects or interactions were significant, *congruence*: `r apa(ANOVA_mem_UNM08_test, effect ="congruence")`, `r report_BF_and_error(bay_ANOVA_mem_UNM08_test[5])`; 
+*group x congruence*: `r apa(ANOVA_mem_UNM08_test, effect = "condition:congruence")`, `r report_BF_and_error(bay_ANOVA_mem_UNM08_test_sxc[1])`; *group x predictiveness x congruence*: `r apa(ANOVA_mem_UNM08_test, effect = "condition:predictiveness:congruence")`, `r report_BF_and_error(bay_ANOVA_mem_UNM08_test_gxpxc[1])`. Simple main effects showed a significant effect of *predictiveness* on Certain Long group, *F*(`r sme_mem_UNM08_test_pred[1,3]`, `r sme_mem_UNM08_test_pred[1,4]`) = `r sme_mem_UNM08_test_pred[1,5]`, *p* = `r sme_mem_UNM08_test_pred[1,9]`, $\\eta^2_p$ = `r sme_mem_UNM08_test_pred[1,8]`, and on Certain Short, *F*(`r sme_mem_UNM08_test_pred[2,3]`, `r sme_mem_UNM08_test_pred[2,4]`) = `r sme_mem_UNM08_test_pred[2,5]`, *p* = `r sme_mem_UNM08_test_pred[2,9]`, $\\eta^2_p$ = `r sme_mem_UNM08_test_pred[2,8]`, but not on group Uncertain, *F*(`r sme_mem_UNM08_test_pred[3,3]`, `r sme_mem_UNM08_test_pred[3,4]`) = `r sme_mem_UNM08_test_pred[3,5]`, *p* = `r sme_mem_UNM08_test_pred[3,9]`, $\\eta^2_p$ = `r sme_mem_UNM08_test_pred[3,8]`. Also, there was a significant effect of predictiveness on incongruent trials,  *F*(`r sme_mem_UNM08_test_predxc[2,3]`, `r sme_mem_UNM08_test_predxc[2,4]`) = `r sme_mem_UNM08_test_predxc[2,5]`, *p* = `r sme_mem_UNM08_test_predxc[2,9]`, $\\eta^2_p$ = `r sme_mem_UNM08_test_predxc[2,8]`, but not on congruent trials, *F*(`r sme_mem_UNM08_test_predxc[1,3]`, `r sme_mem_UNM08_test_predxc[1,4]`) = `r sme_mem_UNM08_test_predxc[1,5]`, *p* = `r sme_mem_UNM08_test_predxc[1,9]`, $\\eta^2_p$ = `r sme_mem_UNM08_test_predxc[1,8]`.
