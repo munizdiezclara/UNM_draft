@@ -11,6 +11,7 @@ library(afex)
 library(BayesFactor)
 library(apa)
 library(emmeans)
+library(papaja)
 library(rstatix)
 library("writexl")
 
@@ -56,6 +57,288 @@ report_BF_and_error <- function(BF_in, sci_not = FALSE, hyp = "alt"){
 }
 ```
 
+# Exp 1
+
+```{r, include=FALSE}
+load("../../UNM05_proc_data.RData")
+#Clean participants that did not pass check 2 and/or 3
+training <- filter(training, !pNum %in% not_passed_pNum)
+test1 <- filter(test1, !pNum %in% not_passed_pNum)
+#add a group variable
+test1 <- test1 %>%
+  mutate(group = case_when(session == 1 ~ "High",
+                                session == 2 ~ "Medium",
+                                session == 3 ~ "Low"))
+test2 <- filter(test2, !pNum %in% not_passed_pNum)
+#add a group variable
+test2 <- test2 %>%
+  mutate(group = case_when(session == 1 ~ "High",
+                                session == 2 ~ "Medium",
+                                session == 3 ~ "Low"), 
+         trial_type = case_when((target == 1 & distractor_test2 == 2) | (target == 2 & distractor_test2 == 1) ~ "P-Con" ,
+                                (target == 5 & distractor_test2 == 6) | (target == 6 & distractor_test2 == 5) ~ "NP-Con",
+                                (target == 1 & (distractor_test2 == 5 | distractor_test2 == 6)) | (target == 2 & (distractor_test2 == 5 | distractor_test2 == 6)) ~ "P-Incon",
+                                  (target == 5 & (distractor_test2 == 1 | distractor_test2 == 2)) | (target == 6 & (distractor_test2 == 1 | distractor_test2 == 2)) ~  "NP-Incon"),
+         #add a congruence variable
+         congruence = case_when ((trial_type == "P-Con") | (trial_type == "NP-Con") ~ "congruent",
+                                 (trial_type == "P-Incon") | (trial_type == "NP-Incon") ~ "incongruent"))
+```
+
+
+## Test1
+```{r, include=FALSE}
+test1 <- test1 %>% 
+  mutate(trial = rep(seq(1, 24), (nrow(test1)/24)))
+
+test1_mean_SDV <- test1 %>%
+  summarise(mean = mean(choice_RT),
+            sd = sd(choice_RT)) %>%
+  mutate(upper_limit = mean + (2.5 * sd),
+         lower_limit = mean - (2.5 * sd))
+
+# Calculate mean, sd, and limits by participant
+test1_p_mean_SDV <- test1 %>%
+  group_by(pNum) %>%
+  summarise(mean = mean(choice_RT),
+            sd = sd(choice_RT)) %>%
+  mutate(upper_limit = mean + (2.5 * sd),
+         lower_limit = mean - (2.5 * sd))
+
+#identify participants that deviate in their mean from the mean of the group
+test1_p_outliers_RT <- test1 %>% 
+  mutate(is_excluded = choice_RT < test1_mean_SDV[[1,4]] | choice_RT > test1_mean_SDV[[1,3]])%>%
+  group_by(pNum) %>%
+  summarise(n_excluded = sum(is_excluded)) %>% 
+  mutate(p_excluded = n_excluded/24)
+
+test1_p_exc <- test1_p_outliers_RT %>% 
+  filter(n_excluded>0)
+
+# Join limits back to original data, and filter out the trials beyond the upper and lower limits
+test1_filtered <- test1 %>%
+  mutate(is_excluded = choice_RT < test1_mean_SDV[[1,4]] | choice_RT > test1_mean_SDV[[1,3]])%>%
+  filter(is_excluded == FALSE)%>%
+  filter(!pNum %in% test1_p_exc$pNum)
+```
+### Accuracy
+
+```{r, include=FALSE}
+#Calculate the mean accuracy and standard error for each block, including the groups
+MA_test1 <- test1_filtered %>%
+  group_by(predictiveness, group) %>%
+    summarise(mean_acc = mean(acc, na.rm = TRUE), 
+            se_acc = sd(acc, na.rm = TRUE)/sqrt(length(acc)))
+```
+
+```{r, echo=FALSE, message=FALSE}
+ggplot(data = MA_test1, mapping = aes(x = factor(group, levels = c("High", "Medium", "Low")), y = mean_acc, fill = predictiveness)) +
+  geom_col(position = position_dodge2()) +
+  geom_errorbar(aes(y= mean_acc, ymin = mean_acc - se_acc, ymax = mean_acc + se_acc), width = .2, position = position_dodge(0.9)) +
+  coord_cartesian(ylim = c(0, 1))+
+  scale_x_discrete (name = "Type of test") +
+  scale_y_continuous(name = "Accuracy") +
+  coord_cartesian(ylim = c(0.5, 1)) +
+  scale_fill_discrete(type = c("#AF8DC3", "#7FBF7B"))+
+  labs(title = "Mean accuracy for each type of cue in test1 phase")
+```
+```{r, include=FALSE}
+test1_filtered$group <- factor(test1_filtered$group, levels = c("High", "Medium", "Low"))
+test1_filtered$predictiveness <- factor(test1_filtered$predictiveness, levels = c("predictive", "non-predictive"))
+contrasts(test1_filtered$group) <- matrix(c(1, -1, 0, 0, 1, -1), ncol = 2)
+contrasts(test1_filtered$predictiveness) <- c(1,-1)
+contrasts(test1_filtered$group)
+contrasts(test1_filtered$predictiveness)
+test1_acc_model <- glmer(acc ~ group*predictiveness + (1 | pNum), data = test1_filtered, family = binomial)
+summary(test1_acc_model)
+```
+
+A generalized linear mixed model (GLMM) was conducted to examine the effects of group membership (Low, Medium, High) and predictiveness (non-predictive, predictive) on accuracy, with a random intercept for participants (pNum) to account for individual variability. The results of the model indicated no significant main effects of group (Medium vs. Low: β = 0.07, SE = 0.19, z = 0.37, p = 0.71; High vs. Low: β = 0.25, SE = 0.19, z = 1.32, p = 0.19) or predictiveness (predictive vs. non-predictive: β = 0.11, SE = 0.10, z = 1.19, p = 0.23). Additionally, the interaction terms between group and predictiveness were not significant: group1 × predictiveness1: β = -0.11, SE = 0.13, z = -0.86, p = 0.39; group2 × predictiveness1: β = -0.07, SE = 0.13, z = -0.54, p = 0.59.
+
+The random effect for participants (pNum) revealed significant variability between individuals in accuracy (variance = 0.69, SD = 0.83).
+
+In summary, none of the fixed effects (main or interaction) were significant, suggesting that group membership and predictiveness did not significantly influence accuracy in this sample. However, individual differences in accuracy were substantial.
+
+
+```{r, echo=FALSE}
+library(DHARMa)
+plotQQunif(test1_acc_model)
+```
+
+## Test2
+
+```{r, include=FALSE}
+test2 <- test2 %>% 
+  mutate(trial = rep(seq(1, 24), (nrow(test2)/24)))
+
+test2_mean_SDV <- test2 %>%
+  summarise(mean = mean(choice_RT),
+            sd = sd(choice_RT)) %>%
+  mutate(upper_limit = mean + (2.5 * sd),
+         lower_limit = mean - (2.5 * sd))
+
+# Calculate mean, sd, and limits by participant
+test2_p_mean_SDV <- test2 %>%
+  group_by(pNum) %>%
+  summarise(mean = mean(choice_RT),
+            sd = sd(choice_RT)) %>%
+  mutate(upper_limit = mean + (2.5 * sd),
+         lower_limit = mean - (2.5 * sd))
+
+#identify participants that deviate in their mean from the mean of the group
+test2_p_outliers_RT <- test2 %>% 
+  mutate(is_excluded = choice_RT < test2_mean_SDV[[1,4]] | choice_RT > test2_mean_SDV[[1,3]])%>%
+  group_by(pNum) %>%
+  summarise(n_excluded = sum(is_excluded)) %>% 
+  mutate(p_excluded = n_excluded/24)
+
+test2_p_exc <- test2_p_outliers_RT %>% 
+  filter(n_excluded>0)
+
+# Join limits back to original data, and filter out the trials beyond the upper and lower limits
+test2_filtered <- test2 %>%
+  mutate(is_excluded = choice_RT < test2_mean_SDV[[1,4]] | choice_RT > test2_mean_SDV[[1,3]])%>%
+  filter(is_excluded == FALSE)%>%
+  filter(!pNum %in% test2_p_exc$pNum)
+```
+
+### Accuracy
+
+```{r, include=FALSE}
+#plot test accuracy
+m_acc_test2 <- test2 %>%
+  group_by(trial_type, group) %>%
+  summarise(mean_acc = mean(acc, na.rm = TRUE), 
+            se_acc = sd(acc, na.rm = TRUE)/sqrt(length(acc)))
+```
+
+```{r, echo = FALSE, message=FALSE}
+ggplot(data = m_acc_test2, mapping = aes(x = factor(group, levels = c("High", "Medium", "Low")), y = mean_acc, fill = trial_type)) +
+  geom_col(position = position_dodge2()) +
+  geom_errorbar(aes(ymin = mean_acc - se_acc, ymax = mean_acc + se_acc), width=.2, position=position_dodge(0.9)) +
+  scale_x_discrete (name = "Similarity") +
+  scale_y_continuous(name = "Rating") +
+  coord_cartesian(ylim = c(0.5, 1)) +
+  labs(fill = "Trial type")+
+  scale_fill_discrete(type = c("#7B3294", "#C2A5CF", "#008837", "#A6DBA0"))+
+  labs(title = "Mean accuracy for each type of cue in test2 phase")
+```
+```{r, include=FALSE}
+test2_filtered$group <- factor(test2_filtered$group, levels = c("High", "Medium", "Low"))
+test2_filtered$predictiveness <- factor(test2_filtered$predictiveness, levels = c("predictive", "non-predictive"))
+test2_filtered$congruence <- factor(test2_filtered$congruence, levels = c("congruent", "incongruent"))
+contrasts(test2_filtered$group) <- matrix(c(1, -1, 0, 0, 1, -1), ncol = 2)
+contrasts(test2_filtered$predictiveness) <- c(1,-1)
+contrasts(test2_filtered$congruence) <- c(1,-1)
+test2_acc_model <- glmer(acc ~ group*predictiveness*congruence + (1 | pNum), data = test2_filtered, family = binomial)
+summary(test2_acc_model)
+```
+
+A generalized linear mixed model (GLMM) was conducted to examine the effects of group membership (Low, Medium, High), predictiveness (non-predictive, predictive), and congruence (incongruent, congruent) on PPR, with a random intercept for participants (pNum). The results showed no significant main effects. Specifically, for group membership, the comparison between High and Medium groups (group1) did not yield a significant effect on PPR (β = 0.08, SE = 0.21, z = 0.38, p = 0.71), nor did the comparison between Medium and Low groups (group2) (β = 0.03, SE = 0.20, z = 0.13, p = 0.90). Similarly, predictiveness (predictive vs. non-predictive) did not significantly affect PPR (β = 0.07, SE = 0.06, z = 1.16, p = 0.25), nor did congruence (congruent vs. incongruent) (β = -0.01, SE = 0.06, z = -0.12, p = 0.90).
+
+No significant interactions were observed. The interaction between group and predictiveness (group1 × predictiveness1: β = 0.10, SE = 0.09, z = 1.12, p = 0.26; group2 × predictiveness1: β = 0.04, SE = 0.08, z = 0.43, p = 0.67), group and congruence (group1 × congruence1: β = 0.13, SE = 0.09, z = 1.40, p = 0.16; group2 × congruence1: β = 0.06, SE = 0.08, z = 0.65, p = 0.52), predictiveness and congruence (predictiveness1 × congruence1: β = 0.00, SE = 0.06, z = 0.03, p = 0.97), and the three-way interaction (group × predictiveness × congruence) were all non-significant (group1 × predictiveness1 × congruence1: β = -0.07, SE = 0.09, z = -0.73, p = 0.47; group2 × predictiveness1 × congruence1: β = -0.05, SE = 0.08, z = -0.55, p = 0.58).
+
+The random effects analysis indicated significant variability in PPR between participants (variance = 1.13, SD = 1.06), suggesting that participants differed in their PPR across the conditions.
+
+In summary, the results revealed no significant main or interaction effects of group membership, predictiveness, or congruence on PPR, though there was significant variability in PPR between participants.
+
+# Exp 2
+
+## Accuracy
+
+```{r, include=FALSE}
+load("../../UNM07_proc_data.RData")
+UNM07_training <- filter(training, !pNum %in% not_passed_pNum$pNum)
+UNM07_test <- filter(test, !pNum %in% not_passed_pNum$pNum)
+
+UNM07_test <- UNM07_test %>%
+  mutate(trial_type = case_when((target == 1 & distractor == 2) | (target == 2 & distractor == 1) | (target == 3 & distractor == 4) | (target == 4 & distractor == 3) ~ "P-Con" ,
+                                (target == 5 & distractor == 6) | (target == 6 & distractor == 5) |  (target == 7 & distractor == 8) | (target == 8 & distractor == 7)~ "NP-Con",
+                                (target == 1 & (distractor == 5 | distractor == 6)) | (target == 2 & (distractor == 5 | distractor == 6)) | (target == 3 & (distractor == 7 | distractor == 8)) | (target == 4 & (distractor == 7 | distractor == 8)) ~ "P-Incon",
+                                  (target == 5 & (distractor == 1 | distractor == 2)) | (target == 6 & (distractor == 1 | distractor == 2)) | (target == 7 & (distractor == 3 | distractor == 4)) | (target == 8 & (distractor == 3 | distractor == 4)) ~  "NP-Incon"),
+         #add a congruence variable
+         congruence = case_when ((trial_type == "P-Con") | (trial_type == "NP-Con") ~ "congruent",
+                                 (trial_type == "P-Incon") | (trial_type == "NP-Incon") ~ "incongruent"))
+
+#create the PPR measure
+UNM07_training <- UNM07_training %>%
+  mutate(prob_response = case_when((cue1 == 1 | cue1 == 3) & response == "o1_image" ~ 1,
+                                   (cue1 == 1 | cue1 == 3) & response == "o2_image" ~ 0, 
+                                   (cue1 == 2 | cue1 == 4) & response == "o1_image" ~ 0,
+                                   (cue1 == 2 | cue1 == 4) & response == "o2_image" ~ 1))
+```
+
+```{r, include=FALSE}
+UNM07_test <- UNM07_test %>% 
+  mutate(trial = rep(seq(1, 24), (nrow(UNM07_test)/24)))
+
+UNM07_test_mean_SDV <- UNM07_test %>%
+  summarise(mean = mean(choice_RT),
+            sd = sd(choice_RT)) %>%
+  mutate(upper_limit = mean + (2.5 * sd),
+         lower_limit = mean - (2.5 * sd))
+
+# Calculate mean, sd, and limits by participant
+UNM07_test_p_mean_SDV <- UNM07_test %>%
+  group_by(pNum) %>%
+  summarise(mean = mean(choice_RT),
+            sd = sd(choice_RT)) %>%
+  mutate(upper_limit = mean + (2.5 * sd),
+         lower_limit = mean - (2.5 * sd))
+
+#identify participants that deviate in their mean from the mean of the group
+UNM07_test_p_outliers_RT <- UNM07_test %>% 
+  mutate(is_excluded = choice_RT < UNM07_test_mean_SDV[[1,4]] | choice_RT > UNM07_test_mean_SDV[[1,3]])%>%
+  group_by(pNum) %>%
+  summarise(n_excluded = sum(is_excluded)) %>% 
+  mutate(p_excluded = n_excluded/24)
+
+UNM07_test_p_exc <- UNM07_test_p_outliers_RT %>% 
+  filter(n_excluded>0)
+
+# Join limits back to original data, and filter out the trials beyond the upper and lower limits
+UNM07_test_filtered <- UNM07_test %>%
+  mutate(is_excluded = choice_RT < UNM07_test_mean_SDV[[1,4]] | choice_RT > UNM07_test_mean_SDV[[1,3]])%>%
+  filter(is_excluded == FALSE)%>%
+  filter(!pNum %in% UNM07_test_p_exc$pNum)
+```
+```{r, include=FALSE}
+#Calculate the mean accuracy and standard error for each block, including the groups
+MA_test <- UNM07_test_filtered %>%
+  group_by(condition, trial_type) %>%
+    summarise(mean_acc = mean(acc, na.rm = TRUE), 
+            se_acc = sd(acc, na.rm = TRUE)/sqrt(length(acc)))
+```
+
+```{r, echo=FALSE, message=FALSE}
+ggplot(data = MA_test, mapping = aes(x = factor(condition, level=c('Uncertain', 'Certain')), y = mean_acc, fill = trial_type)) +
+  geom_col(position = position_dodge2()) +
+  geom_errorbar(aes(y= mean_acc, ymin = mean_acc - se_acc, ymax = mean_acc + se_acc), width = .2, position = position_dodge(0.9)) +
+  coord_cartesian(ylim = c(0, 1))+
+  scale_x_discrete (name = "Type of test") +
+  scale_y_continuous(name = "Accuracy") +
+  coord_cartesian(ylim = c(0.5, 1)) +
+  scale_fill_discrete(type = c("#7B3294", "#C2A5CF", "#008837", "#A6DBA0"))
+```
+```{r, include=FALSE}
+UNM07_test_filtered$condition <- factor(UNM07_test_filtered$condition, levels = c("Uncertain", "Certain"))
+UNM07_test_filtered$predictiveness <- factor(UNM07_test_filtered$predictiveness, levels = c("predictive", "non-predictive"))
+UNM07_test_filtered$congruence <- factor(UNM07_test_filtered$congruence, levels = c("congruent", "incongruent"))
+contrasts(UNM07_test_filtered$condition) <- c(1, -1)
+contrasts(UNM07_test_filtered$predictiveness) <- c(1,-1)
+contrasts(UNM07_test_filtered$congruence) <- c(1,-1)
+UNM07_test_acc_model <- glmer(acc ~ condition*predictiveness*congruence + (1 | pNum), data = UNM07_test_filtered, family = binomial)
+summary(UNM07_test_acc_model)
+```
+
+A generalized linear mixed model (GLMM) was conducted to examine the effects of condition (Condition 1 vs. other levels), predictiveness (non-predictive, predictive), and congruence (incongruent, congruent) on PPR, with a random intercept for participants.  The fixed-effects results revealed a significant main effect of predictiveness (β = 0.13, SE = 0.05, z = 2.41, p=.016), indicating higher PPR for predictive compared to non-predictive trials. Neither the main effect of condition (β =0.06, SE = 0.10, z = 0.54, p = .59) nor congruence (β = 0.01, SE = 0.05, z = 0.11,
+p = .91) was statistically significant.
+
+Among the interaction effects, the condition × predictiveness interaction was significant (β = −0.16, SE = 0.05, z = −2.82, p = .005), suggesting that the effect of predictiveness on accuracy varied by condition. The three-way interaction between condition, predictiveness, and congruence was also significant (β = 0.14, SE = 0.05, z = 2.49, p = .013), indicating that the combined effects of condition and predictiveness on accuracy were moderated by congruence. The condition × congruence (p = .65) and predictiveness × congruence (p = .72) interactions were not significant.
+
+Random effects revealed significant variability in accuracy between participants (variance = 0.62,SD = 0.79).
+
+In summary, the analysis showed a main effect of predictiveness, a condition × predictiveness interaction, and a significant three-way interaction between condition, predictiveness, and congruence. This indicates that the effects of condition and predictiveness on accuracy are dependent on congruence.
+
 # Exp 3
 
 ```{r, include=FALSE}
@@ -78,7 +361,11 @@ UNM08_training <- UNM08_training %>%
   mutate(prob_response = case_when((cue1 == 1 | cue1 == 3) & response == "o1_image" ~ 1,
                                    (cue1 == 1 | cue1 == 3) & response == "o2_image" ~ 0, 
                                    (cue1 == 2 | cue1 == 4) & response == "o1_image" ~ 0,
-                                   (cue1 == 2 | cue1 == 4) & response == "o2_image" ~ 1))
+                                   (cue1 == 2 | cue1 == 4) & response == "o2_image" ~ 1, 
+                                   cue1 == "A" & response == "o1_image" ~ 1,
+                                   cue1 == "A" & response == "o2_image" ~ 0, 
+                                   cue1 == "B" & response == "o1_image" ~ 0,
+                                   cue1 == "B" & response == "o2_image" ~ 1))
 ```
 
 ## RT analysis and exclusions
@@ -125,30 +412,6 @@ UNM08_test_filtered <- UNM08_test %>%
   filter(!pNum %in% p_more2_exc$pNum)
 ```
 
-```{r, include=FALSE}
-UNM08_test_cRT <- UNM08_test_filtered %>% 
-  group_by(pNum, trial) %>% 
-  summarise(RT = mean(choice_RT))
-```
-
-```{r, echo=FALSE, message=FALSE}
-ggplot() +
-  geom_boxplot(data = UNM08_test_cRT, mapping = aes(x= trial, y = RT, group = trial))
-ggplot() +
-  geom_histogram(data = UNM08_test_cRT, mapping = aes(x=RT))
-```
-
-```{r, include=FALSE}
-UNM08_test_rRT <- UNM08_test_filtered %>% 
-  group_by(pNum) %>% 
-  summarise(RT = mean(rating_RT))
-```
-
-```{r, echo=FALSE, message=FALSE}
-ggplot(data = UNM08_test_rRT, mapping = aes(y = RT)) +
-  geom_boxplot()
-```
-
 ## Accuracy
 
 ```{r, include=FALSE}
@@ -171,10 +434,22 @@ ggplot(data = MA_UNM08_test, mapping = aes(x = factor(condition, level=c('Uncert
 ```
 
 ```{r, include=FALSE}
-acc_model <- glmer(acc ~ condition + predictiveness + congruence + (1 | pNum), data = UNM08_test, family = binomial)
-acc_model
-acc_se <- sqrt(diag(vcov(acc_model)))
-(acc_tab <- cbind(Est = fixef(acc_model), LL = fixef(acc_model) - 1.96 * acc_se, UL = fixef(acc_model) + 1.96 *
-    acc_se))
-exp(acc_tab)
+UNM08_test_filtered$condition <- factor(UNM08_test_filtered$condition, levels = c("Uncertain", "Certain Long", "Certain Short"))
+contrasts(UNM08_test_filtered$condition) <- matrix(c(2, -1, -1, 0, 1, -1), ncol = 2)
+UNM08_test_filtered$predictiveness <- factor(UNM08_test_filtered$predictiveness, levels = c("predictive", "non-predictive"))
+contrasts(UNM08_test_filtered$predictiveness) <- c(1, -1)
+UNM08_test_filtered$congruence <- factor(UNM08_test_filtered$congruence, levels = c("congruent", "incongruent"))
+contrasts(UNM08_test_filtered$congruence) <- c(1, -1)
+acc_model <- glmer(acc ~ condition*predictiveness*congruence + (1 | pNum), data = UNM08_test_filtered, family = binomial)
+summary(acc_model)
+```
+
+```{r, echo=FALSE}
+library(DHARMa)
+plotQQunif(acc_model)
+```
+
+```{r, include= FALSE}
+bay_acc_model <- bglmer(acc ~ condition*predictiveness*congruence + (1 | pNum), data = UNM08_test_filtered, family = binomial)
+summary(bay_acc_model)
 ```

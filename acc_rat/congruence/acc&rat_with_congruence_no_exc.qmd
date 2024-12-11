@@ -11,6 +11,7 @@ library(afex)
 library(BayesFactor)
 library(apa)
 library(emmeans)
+library(papaja)
 library(rstatix)
 library("writexl")
 options(scipen=999)
@@ -48,6 +49,288 @@ report_BF_and_error <- function(BF_in, sci_not = FALSE, hyp = "alt"){
          "%")
 }
 ```
+
+# Exp 1
+
+```{r, include=FALSE}
+load("../../UNM05_proc_data.RData")
+#Clean participants that did not pass check 2 and/or 3
+training <- filter(training, !pNum %in% not_passed_pNum)
+test1 <- filter(test1, !pNum %in% not_passed_pNum)
+#add a group variable
+test1 <- test1 %>%
+  mutate(group = case_when(session == 1 ~ "High",
+                                session == 2 ~ "Medium",
+                                session == 3 ~ "Low"))
+test2 <- filter(test2, !pNum %in% not_passed_pNum)
+#add a group variable
+test2 <- test2 %>%
+  mutate(group = case_when(session == 1 ~ "High",
+                                session == 2 ~ "Medium",
+                                session == 3 ~ "Low"))
+```
+
+## RT analysis and exclusions
+
+```{r, include=FALSE}
+test1 <- test1 %>% 
+  mutate(trial = rep(seq(1, 24), (nrow(test1)/24)))
+
+test1_mean_SDV <- test1 %>%
+  summarise(mean = mean(choice_RT),
+            sd = sd(choice_RT)) %>%
+  mutate(upper_limit = mean + (2.5 * sd),
+         lower_limit = mean - (2.5 * sd))
+
+# Calculate mean, sd, and limits by participant
+test1_p_mean_SDV <- test1 %>%
+  group_by(pNum) %>%
+  summarise(mean = mean(choice_RT),
+            sd = sd(choice_RT)) %>%
+  mutate(upper_limit = mean + (2.5 * sd),
+         lower_limit = mean - (2.5 * sd))
+
+#identify participants that deviate in their mean from the mean of the group
+test1_p_outliers_RT <- test1 %>% 
+  mutate(is_excluded = choice_RT < test1_mean_SDV[[1,4]] | choice_RT > test1_mean_SDV[[1,3]])%>%
+  group_by(pNum) %>%
+  summarise(n_excluded = sum(is_excluded)) %>% 
+  mutate(p_excluded = n_excluded/24)
+
+test1_p_exc <- test1_p_outliers_RT %>% 
+  filter(n_excluded>0)
+
+# Join limits back to original data, and filter out the trials beyond the upper and lower limits
+test1_filtered <- test1 %>%
+  mutate(is_excluded = choice_RT < test1_mean_SDV[[1,4]] | choice_RT > test1_mean_SDV[[1,3]])%>%
+  filter(is_excluded == FALSE)%>%
+  filter(!pNum %in% test1_p_exc$pNum)
+```
+
+## Test1
+
+### Accuracy
+
+```{r, include=FALSE}
+#Calculate the mean accuracy and standard error for each block, including the groups
+MA_test1 <- test1_filtered %>%
+  group_by(predictiveness, group) %>%
+    summarise(mean_acc = mean(acc, na.rm = TRUE), 
+            se_acc = sd(acc, na.rm = TRUE)/sqrt(length(acc)))
+```
+
+```{r, echo=FALSE, message=FALSE}
+ggplot(data = MA_test1, mapping = aes(x = factor(group, levels = c("High", "Medium", "Low")), y = mean_acc, fill = predictiveness)) +
+  geom_col(position = position_dodge2()) +
+  geom_errorbar(aes(y= mean_acc, ymin = mean_acc - se_acc, ymax = mean_acc + se_acc), width = .2, position = position_dodge(0.9)) +
+  coord_cartesian(ylim = c(0, 1))+
+  scale_x_discrete (name = "Type of test") +
+  scale_y_continuous(name = "Accuracy") +
+  coord_cartesian(ylim = c(0.5, 1)) +
+  scale_fill_discrete(type = c("#AF8DC3", "#7FBF7B"))+
+  labs(title = "Mean accuracy for each type of cue in test1 phase")
+```
+## Test2
+
+### Accuracy
+
+```{r, include=FALSE}
+#add a group variable
+test2 <- test2 %>%
+  mutate(group = case_when(session == 1 ~ "High",
+                                session == 2 ~ "Medium",
+                                session == 3 ~ "Low"), 
+         trial_type = case_when((target == 1 & distractor_test2 == 2) | (target == 2 & distractor_test2 == 1) ~ "P-Con" ,
+                                (target == 5 & distractor_test2 == 6) | (target == 6 & distractor_test2 == 5) ~ "NP-Con",
+                                (target == 1 & (distractor_test2 == 5 | distractor_test2 == 6)) | (target == 2 & (distractor_test2 == 5 | distractor_test2 == 6)) ~ "P-Incon",
+                                  (target == 5 & (distractor_test2 == 1 | distractor_test2 == 2)) | (target == 6 & (distractor_test2 == 1 | distractor_test2 == 2)) ~  "NP-Incon"),
+         #add a congruence variable
+         congruence = case_when ((trial_type == "P-Con") | (trial_type == "NP-Con") ~ "congruent",
+                                 (trial_type == "P-Incon") | (trial_type == "NP-Incon") ~ "incongruent"))
+#plot test accuracy
+m_acc_test2 <- test2 %>%
+  group_by(trial_type, group) %>%
+  summarise(mean_acc = mean(acc, na.rm = TRUE), 
+            se_acc = sd(acc, na.rm = TRUE)/sqrt(length(acc)))
+```
+
+```{r, echo = FALSE, message=FALSE}
+ggplot(data = m_acc_test2, mapping = aes(x = factor(group, levels = c("High", "Medium", "Low")), y = mean_acc, fill = trial_type)) +
+  geom_col(position = position_dodge2()) +
+  geom_errorbar(aes(ymin = mean_acc - se_acc, ymax = mean_acc + se_acc), width=.2, position=position_dodge(0.9)) +
+  scale_x_discrete (name = "Similarity") +
+  scale_y_continuous(name = "Rating") +
+  coord_cartesian(ylim = c(0.5, 1)) +
+  labs(fill = "Trial type")+
+  scale_fill_discrete(type = c("#7B3294", "#C2A5CF", "#008837", "#A6DBA0"))+
+  labs(title = "Mean accuracy for each type of cue in test2 phase")
+```
+
+```{r, include=FALSE}
+#ANOVA accuracy
+acc_test2 <- test2 %>%
+  group_by (pNum, group, predictiveness, congruence) %>%
+  summarise(acc = mean(acc, na.rm = TRUE))
+acc_test2$predictiveness <- factor(acc_test2$predictiveness)
+acc_test2$group <- factor(acc_test2$group)
+acc_test2$pNum <- factor(acc_test2$pNum)
+acc_test2$congruence <- factor(acc_test2$congruence)
+ANOVA_acc_test2 <- aov_car(formula = acc ~ group + Error(pNum*predictiveness*congruence), data = acc_test2)
+print(ANOVA_acc_test2)
+
+bay_ANOVA_acc_test2 <- anovaBF(formula = acc ~ group*predictiveness*congruence + pNum,
+        data = data.frame(acc_test2),
+        whichRandom = "pNum")
+print(bay_ANOVA_acc_test2)
+
+bay_ANOVA_acc_test2_sxp <- bay_ANOVA_acc_test2[4]/bay_ANOVA_acc_test2[3]
+print(bay_ANOVA_acc_test2_sxp)
+bay_ANOVA_acc_test2_pxc <- bay_ANOVA_acc_test2[13]/bay_ANOVA_acc_test2[7]
+print(bay_ANOVA_acc_test2_pxc)
+bay_ANOVA_acc_test2_sxc <- bay_ANOVA_acc_test2[10]/bay_ANOVA_acc_test2[6]
+print(bay_ANOVA_acc_test2_sxc)
+bay_ANOVA_acc_test2_sxpxc <- bay_ANOVA_acc_test2[18]/bay_ANOVA_acc_test2[17]
+print(bay_ANOVA_acc_test2_sxpxc)
+```
+
+There are no significant differences due to any effect or interaction in accuracy in the second test. Except for those that did the very subtle test, all subjects had lower accuracy for the non predictive vs the predictive targets. However, there are no significant effects: *similarity* : `r apa(ANOVA_acc_test2, effect = "group")`, `r report_BF_and_error(bay_ANOVA_acc_test2[1])`; *predictiveness*: `r apa(ANOVA_acc_test2, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_acc_test2[2])`; *congruence*: `r apa(ANOVA_acc_test2, effect ="congruence")`, `r report_BF_and_error(bay_ANOVA_acc_test2[5])`; *similarity x predictiveness*: `r apa(ANOVA_acc_test2, effect = "group:predictiveness")`, `r report_BF_and_error(bay_ANOVA_acc_test2_sxp[1])`; *predictiveness x congruence*: `r apa(ANOVA_acc_test2, effect = "predictiveness:congruence")`, `r report_BF_and_error(bay_ANOVA_acc_test2_pxc[1])`; *similarity x congruence*: `r apa(ANOVA_acc_test2, effect = "group:congruence")`, `r report_BF_and_error(bay_ANOVA_acc_test2_sxc[1])`; *similarity x predictiveness x congruence*: `r apa(ANOVA_acc_test2, effect = "group:predictiveness:congruence")`, `r report_BF_and_error(bay_ANOVA_acc_test2_sxpxc[1])`.
+
+###Just correct ratings
+
+```{r, include=FALSE}
+#plot test accuracy
+m_rat_test2 <- filter(test2, acc == 1) %>%
+  group_by(trial_type, group) %>%
+  summarise(mean_rat = mean(mem_score, na.rm = TRUE), 
+            se_rat = sd(mem_score, na.rm = TRUE)/sqrt(length(mem_score)))
+```
+
+```{r, echo = FALSE, message=FALSE}
+ggplot(data = m_rat_test2, mapping = aes(x = factor(group, levels = c("High", "Medium", "Low")), y = mean_rat, fill = trial_type)) +
+  geom_col(position = position_dodge2()) +
+  geom_errorbar(aes(ymin = mean_rat - se_rat, ymax = mean_rat + se_rat), width=.2, position=position_dodge(0.9)) +
+  scale_x_discrete (name = "Similarity") +
+  scale_y_continuous(name = "Rating") +
+  labs(fill = "Trial type")+
+  scale_fill_discrete(type = c("#7B3294", "#C2A5CF", "#008837", "#A6DBA0"))+
+  labs(title = "Mean rating for each type of cue in test2 phase")
+```
+
+```{r, include=FALSE}
+#ANOVA rat
+rat_test2 <- filter(test2, acc ==1) %>%
+  group_by (pNum, group, predictiveness, congruence) %>%
+  summarise(rat = mean(mem_score, na.rm = TRUE))
+rat_test2$predictiveness <- factor(rat_test2$predictiveness)
+rat_test2$group <- factor(rat_test2$group)
+rat_test2$pNum <- factor(rat_test2$pNum)
+rat_test2$congruence <- factor(rat_test2$congruence)
+ANOVA_rat_test2 <- aov_car(formula = rat ~ group + Error(pNum*predictiveness*congruence), data = rat_test2)
+print(ANOVA_rat_test2)
+
+bay_ANOVA_rat_test2 <- anovaBF(formula = rat ~ group*predictiveness*congruence + pNum,
+        data = data.frame(rat_test2),
+        whichRandom = "pNum")
+print(bay_ANOVA_rat_test2)
+
+bay_ANOVA_rat_test2_sxp <- bay_ANOVA_rat_test2[4]/bay_ANOVA_rat_test2[3]
+print(bay_ANOVA_rat_test2_sxp)
+bay_ANOVA_rat_test2_pxc <- bay_ANOVA_rat_test2[13]/bay_ANOVA_rat_test2[7]
+print(bay_ANOVA_rat_test2_pxc)
+bay_ANOVA_rat_test2_sxc <- bay_ANOVA_rat_test2[10]/bay_ANOVA_rat_test2[6]
+print(bay_ANOVA_rat_test2_sxc)
+bay_ANOVA_rat_test2_sxpxc <- bay_ANOVA_rat_test2[18]/bay_ANOVA_rat_test2[17]
+print(bay_ANOVA_rat_test2_sxpxc)
+```
+
+When the confidence ratings for the correct options were analysed, there was a clear effect of predictiveness, *predictiveness*: `r apa(ANOVA_rat_test2, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_rat_test2[2])`. The rest of the main effects and interactions were not significant: *similarity* : `r apa(ANOVA_rat_test2, effect = "group")`, `r report_BF_and_error(bay_ANOVA_rat_test2[1])`; ; *congruence*: `r apa(ANOVA_rat_test2, effect ="congruence")`, `r report_BF_and_error(bay_ANOVA_rat_test2[5])`; *similarity x predictiveness*: `r apa(ANOVA_rat_test2, effect = "group:predictiveness")`, `r report_BF_and_error(bay_ANOVA_rat_test2_sxp[1])`; *predictiveness x congruence*: `r apa(ANOVA_rat_test2, effect = "predictiveness:congruence")`, `r report_BF_and_error(bay_ANOVA_rat_test2_pxc[1])`; *similarity x congruence*: `r apa(ANOVA_rat_test2, effect = "group:congruence")`, `r report_BF_and_error(bay_ANOVA_rat_test2_sxc[1])`; *similarity x predictiveness x congruence*: `r apa(ANOVA_rat_test2, effect = "group:predictiveness:congruence")`, `r report_BF_and_error(bay_ANOVA_rat_test2_sxpxc[1])`
+
+#### Group Low
+
+```{r, include = FALSE}
+rat_test2_L <- filter(test2, acc == 1 & group == "Low") %>%
+  group_by (pNum, predictiveness, congruence) %>%
+  summarise(rat = mean(mem_score, na.rm = TRUE))
+rat_test2_L$pNum <- factor(rat_test2_L$pNum)
+rat_test2_L$predictiveness <- factor(rat_test2_L$predictiveness)
+rat_test2_L$congruence <- factor(rat_test2_L$congruence)
+# ANOVA with two within factors
+ANOVA_rat_test2_L <- aov_car(rat ~ predictiveness*congruence + Error(pNum/predictiveness*congruence), data=rat_test2_L)
+print(ANOVA_rat_test2_L)
+#bayesian ANOVA
+bay_ANOVA_rat_test2_L <- anovaBF(formula = rat ~ congruence*predictiveness + pNum,
+                                    data = data.frame(rat_test2_L),
+                                    whichRandom = "pNum")
+print(bay_ANOVA_rat_test2_L)
+bay_ANOVA_rat_test2_L_int <- bay_ANOVA_rat_test2_L[4]/bay_ANOVA_rat_test2_L[3]
+print(bay_ANOVA_rat_test2_L_int)
+```
+
+No significant effects or interactions were found in group Low similarity: *predictiveness*, `r apa(ANOVA_rat_test2_L, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_rat_test2_L[1])`, nor of *congruence*, `r apa(ANOVA_rat_test2_L, effect = "congruence")`, `r report_BF_and_error(bay_ANOVA_rat_test2_L[2])` and no interaction, `r apa(ANOVA_rat_test2_L, effect = "group:predictiveness")`, `r report_BF_and_error(bay_ANOVA_rat_test2_L_int[1])`.
+
+#### Group Medium
+
+```{r, include = FALSE}
+rat_test2_M <- filter(test2, acc == 1 & group == "Medium") %>%
+  group_by (pNum, predictiveness, congruence) %>%
+  summarise(rat = mean(mem_score, na.rm = TRUE))
+rat_test2_M$pNum <- factor(rat_test2_M$pNum)
+rat_test2_M$predictiveness <- factor(rat_test2_M$predictiveness)
+rat_test2_M$congruence <- factor(rat_test2_M$congruence)
+# ANOVA with two within factors
+ANOVA_rat_test2_M <- aov_car(rat ~ predictiveness*congruence + Error(pNum/predictiveness*congruence), data=rat_test2_M)
+print(ANOVA_rat_test2_M)
+#bayesian ANOVA
+bay_ANOVA_rat_test2_M <- anovaBF(formula = rat ~ congruence*predictiveness + pNum,
+                                   data = data.frame(rat_test2_M),
+                                   whichRandom = "pNum")
+print(bay_ANOVA_rat_test2_M)
+bay_ANOVA_rat_test2_M_int <- bay_ANOVA_rat_test2_M[4]/bay_ANOVA_rat_test2_M[3]
+print(bay_ANOVA_rat_test2_M_int)
+```
+
+For group Medium, there was also no effect of *predictiveness*: `r apa(ANOVA_rat_test2_M, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_rat_test2_M[1])`, *congruence*: `r apa(ANOVA_rat_test2_M, effect = "congruence")`, `r report_BF_and_error(bay_ANOVA_rat_test2_M[2])`, and no interaction *group x predictiveness*: `r apa(ANOVA_rat_test2_M, effect = "group:predictiveness")`, `r report_BF_and_error(bay_ANOVA_rat_test2_M_int[1])`).
+
+#### Group High
+
+```{r, include = FALSE}
+rat_test2_H <- filter(test2, acc == 1 & group == "High") %>%
+  group_by (pNum, predictiveness, congruence) %>%
+  summarise(rat = mean(mem_score, na.rm = TRUE))
+rat_test2_H$pNum <- factor(rat_test2_H$pNum)
+rat_test2_H$predictiveness <- factor(rat_test2_H$predictiveness)
+rat_test2_H$congruence <- factor(rat_test2_H$congruence)
+# ANOVA with two within factors
+ANOVA_rat_test2_H <- aov_car(rat ~ predictiveness*congruence + Error(pNum/predictiveness*congruence), data=rat_test2_H)
+print(ANOVA_rat_test2_H)
+#bayesian ANOVA
+bay_ANOVA_rat_test2_H <- anovaBF(formula = rat ~ congruence*predictiveness + pNum,
+                                    data = data.frame(rat_test2_H),
+                                    whichRandom = "pNum")
+print(bay_ANOVA_rat_test2_H)
+bay_ANOVA_rat_test2_H_int <- bay_ANOVA_rat_test2_H[4]/bay_ANOVA_rat_test2_H[3]
+print(bay_ANOVA_rat_test2_H_int)
+```
+
+```{r, include = FALSE}
+# SME
+#calculate the simple main effect of congruence
+sme_rat_test2_H_congruence <- rat_test2_H %>%
+  group_by(predictiveness) %>%
+  anova_test(rat ~ congruence + Error(pNum/congruence), effect.size = "pes") %>%
+  get_anova_table() %>%
+  adjust_pvalue(method = "bonferroni")
+sme_rat_test2_H_congruence #Call the output table
+#calculate the simple main effect of predictiveness
+sme_rat_test2_H_pred <- rat_test2_H %>%
+  group_by(congruence) %>%
+  anova_test(rat ~ predictiveness + Error(pNum/predictiveness), effect.size = "pes") %>%
+  get_anova_table() %>%
+  adjust_pvalue(method = "bonferroni")
+sme_rat_test2_H_pred #Call the output table
+```
+
+For group High there was a significant effect of *predictiveness*, `r apa(ANOVA_rat_test2_H, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_rat_test2_H[1])`, and an effect of the *predictiveness x congruence*, `r apa(ANOVA_rat_test2_H, effect = "predictiveness:congruence")`, `r report_BF_and_error(bay_ANOVA_rat_test2_H_int[1])`, but no main effect of *congruence*, `r apa(ANOVA_rat_test2_H, effect = "congruence")`, `r report_BF_and_error(bay_ANOVA_rat_test2_H[2])`. The main effect of predictiveness was significant in both the congruent, *F* (1, 28) = 16.961, *p* \< .001, $\\eta^2_p$ = .377, and incongruent trials, *F* (1, 28) = 9.490, *p* = .008, $\\eta^2_p$ = .247. However, there was an effect of congruence in predictive trials, *F* (1, 28) = 7.457, *p* = .022, $\\eta^2_p$ = .21, but not on the non-predictive trials, *F* (1, 28) = 0.654, *p* = .852, $\\eta^2_p$ = .023.
 
 # Exp 2
 
@@ -312,7 +595,11 @@ UNM08_training <- UNM08_training %>%
   mutate(prob_response = case_when((cue1 == 1 | cue1 == 3) & response == "o1_image" ~ 1,
                                    (cue1 == 1 | cue1 == 3) & response == "o2_image" ~ 0, 
                                    (cue1 == 2 | cue1 == 4) & response == "o1_image" ~ 0,
-                                   (cue1 == 2 | cue1 == 4) & response == "o2_image" ~ 1))
+                                   (cue1 == 2 | cue1 == 4) & response == "o2_image" ~ 1, 
+                                   cue1 == "A" & response == "o1_image" ~ 1,
+                                   cue1 == "A" & response == "o2_image" ~ 0, 
+                                   cue1 == "B" & response == "o1_image" ~ 0,
+                                   cue1 == "B" & response == "o2_image" ~ 1))
 ```
 
 ## RT analysis and exclusions
@@ -342,21 +629,14 @@ p_outliers_RT <- UNM08_test %>%
   summarise(n_excluded = sum(is_excluded)) %>% 
   mutate(p_excluded = n_excluded/24)
 
-# Join limits back to original data, filter, and calculate exclusion frequency and proportion
-UNM08_test_excluded <- UNM08_test %>%
-  mutate(is_excluded = choice_RT < mean_SDV$lower_limit | choice_RT > mean_SDV$upper_limit)%>%
-  group_by(pNum) %>%
-  summarise(n_excluded = sum(is_excluded)) %>% 
-  mutate(p_excluded = n_excluded/24)
-
-p_more2_exc <- UNM08_test_excluded %>% 
-  filter(n_excluded>2)
+p_exc <- p_outliers_RT %>% 
+  filter(n_excluded>0)
 
 # Join limits back to original data, and filter out the trials beyond the upper and lower limits
 UNM08_test_filtered <- UNM08_test %>%
   mutate(is_excluded = choice_RT < mean_SDV[[1,4]] | choice_RT > mean_SDV[[1,3]])%>%
   filter(is_excluded == FALSE)%>%
-  filter(!pNum %in% p_more2_exc$pNum)
+  filter(!pNum %in% p_exc$pNum)
 ```
 
 ```{r, include=FALSE}
@@ -476,7 +756,7 @@ There was a significant main effect of the *predictiveness*: `r apa(ANOVA_acc_UN
 
 ```{r, include=FALSE}
 #plot test mem_score but take out the errors
-M_rat_UNM08_test <- filter(UNM08_test, acc == 1) %>%
+M_rat_UNM08_test <- filter(UNM08_test_filtered, acc == 1) %>%
   group_by(trial_type, condition) %>%
   summarise(mean_mem_score = mean(mem_score, na.rm = TRUE), 
             se_mem_score = sd(mem_score, na.rm = TRUE)/sqrt(length(mem_score)))
@@ -493,7 +773,7 @@ ggplot(data = M_rat_UNM08_test, mapping = aes(x = factor(condition, levels = c("
 
 ```{r, include=FALSE}
 #ANOVA mem_score
-rat_UNM08_test <- filter(UNM08_test, acc == 1) %>%
+rat_UNM08_test <- filter(UNM08_test_filtered, acc == 1) %>%
   group_by (pNum, condition, predictiveness, congruence) %>%
   summarise(rat = mean(mem_score, na.rm = TRUE))
 rat_UNM08_test$predictiveness <- factor(rat_UNM08_test$predictiveness)

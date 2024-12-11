@@ -1,0 +1,160 @@
+---
+title: "UNM08_mem_score"
+format: docx
+editor: visual
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(afex)
+library(BayesFactor)
+library(apa)
+library(emmeans)
+library(papaja)
+library(rstatix)
+library("writexl")
+options(scipen=999)
+bfit = 500
+
+# function to force scientific formatting of numbers (used for large BFs)
+changeSciNot <- function(n) {
+  output <- format(n, scientific = TRUE, digits = 2) #Transforms the number into scientific notation even if small
+  output <- sub("e", "x10^", output) #Replace e with 10^
+  output <- sub("\\+0?", "", output) #Remove + symbol and leading zeros on exponent, if > 1
+  output <- sub("-0?", "-", output) #Leaves - symbol but removes leading zeros on exponent, if < 1
+  output <- paste0(output,"^")
+  # output = strsplit(output, "^", fixed = TRUE)
+  # output = paste0(output[[1]][1],"^", output[[1]][2], "^")
+  output
+}
+# function to extract and report BFs with error %s
+report_BF_and_error <- function(BF_in, sci_not = FALSE, hyp = "alt"){
+  
+  if (hyp == "alt") {
+    BF_notation = "BF~10~ = "
+  } else if (hyp == "null") {
+    BF_notation = "BF~01~ = "
+  }
+  
+  if (sci_not == TRUE) {
+    BF_value = changeSciNot(extractBF(BF_in)$bf) # change to sci notation
+  } else {
+    BF_value = round(extractBF(BF_in)$bf,2) # otherwise round
+  }
+  
+  paste0(BF_notation, 
+         BF_value, 
+         " &plusmn; ", 
+         round(100*extractBF(BF_in)$error,2), 
+         "%")
+}
+```
+
+```{r, include=FALSE}
+#load the data
+load("UNM08_proc_data.RData")
+UNM08_demographics <- demographics
+UNM08_training <- rbind(stage1, stage2)
+UNM08_test <- test
+UNM08_not_passed <- not_passed_pNum
+```
+
+```{r, include = FALSE}
+#create the PPR measure
+UNM08_training <- UNM08_training %>%
+  mutate(prob_response = case_when((cue1 == 1 | cue1 == 3) & response == "o1_image" ~ 1,
+                                   (cue1 == 1 | cue1 == 3) & response == "o2_image" ~ 0, 
+                                   (cue1 == 2 | cue1 == 4) & response == "o1_image" ~ 0,
+                                   (cue1 == 2 | cue1 == 4) & response == "o2_image" ~ 1, 
+                                   cue1 == "A" & response == "o1_image" ~ 1,
+                                   cue1 == "A" & response == "o2_image" ~ 0, 
+                                   cue1 == "B" & response == "o1_image" ~ 0,
+                                   cue1 == "B" & response == "o2_image" ~ 1))
+
+UNM08_test <- UNM08_test %>%
+  mutate(trial_type = case_when((target == 1 & distractor == 2) | (target == 2 & distractor == 1) | (target == 3 & distractor == 4) | (target == 4 & distractor == 3) ~ "P-Con" ,
+                                (target == 5 & distractor == 6) | (target == 6 & distractor == 5) |  (target == 7 & distractor == 8) | (target == 8 & distractor == 7)~ "NP-Con",
+                                (target == 1 & (distractor == 5 | distractor == 6)) | (target == 2 & (distractor == 5 | distractor == 6)) | (target == 3 & (distractor == 7 | distractor == 8)) | (target == 4 & (distractor == 7 | distractor == 8)) ~ "P-Incon",
+                                  (target == 5 & (distractor == 1 | distractor == 2)) | (target == 6 & (distractor == 1 | distractor == 2)) | (target == 7 & (distractor == 3 | distractor == 4)) | (target == 8 & (distractor == 3 | distractor == 4)) ~  "NP-Incon"),
+         #add a congruence variable
+         congruence = case_when ((trial_type == "P-Con") | (trial_type == "NP-Con") ~ "congruent",
+                                 (trial_type == "P-Incon") | (trial_type == "NP-Incon") ~ "incongruent"))
+
+#detect and clean participants that had an PPR lower than 0.6 in the final block or not passed the test comprehension check
+UNM08_block6 <- filter(UNM08_training, block == 6) %>%
+  group_by(pNum, condition) %>%
+  summarise (mean_response = mean(prob_response, na.rm = TRUE))
+UNM08_low_acc_total <- filter(UNM08_block6, mean_response < 0.6) 
+UNM08_low_acc <- UNM08_low_acc_total$pNum
+UNM08_training <- filter(UNM08_training, !pNum %in% UNM08_not_passed$pNum & !pNum %in% UNM08_low_acc_total$pNum)
+UNM08_test <- filter(UNM08_test, !pNum %in% UNM08_not_passed$pNum & !pNum %in% UNM08_low_acc_total$pNum)
+```
+
+```{r, include = FALSE}
+#Calculate the mean PPR and standard error for each block, including the groups
+UNM08_MS_test <- UNM08_test %>%
+  group_by(trial_type, condition) %>%
+    summarise(mean_mem_score = mean(c_mem_score, na.rm = TRUE), 
+            se_mem_score = sd(c_mem_score, na.rm = TRUE)/sqrt(length(c_mem_score)))
+```
+
+@fig-testExp3 shows the recognition memory data for the three conditions. Memory for non-predictive cues was lower than for predictive cues in all groups, but this difference was notably attenuated in the Uncertain group. Interestingly, the memory for the cues in the Uncertain group was higher, overall, than in the Certain Long and Certain Short groups.
+
+```{r, echo = FALSE, warning=FALSE}
+#| label: fig-testExp3
+#| fig-cap: Memory scores on the Test of Experiment 3.
+#| apa-note: "Mean memory scores (±SEM) during the Test of Experiment 2 for predictive and non-predictive trials across the three groups."
+#| fig-height: 4
+ggplot(UNM08_MS_test, mapping = aes(x = factor(condition, level=c('Uncertain', 'Certain Short', 'Certain Long')), y = mean_mem_score, fill = trial_type)) +
+  geom_col(position = position_dodge2()) +
+  geom_errorbar(aes(ymin = mean_mem_score - se_mem_score, ymax = mean_mem_score + se_mem_score), width=.2, position=position_dodge(0.9)) +
+  scale_x_discrete (name = "Group") +
+  scale_fill_discrete(type = c("#7B3294", "#C2A5CF", "#008837", "#A6DBA0"))+
+  scale_y_continuous(name = "Memory score")+
+  #scale_fill_grey(start = 0.33) +
+  theme_apa()
+```
+
+```{r, include=FALSE}
+#ANOVA mem_score
+UNM08_memscore_test <- UNM08_test %>%
+  group_by (pNum, condition, predictiveness, congruence) %>%
+  summarise(mem_score = mean(c_mem_score, na.rm = TRUE))
+UNM08_memscore_test$predictiveness <- factor(UNM08_memscore_test$predictiveness)
+UNM08_memscore_test$congruence <- factor(UNM08_memscore_test$congruence)
+UNM08_memscore_test$condition <- factor(UNM08_memscore_test$condition)
+UNM08_memscore_test$pNum <- factor(UNM08_memscore_test$pNum)
+ANOVA_UNM08_test <- aov_car(formula = mem_score ~ condition + Error(pNum*predictiveness*congruence), data = UNM08_memscore_test)
+print(ANOVA_UNM08_test)
+bay_ANOVA_UNM08_test <- anovaBF(formula = mem_score ~ condition + predictiveness + congruence,
+        data = data.frame(UNM08_memscore_test),
+        whichRandom = "pNum",
+        iterations = bfit)
+print(bay_ANOVA_UNM08_test)
+bay_ANOVA_UNM08_test_gxp <- bay_ANOVA_UNM08_test[4]/bay_ANOVA_UNM08_test[3]
+print(bay_ANOVA_UNM08_test_gxp)
+bay_ANOVA_UNM08_test_pxc <- bay_ANOVA_UNM08_test[13]/bay_ANOVA_UNM08_test[7]
+print(bay_ANOVA_UNM08_test_pxc)
+bay_ANOVA_UNM08_test_sxc <- bay_ANOVA_UNM08_test[10]/bay_ANOVA_UNM08_test[6]
+print(bay_ANOVA_UNM08_test_sxc)
+bay_ANOVA_UNM08_test_gxpxc <- bay_ANOVA_UNM08_test[18]/bay_ANOVA_UNM08_test[17]
+print(bay_ANOVA_UNM08_test_gxpxc)
+```
+
+```{r}
+UNM08_condition <- UNM08_test %>%
+  group_by (pNum, condition) %>%
+  summarise(mem_score = mean(c_mem_score, na.rm = TRUE))
+UNM08_condition$condition <- factor(UNM08_condition$condition)
+UNM08_memscore_test$pNum <- factor(UNM08_memscore_test$pNum)
+ANOVA_UNM08_condition<- aov_car(formula = mem_score ~ condition + Error(pNum), data = UNM08_condition)
+print(ANOVA_UNM08_condition)
+
+bay_ANOVA_UNM08_condition <- anovaBF(formula = mem_score ~ condition,
+        data = data.frame(UNM08_condition),
+        whichRandom = "pNum",
+        iterations = bfit)
+print(bay_ANOVA_UNM08_condition)
+```
+

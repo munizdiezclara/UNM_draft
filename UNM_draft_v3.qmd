@@ -1,0 +1,238 @@
+---
+title: "Effects of expected and unexpected uncertainty on cue processing"
+# If blank, the running header is the title in upper case.
+shorttitle: "Effects of uncertainty on cue processing"
+# Set names and affiliations.
+# It is nice to specify everyone's orcid, if possible.
+# There can be only one corresponding author, but declaring one is optional.
+author:
+  - name: Clara Muñiz-Diez
+    corresponding: true
+    orcid: 0000-0001-5192-0462
+    email: c.muniz-diez@lancaster.ac.uk
+    # Roles are optional. 
+    # Select from the CRediT: Contributor Roles Taxonomy https://credit.niso.org/
+    # conceptualization, data curation, formal Analysis, funding acquisition, investigation, 
+    # methodology, project administration, resources, software, supervision, validation, 
+    # visualization, writing, editing
+    affiliations:
+      - id: id1
+        name: "Lancaster University"
+        department: Department of Psychology
+        city: Lancaster
+        region: UK
+  - name: Sandra Lagator
+    orcid: 0000-0001-6060-2941
+    affiliations: 
+      - id: id2
+        name: "The University of Nottingham"
+        department: School of Psychology
+        city: Nottingham
+        region: UK
+  - name: Mark Haselgrove
+    orcid: 0000-0001-8981-1181
+    affiliations:
+      - ref: id2
+  - name: Tom Beesley
+    orcid: 0000-0003-2836-2743
+    # List city and region/state for unaffiliated authors
+    affiliations:
+      - ref: id1
+author-note:
+  status-changes: 
+    # Example: [Author name] is now at [affiliation].
+    affiliation-change: ~
+    # Example: [Author name] is deceased.
+    deceased: ~
+  # Disclosures condensed to one paragraph, but you can start a field with two line breaks to break them up: \n\nNew Paragraph
+  disclosures:
+    # Example: This study was registered at X (Identifier Y).
+    study-registration: ~
+    # Acknowledge and cite data/materials to be shared.
+    data-sharing: "The programs of the experiments presented here, the data and the full code for the writing this manuscript are freely available on www.github.com/munizdiezclara/UNM_draft."
+    # Example: This article is based on data published in [Reference].
+    # Example: This article is based on the dissertation completed by [citation].  
+    related-report: ~
+    # Example: [Author name] has been a paid consultant for Corporation X, which funded this study.
+    conflict-of-interest: ~
+    # Example: This study was supported by Grant [Grant Number] from [Funding Source].
+    financial-support: "This study was supported by the ESRC grant Known unknowns and unknown unknowns (ES/W013215/1)." 
+    # Example: The authors are grateful to [Person] for [Reason].
+    gratitude: ~
+    # Example. Because the authors are equal contributors, order of authorship was determined by a fair coin toss.
+    authorship-agreements: ~
+abstract: "Learning influences the overt attention that is paid to stimuli in two main ways: first, stimuli which are reliable predictors of an outcome are paid more attention than unreliable stimuli; and second, stimuli associated with uncertain outcomes capture more attention than stimuli associated with certain outcomes. Past studies have shown that these two phenomena can be demonstrated within the same experiment, but strikingly, the increase in attention due to uncertainty does not necessarily translate into subsequent better learning. We investigate this paradox by examining stimulus processing in three experiments that included predictive and non-predictive cues, trained under different conditions of uncertainty. In Experiment 1, this test revealed that recognition  memory was similar after learning with certain and uncertain stimulus-outcome contingencies. In Experiment 2, uncertain contingencies were introduced after a period of learning with certain contingencies. During the subsequent memory test, this training resulted in better memory than training with certain contingencies throughout the learning phase. These results suggest the importance of drawing a distinction between expected and unexpected uncertainty on stimulus processing. The implications of these results for attentional models of learning are discussed."
+# Put as many keywords at you like, separated by commmas (e.g., [reliability, validity, generalizability])
+keywords: [Associative Learning, Attention, Uncertainty, Predictiveness, Cue processing]
+# If true, tables and figures are mingled with the text instead of listed at the end of the document.
+floatsintext: true
+# Numbered lines (.pdf and .docx only)
+numbered-lines: false
+# File with references
+bibliography: references.bib
+# Suppress title page
+suppress-title-page: false
+# Masks references that appear in the masked-citations list
+mask: false
+masked-citations:
+  - schneider2012cattell
+  - schneider2015intelligence
+# Language options. See https://quarto.org/docs/authoring/language.html
+lang: en
+language:
+  citation-last-author-separator: "and"
+  citation-masked-author: "Masked Citation"
+  citation-masked-date: "n.d."
+  citation-masked-title: "Masked Title"
+  title-block-author-note: "Author Note"
+  title-block-correspondence-note: "Correspondence concerning this article should be addressed to"
+  title-block-role-introduction: "Author roles were classified using the Contributor Role Taxonomy (CRediT; https://credit.niso.org/) as follows:"
+format:
+  apaquarto-docx: default
+  apaquarto-html: default
+  apaquarto-pdf:
+    # Can be jou (journal), man (manuscript), stu (student), or doc (document)
+    documentmode: man
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(afex)
+library(BayesFactor)
+library(apa)
+library(emmeans)
+library(papaja)
+library(rstatix)
+library("writexl")
+options(scipen=999)
+bfit = 5000
+
+# function to force scientific formatting of numbers (used for large BFs)
+changeSciNot <- function(n) {
+  output <- format(n, scientific = TRUE, digits = 2) #Transforms the number into scientific notation even if small
+  output <- sub("e", "x10^", output) #Replace e with 10^
+  output <- sub("\\+0?", "", output) #Remove + symbol and leading zeros on exponent, if > 1
+  output <- sub("-0?", "-", output) #Leaves - symbol but removes leading zeros on exponent, if < 1
+  output <- paste0(output,"^")
+  # output = strsplit(output, "^", fixed = TRUE)
+  # output = paste0(output[[1]][1],"^", output[[1]][2], "^")
+  output
+}
+# function to extract and report BFs with error %s
+report_BF_and_error <- function(BF_in, sci_not = FALSE, hyp = "alt"){
+  
+  if (hyp == "alt") {
+    BF_notation = "BF~10~ = "
+  } else if (hyp == "null") {
+    BF_notation = "BF~01~ = "
+  }
+  
+  if (sci_not == TRUE) {
+    BF_value = changeSciNot(extractBF(BF_in)$bf) # change to sci notation
+  } else {
+    BF_value = round(extractBF(BF_in)$bf,2) # otherwise round
+  }
+  
+  paste0(BF_notation, 
+         BF_value, 
+         " &plusmn; ", 
+         round(100*extractBF(BF_in)$error,2), 
+         "%")
+}
+```
+
+A central feature of the cognition of humans and other animals is the ability to learn the predictive relationships between events in the world in order to anticipate future goals and modify behaviour accordingly. However, not all events that co-occur have predictive validity, that is, not all events that happen at the same time are related to each other; furthermore, because of capacity limitations, processing all stimulus pairings would neither be functional nor possible. The cognitive system must therefore select events that are task relevant to focus resources and refine the allocation of attention. The attention that is paid to a stimulus plays an important role in models of associative learning. Take for example the influential Rescorla & Wagner [-@rescorlaTheoryPavlovianConditioning1972] model, in which, the parameter $\alpha$ refers to the salience of a cue. The inherent salience of a cue (e.g., how loud a sound is; how bright a light is) will determine how much it captures attention, and thus how successful learning will be with it. However, the attention paid to a stimulus is not just inherent – it can also be determined by its associative history [for a review, see @lepelleyAttentionAssociativeLearning2016]; that is, from what has been previously learned about that stimulus. For example, at busy pedestrian crossings/crosswalks it is common for a sound to be played when it is safe to cross. Through experience, this sound will readily come to capture attention due to its predictive nature, while other salient but non-predictive stimuli (e.g., an advertising billboard) will not.
+
+There are two main ways in which learning can shape attention. The first is often referred to as the *predictiveness principle*, according to which attention increases to stimuli that reliably signal the occurrence of an outcome [e.g., @mackintoshTheoryAttentionVariations1975; see also: @kruschkeUnifiedModelAttention2001; -@kruschkeAttentionLearning2003; @lepelleyRoleAssociativeHistory2004]. It is thought that this mode of attention is advantageous as it allows for the *exploitation* of reliable knowledge and permits animals to be prepared to make responses to stimuli with known consequences. A common method for studying this process in the lab is with the “learned predictiveness” design [e.g., @lepelleyLearnedAssociabilityAssociative2003]. In this contingency learning procedure, cues are trained as differentially predictive of particular outcomes (e.g., in the allergist task, participants are instructed that various foods are differentially predictive of one kind of allergic reaction or another on an imaginary patient). Typically, compounds of cues are presented, where one cue is perfectly predictive of an outcome, while the other is non-predictive. Take for example, a training phase in which compounds AX and AY are followed by outcome 1, whereas compounds BX and BY are followed by outcome 2. Here, cues A and B are predictive of outcomes 1 and 2 respectively, but cues X and Y are non-predictive, being paired with outcomes 1 and 2 equally often. Once this training is complete and participants show good levels of learning, a second phase is introduced, in which the cues are trained with new outcomes, and both cues are now perfectly predictive of these outcomes (e.g., AX-O3; BY-O4). The central finding of this procedure is that, in the second phase, participants learn more about the cues that were predictive in the first phase than about the cues that were previously non-predictive. The interpretation of this result [e.g., @lepelleyLearnedAssociabilityAssociative2003] is that, in the first phase, the cues that were established as predictive undergo an increase in their ability to attract attention, which enhances learning in the second phase. Consistent with this interpretation is the observation that (a) cues which have been established as predictive attract longer eye-gaze durations than non-predictive cues and (b) this overt measure of differential attention correlates with the bias established to learning [@lepelleyOvertAttentionPredictiveness2011]. The learned predictiveness effect has been extensively replicated and reproduced in studies of learning [for a review, see: @lepelleyAttentionAssociativeLearning2016].
+
+The second way in which learning can modify the attention paid to stimuli is the *uncertainty principle* [e.g., @pearceModelPavlovianLearning1980; see also: @lepelleyModelingAttentionAssociative2012; @schmajukLatentInhibitionNeural1996] which states that more attention will be paid to cues which have an uncertain outcome. It is thought that this mode of attention is useful as it allows for the exploration of cues, whose predictive validity is uncertain, in order to discover relationships between these events. Griffiths et al. [-@griffithsNegativeTransferHuman2011] showed an instance of this principle using the “negative transfer” procedure. In this study, participants experienced a stimulus followed by a small-magnitude outcome (a food predicted a minor allergic reaction) in the first phase, and the same stimulus followed by a larger-magnitude outcome (a food predicted a critical allergic reaction) in the second phase. The study had two groups, with the only difference between the groups being that one group received a small number of presentations of the stimulus in the absence of the outcome between the first and second phases of the experiment in order to introduce uncertainty into the learnt contingency. The critical result was that the group that received “no outcome” trials learned more quickly about the large outcome in the second phase, compared to the group who did not have these no outcome trials. This result suggests that this brief period of uncertainty enhanced the attention paid to the cues facilitating subsequent learning[^1].
+
+[^1]: It should be noted that this result has proved difficult to reproduce (see Le Pelley et al., 2016).
+
+At face value, these two principles seem to be incompatible or contradictory: the predictiveness principle states we focus resources on cues that we know about, whilst the uncertainty principle states that we focus resources on cues we are less sure about. However, it is quite possible that both principles operate and describe changes in the allocation of attention, depending on the experienced contingencies. In fact, a number of hybrid models of learning and attention have tried to reconcile the evidence in favour of both principles [e.g., @esberReconcilingInfluencePredictiveness2011; @lepelleyRoleAssociativeHistory2004; @pearceTwoTheoriesAttention2010], and some of them propose that the predictiveness and the uncertainty principles may have different functions [e.g., @kerstenTwoCompetingAttentional1998; @lepelleyRoleAssociativeHistory2004]. The predictiveness principle leads to a prioritization of information in situations in which outcome events are reliable. However, when outcome events are less stable, it is less advantageous to invest cognitive resources in exploiting what is known. Under these circumstances it might be more advantageous to explore other sources of information, in order to attempt to reduce the uncertainty in the environment. For example, a teacher can easily identify students that might need extra help, solely focusing on their grades on the exams. However, there might be students who pass those exams, but show other, less reliable signs of a need for extra help, such as poor class engagement or absenteeism. For this reason, if the teacher wants to better understand the needs of their students, they might explore new signals in order to reduce uncertainty.
+
+There is a growing body of evidence that points towards both principles operating in parallel in human contingency learning tasks [@koenigRewardDrawsEye2017; @luquePredictionUncertaintyAssociative2017; @torrents-rodasEvidenceTwoAttentional2021]. Beesley et al. [-@beesleyUncertaintyPredictivenessDetermine2015], for example, adapted the learned predictiveness design of Le Pelley and McLaren [-@lepelleyLearnedAssociabilityAssociative2003] to manipulate both predictiveness and uncertainty within the same procedure. In this study, each compound of cues had either a certain contingency with the outcome (i.e., it was consistently followed by the same outcome), or an uncertain contingency (i.e., it was probabilistically related to the outcomes, with one outcome occurring on 70% of trials, and the other on 30% of trials). Measuring participants eye gaze, this study showed that on “uncertain trials”, all cues (both predictive and non-predictive) received more attention than the cues did on “certain trials”. However, a predictiveness effect was also evident, with higher attention to predictive than to non-predictive cues, although this effect was only evident for cues. Thus, this study showed that attention is both determined by the uncertainty principle, since there was higher attention when uncertainty was high, as well as by the predictiveness principle, since within each compound, attention was devoted more to predictive over non-predictive cues.
+
+A study by Easdale et al. [-@easdaleOnsetUncertaintyFacilitates2019] examined how these differences in uncertainty affected the rate of learning about cues. Participants experienced the same certain and uncertain contingencies as in Beesley et al. [-@beesleyUncertaintyPredictivenessDetermine2015] in a first phase, before receiving a second phase in which there were new contingencies to learn that would resolve the uncertainty entirely. Contrary to the expectations of models of the uncertainty principle [e.g., @pearceModelPavlovianLearning1980] it was found that participants who initially experienced the uncertain contingencies learnt about these new contingencies more *slowly* than those participants who first learnt about certain contingencies. Easdale et al. argued that this result provides evidence to support a distinction between “expected uncertainty” and “unexpected uncertainty”: in the former, participants may learn to anticipate variation in the outcome, which then leads to slower acquisition of the new contingencies [see also, @behrensLearningValueInformation2007].
+
+Torrent-Rodas et al. [-@torrents-rodasEffectPredictionError2023] also examined the impact of uncertainty on overt attention and new learning using a within-subjects design. In a first phase they found that non-predictive cues that were associated with maximal prediction error (e.g., cue X during XZ-O1 and XZ-O2 training) received higher levels of attention compared to predictive cues (e.g., cues A and B during AZ-O1 and BZ-O2 training). However, when the participants were given new contingencies to learn in a second stage, discriminations between compounds that relied on previously non-predictive cues were not learnt at a faster rate than those that relied on previously predictive cues. Thus, like the results of Easdale et al., the data from Torrents-Rodas et al. suggest that expected uncertainty drives higher levels of overt attention to cues, but this does not translate into more rapid learning. One of the reasons why this finding of slower learning under conditions of expected uncertainty is surprising, is that participants in this condition showed higher attention to the cues in the first stage. Thus, the data from Easdale et al. and Torrents-Rodas et al. represent a paradoxical set of results for theories of associative learning to explain, since participants were overtly attending to cues more in the uncertain condition, yet this did not translate into faster learning about these cues. All attentional theories of associative learning predict that the attention paid to a stimulus is directly related to the rate at which learning occurs for that stimulus. This raises the question of what the high levels of overt attention to uncertain cues represent in the results of Beesley et al. [-@beesleyUncertaintyPredictivenessDetermine2015], Easdale et al. [-@easdaleOnsetUncertaintyFacilitates2019], and Torrents-Rodas et al. [-@torrents-rodasEffectPredictionError2023]. It is this process that is currently poorly understood and is the focus of the current study.
+
+A critical question arises from this paradox: do uncertain conditions result in an increase in cognitive processing? Pearce and Hall [-@pearceModelPavlovianLearning1980] thought so, suggesting that stimuli which are part of an unfamiliar (i.e. unlearned) task undergo more controlled processing (Pearce and Hall, 1980, p 549) and only transition to more automatic processing once the task is familiar. Consequently, we might expect that uncertainty should not only increase just the associative learning pertaining to these stimuli (i.e., “learning rate”), but also the memory of the stimulus representation itself [@chunInteractionsAttentionMemory2007]. For example, Otten et al. [-@ottenBrainActivityEvent2006] have shown that neural activity associated with a cue to semantically process an upcoming stimulus predicts the successful later retrieval of that stimulus at test; deeper processing tasks encourage richer encoding.
+
+In the current study, two experiments were conducted with a design similar to the one employed by Beesley et al. [-@beesleyUncertaintyPredictivenessDetermine2015], in which the predictiveness and the uncertainty of the cues were manipulated. Based on the notion that greater stimulus processing is associated with superior memory recall [@craikLevelsProcessingFramework1972; @craikDepthProcessingRetention1975; @fletcherFunctionalRolesPrefrontal1998]. Stimulus processing was measured by means of a recognition memory test for the cues at the end of the task. Experiment 1 assessed the memory for predictive and non-predictive cues trained either under certain or expected uncertain cues, and Experiment 2 contrasted the effect of expected and unexpected uncertainty.
+
+# Experiment 1
+
+The purpose of Experiment 1 was to examine differences in recognition memory in a learned predictiveness procedure under certain and uncertain cue-outcome contingency conditions. Two groups were trained, one with a perfect contingency between the predictive cues and their paired outcome (Group Certain) and one with a contingency of 0.8 between the predictive cues and their paired outcome (Group Uncertain). After this training, we tested the memory for cues in both groups using the memory test in which targets were paired with foils from different cues.
+
+The design of Experiment 1 is shown in @tbl-exp1. Previous experiments have established that for uncertain contingencies, participants spend longer attending to (looking at) all cues compared to attention to cues in certain contingencies [@beesleyUncertaintyPredictivenessDetermine2015; @easdaleOnsetUncertaintyFacilitates2019; @walkerProtectionUncertaintyExploration2022]. Experiment 1 therefore aimed to test whether uncertain contingencies, where it is well established that there is a high level of attention to cues, result in an improvement in the processing of these stimuli. As such, we predicted that memory would be better, overall, for the cues in group Uncertain compared to group Certain. Also, on the basis of the better attention found to predictive than non-predictive cues in the learned predictiveness effect, we anticipate seeing superior memory scores for the predictive than the non-predictive cues in group Certain.
+
+::: {#tbl-exp1 apa-note="Uppercase letters A, B, X, and Y represent the cues presented during training. O1 and O2 represent the outcomes presented in training. Lowercase letters a, b, x, and y represent the foils that are similar to the (corresponding upper-case letter) cues presented in the training phase. The numbers before the trials define the proportion of trials of that type that were presented." apa-twocolumn="true"}
++----------------+---------------------------+------------------+
+| Group          | Training                  | Test             |
++================+:=========================:+:================:+
+| Certain        | AX - O1                   | A vs *b*/*x*/*y* |
+|                |                           |                  |
+|                | AY - O1                   | B vs *a*/*x*/*y* |
+|                |                           |                  |
+|                | BX - O2                   | X vs *a*/*b*/*y* |
+|                |                           |                  |
+|                | BY - O2                   | Y vs *a*/*b*/*x* |
++----------------+---------------------------+------------------+
+| Uncertain      | 0.8 AX - O1 / 0.2 AX - O2 | A vs *b*/*x*/*y* |
+|                |                           |                  |
+|                | 0.8 AY - O1 / 0.2 AY - O2 | B vs *a*/*x*/*y* |
+|                |                           |                  |
+|                | 0.8 BX - O2 / 0.2 BX - O1 | X vs *a*/*b*/*y* |
+|                |                           |                  |
+|                | 0.8 BY - O2 / 0.2 BY - O1 | Y vs *a*/*b*/*x* |
++----------------+---------------------------+------------------+
+
+Design of Experiment 1
+:::
+
+## Methods
+
+### Transparency and openness statement
+
+In this study we detail the processes for identifying any data to be excluded, any data exclusions and all measures in the study. Statistical analyses were conducted using RStudio [-@positteamRStudio2024], with R version 4.3.3 [@rcoreteamLanguageEnvironmentStatistical2023]. All experiments were built with the open-source software PsychoPy [v. 2022.2.4, @peircePsychoPy2ExperimentsBehavior2019], and all experiments were run on Pavlovia. Participants were recruited through Prolific. The design and analysis of the experiments were based on previously published manuscripts but were not preregistered. Materials and data are freely available at: www.github.com/munizdiezclara/UNM_draft. All the experiments reported in this paper received ethical approval by the Ethics Committee at the School of Psychology, Lancaster University, UK.
+
+### Participants
+
+```{r, include=FALSE}
+#load the data
+load("UNM07_proc_data.RData")
+UNM07_demographics <- demographics
+UNM07_training <- training
+UNM07_test <- test
+UNM07_not_passed <- not_passed_pNum
+
+#create the PPR measure
+UNM07_training <- UNM07_training %>%
+  mutate(prob_response = case_when((cue1 == 1 | cue1 == 3) & response == "o1_image" ~ 1,
+                                   (cue1 == 1 | cue1 == 3) & response == "o2_image" ~ 0, 
+                                   (cue1 == 2 | cue1 == 4) & response == "o1_image" ~ 0,
+                                   (cue1 == 2 | cue1 == 4) & response == "o2_image" ~ 1))
+
+#detect and clean participants that not passed the test comprehension check
+UNM07_training <- filter(UNM07_training, !pNum %in% UNM07_not_passed$pNum)
+UNM07_test <- filter(UNM07_test, !pNum %in% UNM07_not_passed$pNum)
+```
+
+`r nrow(UNM07_demographics)` participants were recruited through Prolific. The sample consisted of `r length(which(UNM07_demographics$gender == "female"))` women, `r length(which(UNM07_demographics$gender == "male"))` men and one non-binary person, with `r n_distinct(UNM07_demographics$Nationality)` different nationalities. The mean age was `r format(mean(UNM07_demographics$age, na.rm = TRUE), digits = 3)` calculated for the `r nrow(UNM07_demographics) - sum(is.na(UNM07_demographics$age))` participants that reported their age (range `r min(UNM07_demographics$age, na.rm = TRUE)` - `r max(UNM07_demographics$age, na.rm = TRUE)`). Pre-screening of participants in Prolific ensured that they had normal or corrected to normal vision, fluency in English language, and had not participated in previous studies from our lab. Participants were rewarded with £2.70 for their participation in the study. Participants were randomly allocated to either the Certain or Uncertain condition. Four participants were excluded due to failing the comprehension check before the test (three in group Certain and one in group Uncertain). Post-hoc calculations using G\*Power 3.1 [@faulStatisticalPowerAnalyses2007] revealed that this sample size had a power of .99 to detect an effect size of *η~p~^2^* = .08 that was observed for the *group x predictiveness* interaction reported in @fig-testExp1.
+
+### Apparatus and stimuli
+
+Participants were presented with a task built in PsychoPy [v. 2022.2.4, @peircePsychoPy2ExperimentsBehavior2019] and hosted in Pavlovia. The task was designed so it could only be run on a computer, but not on mobile devices. The screen background colour was grey (RGB: 128, 128, 128) and all stimuli and instructions were presented against this background. The four cues presented to each participant (A, B, X and Y) were randomly selected from a set of eight images, representing imaginary chemical compounds made of three red circles and three blue circles connected with black lines. Each cue was 945 x 945 pixels, automatically re-scaled to 0.4 x 0.4 of the window height. The outcomes (O1 and O2) were two images displaying a mutant creature, black with yellow details. Each was 332 x 664 pixels, automatically re-scaled to 0.16 x 0.2 of the window height.
+
+Examples of the cue images are shown in @fig-foil_example. The foils used in the tests were colour-modifications of the original cues: the colours of one red and one blue circle were switched (four remained unchanged). All of the images used in the experiment are presented in Appendix I.
+
+```{r fig-foil_example}
+#| fig-cap: Example of the modifications in the original cue image to create the foils.
+#| apa-twocolumn: true
+#| apa-note: "The top row shows an example cue used in the training phase, with three potential foils (depending on condition) shown in the bottom row. High - two of the circles have swapped colours; Medium - four circles have swapped colours; Low - all six circles have swapped colours."
+#| out-width: 100%
+#| fig-pos: h
+knitr::include_graphics("images/foil_example.png")
+```
