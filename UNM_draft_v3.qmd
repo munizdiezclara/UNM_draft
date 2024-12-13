@@ -61,7 +61,7 @@ author-note:
     gratitude: ~
     # Example. Because the authors are equal contributors, order of authorship was determined by a fair coin toss.
     authorship-agreements: ~
-abstract: "Learning influences the overt attention that is paid to stimuli in two main ways: first, stimuli which are reliable predictors of an outcome are paid more attention than unreliable stimuli; and second, stimuli associated with uncertain outcomes capture more attention than stimuli associated with certain outcomes. Past studies have shown that these two phenomena can be demonstrated within the same experiment, but strikingly, the increase in attention due to uncertainty does not necessarily translate into subsequent better learning. We investigate this paradox by examining stimulus processing in three experiments that included predictive and non-predictive cues, trained under different conditions of uncertainty. In Experiment 1, this test revealed that recognition  memory was similar after learning with certain and uncertain stimulus-outcome contingencies. In Experiment 2, uncertain contingencies were introduced after a period of learning with certain contingencies. During the subsequent memory test, this training resulted in better memory than training with certain contingencies throughout the learning phase. These results suggest the importance of drawing a distinction between expected and unexpected uncertainty on stimulus processing. The implications of these results for attentional models of learning are discussed."
+abstract: "Learning influences the overt attention that is paid to stimuli in two main ways: first, stimuli which are reliable predictors of an outcome are paid more attention than unreliable stimuli; and second, stimuli associated with uncertain outcomes capture more attention than stimuli associated with certain outcomes. Past studies have shown that these two phenomena can be demonstrated within the same experiment, but strikingly, the increase in attention due to uncertainty does not necessarily translate into subsequent better learning. We investigate this paradox by examining stimulus processing in two experiments that included predictive and non-predictive cues, trained under different conditions of uncertainty. In Experiment 1, we testet the memory for the cues after the training with either certain or uncertian cues, finding that recognition  memory was similar after learning with certain and uncertain stimulus-outcome contingencies. In Experiment 2, uncertain contingencies were introduced after a period of learning with certain contingencies. During the subsequent memory test, this training resulted in better memory than training with certain contingencies throughout the learning phase. These results suggest the importance of drawing a distinction between expected and unexpected uncertainty on stimulus processing. The implications of these results for attentional models of learning are discussed."
 # Put as many keywords at you like, separated by commmas (e.g., [reliability, validity, generalizability])
 keywords: [Associative Learning, Attention, Uncertainty, Predictiveness, Cue processing]
 # If true, tables and figures are mingled with the text instead of listed at the end of the document.
@@ -164,7 +164,7 @@ In the current study, two experiments were conducted with a design similar to th
 
 # Experiment 1
 
-The purpose of Experiment 1 was to examine differences in recognition memory in a learned predictiveness procedure under certain and uncertain cue-outcome contingency conditions. Two groups were trained, one with a perfect contingency between the predictive cues and their paired outcome (Group Certain) and one with a contingency of 0.8 between the predictive cues and their paired outcome (Group Uncertain). After this training, we tested the memory for cues in both groups using a forced choice memory test, between a cue participants had seen in the training phase, the target, and a foil, very similar to the cues seen before.
+The purpose of Experiment 1 was to examine differences in recognition memory in a learned predictiveness procedure under certain and uncertain cue-outcome contingency conditions. Two groups were trained, one with a perfect contingency between the predictive cues and their paired outcome (Group Certain) and one with a contingency of 0.8 between the predictive cues and their paired outcome (Group Uncertain). After this training, we tested the memory for cues in both groups using a tow-alternative forced-choice memory test, between a cue participants had seen in the training phase, the target, and a foil, very similar to the cues seen before.
 
 The design of Experiment 1 is shown in @tbl-exp1. Previous experiments have established that for uncertain contingencies, participants spend longer attending to (looking at) all cues compared to attention to cues in certain contingencies [@beesleyUncertaintyPredictivenessDetermine2015; @easdaleOnsetUncertaintyFacilitates2019; @walkerProtectionUncertaintyExploration2022]. Experiment 1 therefore aimed to test whether uncertain contingencies, where it is well established that there is a high level of attention to cues, result in an improvement in the processing of these stimuli. As such, we predicted that memory would be better, overall, for the cues in group Uncertain compared to group Certain. Also, on the basis of the better attention found to predictive than non-predictive cues in the learned predictiveness effect, we anticipate seeing superior memory scores for the predictive than the non-predictive cues in group Certain.
 
@@ -196,7 +196,7 @@ Design of Experiment 1
 
 ### Transparency and openness statement
 
-In this study we detail the processes for identifying any data to be excluded, any data exclusions and all measures in the study. Statistical analyses were conducted using RStudio [-@positteamRStudio2024], with R version 4.3.3 [@rcoreteamLanguageEnvironmentStatistical2023]. All experiments were built with the open-source software PsychoPy [v. 2022.2.4, @peircePsychoPy2ExperimentsBehavior2019], and all experiments were run on Pavlovia. Participants were recruited through Prolific. The design and analysis of the experiments were based on previously published manuscripts but were not preregistered. Materials and data are freely available at: www.github.com/munizdiezclara/UNM_draft. All the experiments reported in this paper received ethical approval by the Ethics Committee at the School of Psychology, Lancaster University, UK.
+In this study we detail the processes for identifying any data to be excluded, any data exclusions and all measures in the study. Statistical analyses were conducted using RStudio [-@positteamRStudio2024], with R version 4.3.3 [@rcoreteamLanguageEnvironmentStatistical2023]. All experiments were built with the open-source software PsychoPy [v. 2022.2.4, @peircePsychoPy2ExperimentsBehavior2019], and all experiments were run on Pavlovia. Participants were recruited through Prolific. The design and analysis of the experiments were based on previously published manuscripts but were not preregistered. Some of the pilot work, as well as the materials and data of the two experiments reported in this paper are freely available at: www.github.com/munizdiezclara/UNM_draft. All the experiments reported in this paper received ethical approval by the Ethics Committee at the School of Psychology, Lancaster University, UK.
 
 ### Participants
 
@@ -228,9 +228,10 @@ Participants were presented with a task built in PsychoPy [v. 2022.2.4, @peirceP
 
 ### Design
 
-The design of Experiment 1 is shown in @tbl-exp1. The experiment used a mixed design, with cue-predictiveness (P and NP) manipulated within-subjects and the contingency between predictive cues and outcomes manipulated between-subjects (group Certain and Uncertain). The training phase consisted of eight block, each consistent of 20 trials. There were four trial types (compound cues), each presented five times per block, with cues A and B predictive of outcome 1 and 2, respectively. In the Certain group, cues A and B were perfectly predictive of the outcomes they were paired with, while cues X and Y were non-predictive. For the Uncertain group, cues A and B were the best available predictors on each trial but had a 0.8 contingency with the predicted outcome. To implement this contingency, in each block, for four of the five trials one outcome was “correct” (e.g., AX-O1) and for the remaining one the alternative outcome was “correct” (e.g., AX-O2). Cues X and Y were paired equally often with outcomes 1 and 2 and were therefore non-predictive. The position of the cues and the outcomes (right-left), as well as the order of presentation of the trials, was fully randomized within each block. 
+The design of Experiment 1 is shown in @tbl-exp1. The experiment used a mixed design, with cue-predictiveness (P and NP) manipulated within-subjects and the contingency between predictive cues and outcomes manipulated between-subjects (group Certain and Uncertain). The training phase consisted of eight block, each consistent of 20 trials. There were four trial types (compound cues), each presented five times per block, with cues A and B predictive of outcome 1 and 2, respectively. In the Certain group, cues A and B were perfectly predictive of the outcomes they were paired with, while cues X and Y were non-predictive. For the Uncertain group, cues A and B were the best available predictors on each trial but had a 0.8 contingency with the predicted outcome. To implement this contingency, in each block, for four of the five trials one outcome was “correct” (e.g., AX-O1) and for the remaining one the alternative outcome was “correct” (e.g., AX-O2). Cues X and Y were paired equally often with outcomes 1 and 2 and were therefore non-predictive. The position of the cues and the outcomes (right-left), as well as the order of presentation of the trials, was fully randomized within each block. Note that during the training stage cues A, B, X and Y were all presented equally frequently and equivalently recently to the recognition memory tests. Other things being equal, then, their memory traces should be equivalent. Thus, if recognition scores differ between these stimuli, it would indicate a difference in the level of processing that the cues underwent during training.
 
-Training was followed by a memory test, consisting of six presentations of each of the four cues (24 trials in total). Each cue was presented twice with each of the three foils shown in @tbl-exp1. For example, cue A was presented with the foil corresponding to cue B, the foil corresponding to cue X, and the foil corresponding to cue Y. The left-right display of the target and the foil was counterbalanced, in such a way that each target appeared once on the left and once on the right.
+Training was followed by a memory test, in which two images were presented side-by-side, with one image being a cue presented in the training phase, the target, and the other image being a variation of one of the other training cues, the foil. The left-right display of the target and the foil was counterbalanced, in such a way that each target appeared once on the left and once on the right. Each of the four targets (A, B, X and Y) was presented six times (24 trials in total), with target presented twice with each of the three foils shown in @tbl-exp1. For example, cue A was presented with the foil corresponding to cue B, the foil corresponding to cue X, and the foil corresponding to cue Y. It is worth noting that this distribution of the target vs foil trials produces two types of trials: congruent trials, in which the target and the foil were of the same predictiveness, and incongruent trials, in which the target and foil differed in their predictiveness. However, in order to make the presentation of the results clearer, the following analyses do not include this factor, given that it had no main effect in any of them, and did not interact with any of the main significant results. The analyses including this factor for both Experiment 1 and 2 are reported in Appendix II.
+ 
 
 ### Procedure
 
@@ -362,19 +363,11 @@ print(bay_ANOVA_acc_UNM07_test)
 bay_ANOVA_acc_UNM07_test_gxp <- bay_ANOVA_acc_UNM07_test[4]/bay_ANOVA_acc_UNM07_test[3]
 print(bay_ANOVA_acc_UNM07_test_gxp)
 ```
-
 ```{r, include = FALSE}
 # SME of the condition:predictiveness interaction
 SME_acc_UNM07_test <- UNM07_test %>%
   group_by (pNum, condition, predictiveness) %>%
   summarise(acc = mean(acc, na.rm = TRUE))
-#calculate the simple main effect of condition
-sme_acc_UNM07_test_condition <- SME_acc_UNM07_test %>%
-  group_by(predictiveness) %>%
-  anova_test(acc ~ condition, effect.size = "pes") %>%
-  get_anova_table() %>%
-  adjust_pvalue(method = "bonferroni")
-sme_acc_UNM07_test_condition #Call the output table
 #calculate the simple main effect of predictiveness
 sme_acc_UNM07_test_pred <- SME_acc_UNM07_test %>%
   group_by(condition) %>%
@@ -453,19 +446,11 @@ print(bay_ANOVA_UNM07_test)
 bay_ANOVA_UNM07_test_gxp <- bay_ANOVA_UNM07_test[4]/bay_ANOVA_UNM07_test[3]
 print(bay_ANOVA_UNM07_test_gxp)
 ```
-
 ```{r, include = FALSE}
 # SME of the condition:predictiveness interaction
 SME_mem_UNM07_test <- UNM07_test %>%
   group_by (pNum, condition, predictiveness) %>%
   summarise(mem = mean(c_mem_score, na.rm = TRUE))
-#calculate the simple main effect of condition
-sme_mem_UNM07_test_condition <- SME_mem_UNM07_test %>%
-  group_by(predictiveness) %>%
-  anova_test(mem ~ condition, effect.size = "pes") %>%
-  get_anova_table() %>%
-  adjust_pvalue(method = "bonferroni")
-sme_mem_UNM07_test_condition #Call the output table
 #calculate the simple main effect of predictiveness
 sme_mem_UNM07_test_pred <- SME_mem_UNM07_test %>%
   group_by(condition) %>%
@@ -473,9 +458,32 @@ sme_mem_UNM07_test_pred <- SME_mem_UNM07_test %>%
   get_anova_table() %>%
   adjust_pvalue(method = "bonferroni")
 sme_mem_UNM07_test_pred #Call the output table
+
+SME_UNM07_test_certain <- filter(UNM07_test, condition == "Certain") %>%
+  group_by(pNum, predictiveness) %>%
+  summarise(mem = mean(c_mem_score, na.rm = TRUE))
+SME_UNM07_test_certain$predictiveness <- factor(SME_UNM07_test_certain$predictiveness)
+SME_UNM07_test_certain$pNum <- factor(SME_UNM07_test_certain$pNum)
+
+SME_UNM07_test_uncertain <- filter(UNM07_test, condition == "Uncertain") %>%
+  group_by(pNum, predictiveness) %>%
+  summarise(mem = mean(c_mem_score, na.rm = TRUE))
+SME_UNM07_test_uncertain$predictiveness <- factor(SME_UNM07_test_uncertain$predictiveness)
+SME_UNM07_test_uncertain$pNum <- factor(SME_UNM07_test_uncertain$pNum)
+
+bay_SME_UNM07_test_certain <- anovaBF(formula = mem ~ predictiveness + pNum,
+        data = data.frame(SME_UNM07_test_certain),
+        whichRandom = "pNum",
+        iterations = bfit)
+print(bay_SME_UNM07_test_certain)
+bay_SME_UNM07_test_uncertain <- anovaBF(formula = mem ~ predictiveness + pNum,
+        data = data.frame(SME_UNM07_test_uncertain),
+        whichRandom = "pNum",
+        iterations = bfit)
+print(bay_SME_UNM07_test_uncertain)
 ```
 
-The mixed model ANOVA mirrored the findings from the accuracy analysis: there was no main effects of *group*: `r apa(ANOVA_UNM07_test, effect = "condition")`, `r report_BF_and_error(bay_ANOVA_UNM07_test[1])`, nor of *predictiveness*,`r apa(ANOVA_UNM07_test, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_UNM07_test[2])`, but there was a  significant *group x predictiveness* interaction, `r apa(ANOVA_UNM07_test, effect = "condition:predictiveness")`, `r report_BF_and_error(bay_ANOVA_UNM07_test_gxp[1])`. Simple main effects showed a significant effect of *predictiveness* in group Certain, *F*(`r sme_mem_UNM07_test_pred[1,3]`, `r sme_mem_UNM07_test_pred[1,4]`) = `r sme_mem_UNM07_test_pred[1,5]`, *p* = `r sme_mem_UNM07_test_pred[1,9]`, *η~p~^2^* = `r sme_mem_UNM07_test_pred[1,8]`, but not in group Uncertain, *F*(`r sme_mem_UNM07_test_pred[2,3]`, `r sme_mem_UNM07_test_pred[2,4]`) = `r sme_mem_UNM07_test_pred[2,5]`, *p* = `r sme_mem_UNM07_test_pred[2,9]`, *η~p~^2^* = `r sme_mem_UNM07_test_pred[2,8]`. Again, memory score analysis suggests there was better memory for predictive cues than for non-predictive cues in group Certain, whereas this difference was not present in group Uncertain. The lack of a main effect of the group suggest that overall memory was similar in both groups.
+The mixed model ANOVA mirrored the findings from the accuracy analysis: there was no main effects of *group*: `r apa(ANOVA_UNM07_test, effect = "condition")`, `r report_BF_and_error(bay_ANOVA_UNM07_test[1])`, nor of *predictiveness*,`r apa(ANOVA_UNM07_test, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_UNM07_test[2])`, but there was a  significant *group x predictiveness* interaction, `r apa(ANOVA_UNM07_test, effect = "condition:predictiveness")`, `r report_BF_and_error(bay_ANOVA_UNM07_test_gxp[1])`. Simple main effects showed a significant effect of *predictiveness* in group Certain, *F*(`r sme_mem_UNM07_test_pred[1,3]`, `r sme_mem_UNM07_test_pred[1,4]`) = `r sme_mem_UNM07_test_pred[1,5]`, *p* = `r sme_mem_UNM07_test_pred[1,9]`, *η~p~^2^* = `r sme_mem_UNM07_test_pred[1,8]`, `r report_BF_and_error(bay_SME_UNM07_test_certain)`, but not in group Uncertain, *F*(`r sme_mem_UNM07_test_pred[2,3]`, `r sme_mem_UNM07_test_pred[2,4]`) = `r sme_mem_UNM07_test_pred[2,5]`, *p* = `r sme_mem_UNM07_test_pred[2,9]`, *η~p~^2^* = `r sme_mem_UNM07_test_pred[2,8]`, `r report_BF_and_error(bay_SME_UNM07_test_uncertain)`. Again, memory score analysis suggests there was better memory for predictive cues than for non-predictive cues in group Certain, whereas this difference was not present in group Uncertain. The lack of a main effect of the group suggest that overall memory was similar in both groups.
 
 ## Discussion
 
@@ -650,7 +658,6 @@ print(bay_ANOVA_UNM08_acc)
 bay_ANOVA_UNM08_acc_int <- bay_ANOVA_UNM08_acc[4]/bay_ANOVA_UNM08_acc[3]
 print(bay_ANOVA_UNM08_acc_int)
 ```
-
 ```{r, include = FALSE}
 # SME of the condition:block interaction
 SME_acc_UNM08_training <- filter(UNM08_training, condition == "Certain Long" | condition == "Uncertain") %>%
@@ -860,17 +867,17 @@ SME_UNM08_test_CS <- filter(UNM08_test, condition == "Certain Short") %>%
 SME_UNM08_test_CS$predictiveness <- factor(SME_UNM08_test_CS$predictiveness)
 SME_UNM08_test_CS$pNum <- factor(SME_UNM08_test_CS$pNum)
 
-bay_SME_UNM08_test_CS <- anovaBF(formula = mem_score ~ predictiveness + pNum,
-        data = data.frame(SME_UNM08_test_CS),
-        whichRandom = "pNum",
-        iterations = bfit)
-print(bay_SME_UNM08_test_CS)
-
 SME_UNM08_test_U <- filter(UNM08_test, condition == "Uncertain") %>%
   group_by(pNum, predictiveness) %>%
   summarise(mem_score = mean(c_mem_score, na.rm = TRUE))
 SME_UNM08_test_U$predictiveness <- factor(SME_UNM08_test_U$predictiveness)
 SME_UNM08_test_U$pNum <- factor(SME_UNM08_test_U$pNum)
+
+bay_SME_UNM08_test_CS <- anovaBF(formula = mem_score ~ predictiveness + pNum,
+        data = data.frame(SME_UNM08_test_CS),
+        whichRandom = "pNum",
+        iterations = bfit)
+print(bay_SME_UNM08_test_CS)
 
 bay_SME_UNM08_test_U <- anovaBF(formula = mem_score ~ predictiveness + pNum,
         data = data.frame(SME_UNM08_test_U),
@@ -879,10 +886,6 @@ bay_SME_UNM08_test_U <- anovaBF(formula = mem_score ~ predictiveness + pNum,
 print(bay_SME_UNM08_test_U)
 ```
 ```{r, include = FALSE}
-# SME of the condition:predictiveness interaction
-SME_UNM08_test <- UNM08_test %>%
-  group_by (pNum, condition, predictiveness) %>%
-  summarise(mem_score = mean(c_mem_score, na.rm = TRUE))
 #calculate the simple main effect of condition
 sme_UNM08_test_condition <- SME_UNM08_test %>%
   group_by(predictiveness) %>%
@@ -897,17 +900,17 @@ SME_UNM08_test_NP <- filter(UNM08_test, predictiveness == "non-predictive") %>%
 SME_UNM08_test_NP$condition <- factor(SME_UNM08_test_NP$condition)
 SME_UNM08_test_NP$pNum <- factor(SME_UNM08_test_NP$pNum)
 
-bay_SME_UNM08_test_NP <- anovaBF(formula = mem_score ~ condition,
-        data = data.frame(SME_UNM08_test_NP),
-        whichRandom = "pNum",
-        iterations = bfit)
-print(bay_SME_UNM08_test_NP)
-
 SME_UNM08_test_P <- filter(UNM08_test, predictiveness == "predictive") %>%
   group_by(pNum, condition) %>%
   summarise(mem_score = mean(c_mem_score, na.rm = TRUE))
 SME_UNM08_test_P$condition <- factor(SME_UNM08_test_P$condition)
 SME_UNM08_test_P$pNum <- factor(SME_UNM08_test_P$pNum)
+
+bay_SME_UNM08_test_NP <- anovaBF(formula = mem_score ~ condition,
+        data = data.frame(SME_UNM08_test_NP),
+        whichRandom = "pNum",
+        iterations = bfit)
+print(bay_SME_UNM08_test_NP)
 
 bay_SME_UNM08_test_P <- anovaBF(formula = mem_score ~ condition,
         data = data.frame(SME_UNM08_test_P),
@@ -976,3 +979,319 @@ The two images used as outcomes in these experiments can be seen in @fig-outcome
 #| fig-pos: h
 knitr::include_graphics("images/outcomes.png")
 ```
+
+# Appendix II
+
+## Experiment 1
+
+```{r, include=FALSE}
+UNM07_test <- UNM07_test %>%
+  mutate(trial_type = case_when((target == 1 & distractor == 2) | (target == 2 & distractor == 1) | (target == 3 & distractor == 4) | (target == 4 & distractor == 3) ~ "P-Con" ,
+                                (target == 5 & distractor == 6) | (target == 6 & distractor == 5) |  (target == 7 & distractor == 8) | (target == 8 & distractor == 7)~ "NP-Con",
+                                (target == 1 & (distractor == 5 | distractor == 6)) | (target == 2 & (distractor == 5 | distractor == 6)) | (target == 3 & (distractor == 7 | distractor == 8)) | (target == 4 & (distractor == 7 | distractor == 8)) ~ "P-Incon",
+                                  (target == 5 & (distractor == 1 | distractor == 2)) | (target == 6 & (distractor == 1 | distractor == 2)) | (target == 7 & (distractor == 3 | distractor == 4)) | (target == 8 & (distractor == 3 | distractor == 4)) ~  "NP-Incon"),
+         #add a congruence variable
+         congruence = case_when ((trial_type == "P-Con") | (trial_type == "NP-Con") ~ "congruent",
+                                 (trial_type == "P-Incon") | (trial_type == "NP-Incon") ~ "incongruent"))
+```
+```{r, include=FALSE}
+#Calculate the mean accuracy and standard error for each block, including the groups
+MA_test <- UNM07_test %>%
+  group_by(condition, trial_type) %>%
+    summarise(mean_acc = mean(acc, na.rm = TRUE), 
+            se_acc = sd(acc, na.rm = TRUE)/sqrt(length(acc)))
+```
+
+@fig-acctestExp1_cong shows the accuracy results from the recognition memory test of Experiment 1. In group Certain, accuracy for non-predictive cues was lower than for the predictive cues in the Certain group. This difference was bigger for the incongruent trials than the congruent ones. However, this differences were not evident in group Uncertain, in which, accuracy was similar in all trial types. The overall accuracy was similar in both groups.
+
+```{r, echo = FALSE, warning=FALSE}
+#| label: fig-acctestExp1_cong
+#| fig-cap: Accuracy on the test phase of Experiment 1.
+#| apa-note: "Mean accuracy (±SEM) during the test phase of Experiment 1, for groups trained with certain and uncertain contingencies."
+#| fig-height: 4
+ggplot(data = MA_test, mapping = aes(x = factor(condition, level=c('Uncertain', 'Certain')), y = mean_acc, fill = trial_type)) +
+  geom_col(position = position_dodge2()) +
+  geom_errorbar(aes(y= mean_acc, ymin = mean_acc - se_acc, ymax = mean_acc + se_acc), width = .2, position = position_dodge(0.9)) +
+  coord_cartesian(ylim = c(0, 1))+
+  scale_x_discrete (name = "Type of test") +
+  scale_y_continuous(name = "Accuracy") +
+  coord_cartesian(ylim = c(0.5, 1)) +
+  scale_fill_discrete(type = c("#7B3294", "#C2A5CF", "#008837", "#A6DBA0"))+
+  theme_apa()
+```
+```{r, include=FALSE}
+#ANOVA accuracy
+acc_UNM07_test <- UNM07_test %>%
+  group_by (pNum, condition, predictiveness, congruence) %>%
+  summarise(acc = mean(acc, na.rm = TRUE))
+acc_UNM07_test$predictiveness <- factor(acc_UNM07_test$predictiveness)
+acc_UNM07_test$condition <- factor(acc_UNM07_test$condition)
+acc_UNM07_test$pNum <- factor(acc_UNM07_test$pNum)
+acc_UNM07_test$congruence<- factor(acc_UNM07_test$congruence)
+ANOVA_acc_UNM07_test <- aov_car(formula = acc ~ condition + Error(pNum*predictiveness*congruence), data = acc_UNM07_test)
+print(ANOVA_acc_UNM07_test)
+
+bay_ANOVA_acc_UNM07_test <- anovaBF(formula = acc ~ condition*predictiveness*congruence + pNum,
+        data = data.frame(acc_UNM07_test),
+        whichRandom = "pNum",
+        iterations = bfit)
+print(bay_ANOVA_acc_UNM07_test)
+
+bay_ANOVA_acc_UNM07_test_gxp <- bay_ANOVA_acc_UNM07_test[4]/bay_ANOVA_acc_UNM07_test[3]
+print(bay_ANOVA_acc_UNM07_test_gxp)
+bay_ANOVA_acc_UNM07_test_pxc <- bay_ANOVA_acc_UNM07_test[13]/bay_ANOVA_acc_UNM07_test[7]
+print(bay_ANOVA_acc_UNM07_test_pxc)
+bay_ANOVA_acc_UNM07_test_sxc <- bay_ANOVA_acc_UNM07_test[10]/bay_ANOVA_acc_UNM07_test[6]
+print(bay_ANOVA_acc_UNM07_test_sxc)
+bay_ANOVA_acc_UNM07_test_gxpxc <- bay_ANOVA_acc_UNM07_test[18]/bay_ANOVA_acc_UNM07_test[17]
+print(bay_ANOVA_acc_UNM07_test_gxpxc)
+```
+
+A mixed model ANOVA including the between-subjects factor *group* (Certain vs Uncertain) and the within-subjects factors *predictiveness* (predictive vs non-predictive) and *congruence* (congruent vs incongruent) was performed. This analysis found only a significant effect of the *group x predictiveness* interaction, `r apa(ANOVA_acc_UNM07_test, effect = "condition:predictiveness")`, `r report_BF_and_error(bay_ANOVA_acc_UNM07_test_gxp[1])`; but no other significant differences, *group*: `r apa(ANOVA_acc_UNM07_test, effect = "condition")`, `r report_BF_and_error(bay_ANOVA_acc_UNM07_test[1])`; *predictiveness*: `r apa(ANOVA_acc_UNM07_test, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_acc_UNM07_test[2])`; *congruence*: `r apa(ANOVA_acc_UNM07_test, effect ="congruence")`, `r report_BF_and_error(bay_ANOVA_acc_UNM07_test[5])`; *predictiveness x congruence*: `r apa(ANOVA_acc_UNM07_test, effect = "predictiveness:congruence")`, `r report_BF_and_error(bay_ANOVA_acc_UNM07_test_pxc[1])`; *group x congruence*: `r apa(ANOVA_acc_UNM07_test, effect = "condition:congruence")`, `r report_BF_and_error(bay_ANOVA_acc_UNM07_test_sxc[1])`; *group x predictiveness x congruence*: `r apa(ANOVA_acc_UNM07_test, effect = "condition:predictiveness:congruence")`, `r report_BF_and_error(bay_ANOVA_acc_UNM07_test_gxpxc[1])`. Simple main effects analysis showed a significant effect of predictiveness in group Certain, *F* (`r sme_acc_UNM07_test_pred[1, 3]`, `r sme_acc_UNM07_test_pred[1, 4]`) = `r sme_acc_UNM07_test_pred[1, 5]`, *p* = `r sme_acc_UNM07_test_pred[1, 9]`, *η~p~^2^* = `r sme_acc_UNM07_test_pred[1, 8]`, `r report_BF_and_error(bay_SME_acc_UNM07_test_certain[1])`,  but not in group Uncertain, *F* (`r sme_acc_UNM07_test_pred[2, 3]`, `r sme_acc_UNM07_test_pred[2, 4]`) = `r sme_acc_UNM07_test_pred[2, 5]`, *p* = `r sme_acc_UNM07_test_pred[2, 9]`, *η~p~^2^* = `r sme_acc_UNM07_test_pred[2, 8]`, `r report_BF_and_error(bay_SME_acc_UNM07_test_uncertain[1])`. These analyses suggest that group Certain were more accurate at remembering predictive than non-predictive cues, whereas group Uncertain did not show this difference.
+
+```{r, include=FALSE}
+#plot test mem_score but take out the errors
+M_mem_UNM07_test <- UNM07_test %>%
+  group_by(trial_type, condition) %>%
+  summarise(mean_mem_score = mean(c_mem_score, na.rm = TRUE), 
+            se_mem_score = sd(mem_score, na.rm = TRUE)/sqrt(length(mem_score)))
+```
+
+@fig-testExp1_cong shows the memory scores for Experiment 1. The memory scores for non-predictive cues was lower than for the predictive cues in the Certain group, with similar scores for congruent and incongruent trials. This difference was not observed in the Uncertain group. Overall, there was no indication of higher memory scores in the Uncertain group relative to the Certain group.
+
+```{r, echo = FALSE, warning=FALSE}
+#| label: fig-testExp1_cong
+#| fig-cap: Memory scores during the Test of Experiment 1.
+#| apa-note: "Mean memory scores (±SEM) during the Test phase of Experiment 1 for predictive and non-predictive trials in the Certain and Uncertain groups."
+#| fig-height: 4
+ggplot(data = M_mem_UNM07_test, mapping = aes(x = factor(condition, levels = c("Uncertain", "Certain")), y = mean_mem_score, fill = trial_type)) +
+  geom_col(position = position_dodge2()) +
+  geom_errorbar(aes(ymin = mean_mem_score - se_mem_score, ymax = mean_mem_score + se_mem_score), width=.2, position=position_dodge(0.9)) +
+  scale_x_discrete (name = "Group") +
+  scale_y_continuous(name = "Memory Score") +
+  scale_fill_discrete(type = c("#7B3294", "#C2A5CF", "#008837", "#A6DBA0"))+
+  theme_apa()
+```
+
+```{r, include=FALSE}
+#ANOVA mem_score
+mem_UNM07_test <- UNM07_test %>%
+  group_by (pNum, condition, predictiveness, congruence) %>%
+  summarise(mem = mean(c_mem_score, na.rm = TRUE))
+mem_UNM07_test$predictiveness <- factor(mem_UNM07_test$predictiveness)
+mem_UNM07_test$condition <- factor(mem_UNM07_test$condition)
+mem_UNM07_test$pNum <- factor(mem_UNM07_test$pNum)
+mem_UNM07_test$congruence <- factor(mem_UNM07_test$congruence)
+ANOVA_mem_UNM07_test <- aov_car(formula = mem ~ condition + Error(pNum*predictiveness*congruence), data = mem_UNM07_test)
+print(ANOVA_mem_UNM07_test)
+
+bay_ANOVA_mem_UNM07_test <- anovaBF(formula = mem ~ condition*predictiveness*congruence + pNum,
+        data = data.frame(mem_UNM07_test),
+        whichRandom = "pNum", 
+        iterations = bfit)
+print(bay_ANOVA_mem_UNM07_test)
+bay_ANOVA_mem_UNM07_test_gxp <- bay_ANOVA_mem_UNM07_test[4]/bay_ANOVA_mem_UNM07_test[3]
+print(bay_ANOVA_mem_UNM07_test_gxp)
+bay_ANOVA_mem_UNM07_test_pxc <- bay_ANOVA_mem_UNM07_test[13]/bay_ANOVA_mem_UNM07_test[7]
+print(bay_ANOVA_mem_UNM07_test_pxc)
+bay_ANOVA_mem_UNM07_test_sxc <- bay_ANOVA_mem_UNM07_test[10]/bay_ANOVA_mem_UNM07_test[6]
+print(bay_ANOVA_mem_UNM07_test_sxc)
+bay_ANOVA_mem_UNM07_test_gxpxc <- bay_ANOVA_mem_UNM07_test[18]/bay_ANOVA_mem_UNM07_test[17]
+print(bay_ANOVA_mem_UNM07_test_gxpxc)
+```
+
+A mixed model ANOVA found a significant effect of *predictiveness*, `r apa(ANOVA_mem_UNM07_test, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_mem_UNM07_test[2])`, and a significant *group x predictiveness* interaction, `r apa(ANOVA_mem_UNM07_test, effect = "condition:predictiveness")`, `r report_BF_and_error(bay_ANOVA_mem_UNM07_test_gxp[1])`. There were no other significant effects or interactions, *group*: `r apa(ANOVA_mem_UNM07_test, effect = "condition")`, `r report_BF_and_error(bay_ANOVA_mem_UNM07_test[1])`; *congruence*: `r apa(ANOVA_mem_UNM07_test, effect ="congruence")`, `r report_BF_and_error(bay_ANOVA_mem_UNM07_test[5])`; *predictiveness x congruence*: `r apa(ANOVA_mem_UNM07_test, effect = "predictiveness:congruence")`, `r report_BF_and_error(bay_ANOVA_mem_UNM07_test_pxc[1])`; *group x congruence*: `r apa(ANOVA_mem_UNM07_test, effect = "condition:congruence")`, `r report_BF_and_error(bay_ANOVA_mem_UNM07_test_sxc[1])`; *group x predictiveness x congruence*: `r apa(ANOVA_mem_UNM07_test, effect = "condition:predictiveness:congruence")`, `r report_BF_and_error(bay_ANOVA_mem_UNM07_test_gxpxc[1])`. Simple main effects showed a significant effect of *predictiveness* in group Certain, *F*(`r sme_mem_UNM07_test_pred[1,3]`, `r sme_mem_UNM07_test_pred[1,4]`) = `r sme_mem_UNM07_test_pred[1,5]`, *p* = `r sme_mem_UNM07_test_pred[1,9]`, *η~p~^2^* = `r sme_mem_UNM07_test_pred[1,8]`, `r report_BF_and_error(bay_SME_UNM07_test_uncertain[1])`, but not in group Uncertain, *F*(`r sme_mem_UNM07_test_pred[2,3]`, `r sme_mem_UNM07_test_pred[2,4]`) = `r sme_mem_UNM07_test_pred[2,5]`, *p* = `r sme_mem_UNM07_test_pred[2,9]`, *η~p~^2^* = `r sme_mem_UNM07_test_pred[2,8]`, `r report_BF_and_error(bay_SME_UNM07_test_certain[1])`. Again, memory score analysis suggests there was better memory for predictive cues than for non-predictive cues in group Certain, whereas this difference was not present in group Uncertain. The lack of a main effect of the group suggest that overall memory was similar in both groups.
+
+## Experiment 2
+
+```{r, include=FALSE}
+UNM08_test <- UNM08_test %>%
+  mutate(trial_type = case_when((target == 1 & distractor == 2) | (target == 2 & distractor == 1) | (target == 3 & distractor == 4) | (target == 4 & distractor == 3) ~ "P-Con" ,
+                                (target == 5 & distractor == 6) | (target == 6 & distractor == 5) |  (target == 7 & distractor == 8) | (target == 8 & distractor == 7)~ "NP-Con",
+                                (target == 1 & (distractor == 5 | distractor == 6)) | (target == 2 & (distractor == 5 | distractor == 6)) | (target == 3 & (distractor == 7 | distractor == 8)) | (target == 4 & (distractor == 7 | distractor == 8)) ~ "P-Incon",
+                                  (target == 5 & (distractor == 1 | distractor == 2)) | (target == 6 & (distractor == 1 | distractor == 2)) | (target == 7 & (distractor == 3 | distractor == 4)) | (target == 8 & (distractor == 3 | distractor == 4)) ~  "NP-Incon"),
+         #add a congruence variable
+         congruence = case_when ((trial_type == "P-Con") | (trial_type == "NP-Con") ~ "congruent",
+                                 (trial_type == "P-Incon") | (trial_type == "NP-Incon") ~ "incongruent"))
+```
+```{r, include=FALSE}
+#Calculate the mean accuracy and standard error for trial type, including the groups
+MA_UNM08_test <- UNM08_test %>%
+  group_by(trial_type, condition) %>%
+    summarise(mean_acc = mean(acc, na.rm = TRUE), 
+            se_acc = sd(acc, na.rm = TRUE)/sqrt(length(acc)))
+```
+
+@fig-acctestExp2_cong shows the accuracy results from the recognition memory test of Experiment 2. In group Uncertain, accuracy was similar in all trial types. In both Certain groups, there was lower accuracy in non-predictive trials than in predictive trials, being this difference larger for the incongruent trials than for the congruent trials. The overall accuracy was higher in group Uncertain compared with the other two Certain groups.
+
+```{r, echo = FALSE, warning=FALSE}
+#| label: fig-acctestExp2_cong
+#| fig-cap: Accuracy on the test phase of Experiment 2.
+#| apa-note: "Mean accuracy (±SEM) during the test phase of Experiment 2, for groups Uncertain, Certain Long and Certain Short."
+#| fig-height: 4
+ggplot(data = MA_UNM08_test, mapping = aes(x = factor(condition, level=c('Uncertain', 'Certain Short','Certain Long')), y = mean_acc, fill = trial_type)) +
+  geom_col(position = position_dodge2()) +
+  geom_errorbar(aes(y= mean_acc, ymin = mean_acc - se_acc, ymax = mean_acc + se_acc), width = .2, position = position_dodge(0.9)) +
+  coord_cartesian(ylim = c(0, 1))+
+  scale_x_discrete (name = "Type of test") +
+  scale_y_continuous(name = "Accuracy") +
+  coord_cartesian(ylim = c(0.5, 1)) +
+  scale_fill_discrete(type = c("#7B3294", "#C2A5CF", "#008837", "#A6DBA0"))+
+  theme_apa()
+```
+
+```{r, include=FALSE}
+#ANOVA accuracy
+acc_UNM08_test <- UNM08_test %>%
+  group_by (pNum, condition, predictiveness, congruence) %>%
+  summarise(acc = mean(acc, na.rm = TRUE))
+acc_UNM08_test$predictiveness <- factor(acc_UNM08_test$predictiveness)
+acc_UNM08_test$condition <- factor(acc_UNM08_test$condition)
+acc_UNM08_test$pNum <- factor(acc_UNM08_test$pNum)
+acc_UNM08_test$congruence <- factor(acc_UNM08_test$congruence)
+ANOVA_acc_UNM08_test <- aov_car(formula = acc ~ condition + Error(pNum*predictiveness*congruence), data = acc_UNM08_test)
+print(ANOVA_acc_UNM08_test)
+
+bay_ANOVA_acc_UNM08_test <- anovaBF(formula = acc ~ condition*predictiveness*congruence + pNum,
+        data = data.frame(acc_UNM08_test),
+        whichRandom = "pNum")
+print(bay_ANOVA_acc_UNM08_test)
+
+bay_ANOVA_acc_UNM08_test_gxp <- bay_ANOVA_acc_UNM08_test[4]/bay_ANOVA_acc_UNM08_test[3]
+print(bay_ANOVA_acc_UNM08_test_gxp)
+bay_ANOVA_acc_UNM08_test_pxc <- bay_ANOVA_acc_UNM08_test[13]/bay_ANOVA_acc_UNM08_test[7]
+print(bay_ANOVA_acc_UNM08_test_pxc)
+bay_ANOVA_acc_UNM08_test_sxc <- bay_ANOVA_acc_UNM08_test[10]/bay_ANOVA_acc_UNM08_test[6]
+print(bay_ANOVA_acc_UNM08_test_sxc)
+bay_ANOVA_acc_UNM08_test_gxpxc <- bay_ANOVA_acc_UNM08_test[18]/bay_ANOVA_acc_UNM08_test[17]
+print(bay_ANOVA_acc_UNM08_test_gxpxc)
+```
+```{r, include = FALSE}
+# SME of predictiveness:congruence interaction
+SME_acc_UM08_pxc <- UNM08_test %>%
+  group_by (pNum, congruence, predictiveness) %>%
+  summarise(acc = mean(acc, na.rm = TRUE))
+#calculate the simple main effect of predictiveness
+SME_acc_UM08_pxc_pred <- SME_acc_UM08_pxc %>%
+  group_by(congruence) %>%
+  anova_test(acc ~ predictiveness + Error(pNum/predictiveness), effect.size = "pes") %>%
+  get_anova_table() %>%
+  adjust_pvalue(method = "bonferroni")
+SME_acc_UM08_pxc_pred #Call the output table
+
+SME_acc_UNM08_test_cong <- filter(UNM08_test, congruence == "congruent") %>%
+  group_by(pNum, predictiveness) %>%
+  summarise(acc = mean(acc, na.rm = TRUE))
+SME_acc_UNM08_test_cong$predictiveness <- factor(SME_acc_UNM08_test_cong$predictiveness)
+SME_acc_UNM08_test_cong$pNum <- factor(SME_acc_UNM08_test_cong$pNum)
+
+SME_acc_UNM08_test_incong <- filter(UNM08_test, congruence == "incongruent") %>%
+  group_by(pNum, predictiveness) %>%
+  summarise(acc = mean(acc, na.rm = TRUE))
+SME_acc_UNM08_test_incong$predictiveness <- factor(SME_acc_UNM08_test_incong$predictiveness)
+SME_acc_UNM08_test_incong$pNum <- factor(SME_acc_UNM08_test_incong$pNum)
+
+bay_SME_acc_UNM08_test_cong <- anovaBF(formula = acc ~ predictiveness,
+        data = data.frame(SME_acc_UNM08_test_cong),
+        whichRandom = "pNum",
+        iterations = bfit)
+print(bay_SME_acc_UNM08_test_cong)
+
+bay_SME_acc_UNM08_test_incong <- anovaBF(formula = acc ~ predictiveness,
+        data = data.frame(SME_acc_UNM08_test_incong),
+        whichRandom = "pNum",
+        iterations = bfit)
+print(bay_SME_acc_UNM08_test_incong)
+```
+
+A mixed model ANOVA showed a significant main effect of the *group*, `r apa(ANOVA_acc_UNM08_test, effect = "condition")`, `r report_BF_and_error(bay_ANOVA_acc_UNM08_test[1])`, and of the *predictiveness*: `r apa(ANOVA_acc_UNM08_test, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_acc_UNM08_test[2])`, as well as a significant *predictiveness x congruence* interaction, `r apa(ANOVA_acc_UNM08_test, effect = "predictiveness:congruence")`, `r report_BF_and_error(bay_ANOVA_acc_UNM08_test_pxc[1])`. All other effects and interactions were non significant, *congruence*: `r apa(ANOVA_acc_UNM08_test, effect ="congruence")`, `r report_BF_and_error(bay_ANOVA_acc_UNM08_test[5])`; *group x predictiveness* interaction, `r apa(ANOVA_acc_UNM08_test, effect = "condition:predictiveness")`, `r report_BF_and_error(bay_ANOVA_acc_UNM08_test_gxp[1])`; *group x congruence*: `r apa(ANOVA_acc_UNM08_test, effect = "condition:congruence")`, `r report_BF_and_error(bay_ANOVA_acc_UNM08_test_sxc[1])`; *group x predictiveness x congruence*: `r apa(ANOVA_acc_UNM08_test, effect = "condition:predictiveness:congruence")`, `r report_BF_and_error(bay_ANOVA_acc_UNM08_test_gxpxc[1])`. Simple main effects showed an effect of *predictiveness* in the incongruent trials, *F* (`r SME_acc_UM08_pxc_pred[2,3]`, `r SME_acc_UM08_pxc_pred[2,4]`) = `r SME_acc_UM08_pxc_pred[2,5]`, *p* = `r SME_acc_UM08_pxc_pred[2,9]`, *η~p~^2^* = `r SME_acc_UM08_pxc_pred[2,8]`, `r report_BF_and_error(bay_SME_acc_UNM08_test_incong[1])`, but not on the congruent trials, *F* (`r SME_acc_UM08_pxc_pred[1,3]`, `r SME_acc_UM08_pxc_pred[1,4]`) = `r SME_acc_UM08_pxc_pred[1,5]`, *p* = `r SME_acc_UM08_pxc_pred[1,9]`, *η~p~^2^* = `r SME_acc_UM08_pxc_pred[1,8]`, `r report_BF_and_error(bay_SME_acc_UNM08_test_cong[1])`.
+
+```{r, include=FALSE}
+#plot test mem_score
+M_mem_UNM08_test <- UNM08_test %>%
+  group_by(trial_type, condition) %>%
+  summarise(mean_mem_score = mean(c_mem_score, na.rm = TRUE), 
+            se_mem_score = sd(mem_score, na.rm = TRUE)/sqrt(length(mem_score)))
+```
+
+@fig-testExp2_cong shows the memory scores from the recognition memory test of Experiment 2. In group Uncertain, accuracy was similar in all trial types. In both Certain groups, there was lower accuracy in non-predictive trials than in predictive trials, being this difference similar for the incongruent trials than for the congruent trials. The overall accuracy was higher in group Uncertain compared with the other two Certain groups.
+
+```{r, echo = FALSE, warning=FALSE}
+#| label: fig-testExp2_cong
+#| fig-cap: Memory score on the test phase of Experiment 2.
+#| apa-note: "Mean memory scores (±SEM) during the test phase of Experiment 2, for groups Uncertain, Certain Long and Certain Short."
+#| fig-height: 4
+ggplot(data = M_mem_UNM08_test, mapping = aes(x = factor(condition, levels = c("Uncertain", "Certain Long", "Certain Short")), y = mean_mem_score, fill = trial_type)) +
+  geom_col(position = position_dodge2()) +
+  geom_errorbar(aes(ymin = mean_mem_score - se_mem_score, ymax = mean_mem_score + se_mem_score), width=.2, position=position_dodge(0.9)) +
+  scale_x_discrete (name = "Group") +
+  scale_y_continuous(name = "Memory Score") +
+  scale_fill_discrete(type = c("#7B3294", "#C2A5CF", "#008837", "#A6DBA0"))+
+  theme_apa()
+```
+
+```{r, include=FALSE}
+#ANOVA mem_score
+mem_UNM08_test <- UNM08_test %>%
+  group_by (pNum, condition, predictiveness, congruence) %>%
+  summarise(mem = mean(c_mem_score, na.rm = TRUE))
+mem_UNM08_test$predictiveness <- factor(mem_UNM08_test$predictiveness)
+mem_UNM08_test$condition <- factor(mem_UNM08_test$condition)
+mem_UNM08_test$pNum <- factor(mem_UNM08_test$pNum)
+mem_UNM08_test$congruence <- factor(mem_UNM08_test$congruence)
+ANOVA_mem_UNM08_test <- aov_car(formula = mem ~ condition + Error(pNum*predictiveness*congruence), data = mem_UNM08_test)
+print(ANOVA_mem_UNM08_test)
+bay_ANOVA_mem_UNM08_test <- anovaBF(formula = mem ~ condition*predictiveness*congruence + pNum,
+        data = data.frame(mem_UNM08_test),
+        whichRandom = "pNum")
+print(bay_ANOVA_mem_UNM08_test)
+
+bay_ANOVA_mem_UNM08_test_gxp <- bay_ANOVA_mem_UNM08_test[4]/bay_ANOVA_mem_UNM08_test[3]
+print(bay_ANOVA_mem_UNM08_test_gxp)
+bay_ANOVA_mem_UNM08_test_pxc <- bay_ANOVA_mem_UNM08_test[13]/bay_ANOVA_mem_UNM08_test[7]
+print(bay_ANOVA_mem_UNM08_test_pxc)
+bay_ANOVA_mem_UNM08_test_sxc <- bay_ANOVA_mem_UNM08_test[10]/bay_ANOVA_mem_UNM08_test[6]
+print(bay_ANOVA_mem_UNM08_test_sxc)
+bay_ANOVA_mem_UNM08_test_gxpxc <- bay_ANOVA_mem_UNM08_test[18]/bay_ANOVA_mem_UNM08_test[17]
+print(bay_ANOVA_mem_UNM08_test_gxpxc)
+```
+
+```{r, include = FALSE}
+# SME of the predictiveness:congruence interaction
+SME_mem_UNM08_test <- UNM08_test %>%
+  group_by (pNum, congruence, predictiveness) %>%
+  summarise(mem = mean(c_mem_score, na.rm = TRUE))
+#calculate the simple main effect of predictiveness
+sme_mem_UNM08_test_predxc <- SME_mem_UNM08_test %>%
+  group_by(congruence) %>%
+  anova_test(mem ~ predictiveness + Error(pNum/predictiveness), effect.size = "pes") %>%
+  get_anova_table() %>%
+  adjust_pvalue(method = "bonferroni")
+sme_mem_UNM08_test_predxc #Call the output table
+
+SME_UNM08_test_cong <- filter(UNM08_test, congruence == "congruent") %>%
+  group_by(pNum, predictiveness) %>%
+  summarise(mem_score = mean(c_mem_score, na.rm = TRUE))
+SME_UNM08_test_cong$predictiveness <- factor(SME_UNM08_test_cong$predictiveness)
+SME_UNM08_test_cong$pNum <- factor(SME_UNM08_test_cong$pNum)
+
+SME_UNM08_test_incong <- filter(UNM08_test, congruence == "incongruent") %>%
+  group_by(pNum, predictiveness) %>%
+  summarise(mem_score = mean(c_mem_score, na.rm = TRUE))
+SME_UNM08_test_incong$predictiveness <- factor(SME_UNM08_test_incong$predictiveness)
+SME_UNM08_test_incong$pNum <- factor(SME_UNM08_test_incong$pNum)
+
+bay_SME_UNM08_test_cong <- anovaBF(formula = mem_score ~ predictiveness,
+        data = data.frame(SME_UNM08_test_cong),
+        whichRandom = "pNum",
+        iterations = bfit)
+print(bay_SME_UNM08_test_cong)
+
+bay_SME_UNM08_test_incong <- anovaBF(formula = mem_score ~ predictiveness,
+        data = data.frame(SME_UNM08_test_incong),
+        whichRandom = "pNum",
+        iterations = bfit)
+print(bay_SME_UNM08_test_incong)
+```
+
+A mixed model ANOVA found a significant main effect of the *group*, `r apa(ANOVA_mem_UNM08_test, effect = "condition")`, `r report_BF_and_error(bay_ANOVA_mem_UNM08_test[1])`, and of the *predictiveness*, `r apa(ANOVA_mem_UNM08_test, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_mem_UNM08_test[2])`, as well as a significant *group x predictiveness* interaction, `r apa(ANOVA_mem_UNM08_test, effect = "condition:predictiveness")`, `r report_BF_and_error(bay_ANOVA_mem_UNM08_test_gxp[1])` and a significant *predictiveness x congruence* interaction, `r apa(ANOVA_mem_UNM08_test, effect = "predictiveness:congruence")`, `r report_BF_and_error(bay_ANOVA_mem_UNM08_test_pxc[1])`. No other main effects or interactions were significant, *congruence*: `r apa(ANOVA_mem_UNM08_test, effect ="congruence")`, `r report_BF_and_error(bay_ANOVA_mem_UNM08_test[5])`; *group x congruence*: `r apa(ANOVA_mem_UNM08_test, effect = "condition:congruence")`, `r report_BF_and_error(bay_ANOVA_mem_UNM08_test_sxc[1])`; *group x predictiveness x congruence*: `r apa(ANOVA_mem_UNM08_test, effect = "condition:predictiveness:congruence")`, `r report_BF_and_error(bay_ANOVA_mem_UNM08_test_gxpxc[1])`. Ssimple main effects showed a significant effect of *predictiveness* for group Certain Long, *F* (`r sme_UNM08_test_pred[1, 3]`, `r sme_UNM08_test_pred[1, 4]`) = `r sme_UNM08_test_pred[1, 5]`, *p* = `r sme_UNM08_test_pred[1, 9]`, *η~p~^2^* = `r sme_UNM08_test_pred[1, 8]`, `r report_BF_and_error(bay_SME_UNM08_test_CL[1])`, and for group Certain Short, *F* (`r sme_UNM08_test_pred[2, 3]`, `r sme_UNM08_test_pred[2, 4]`) = `r sme_UNM08_test_pred[2, 5]`, *p* = `r sme_UNM08_test_pred[2, 9]`, *η~p~^2^* = `r sme_UNM08_test_pred[2, 8]`, `r report_BF_and_error(bay_SME_UNM08_test_CS[1])`, but not for group Uncertain, *F* (`r sme_UNM08_test_pred[3, 3]`, `r sme_UNM08_test_pred[3, 4]`) = `r sme_UNM08_test_pred[3, 5]`, *p* = `r sme_UNM08_test_pred[3, 9]`, *η~p~^2^* = `r sme_UNM08_test_pred[3, 8]`, `r report_BF_and_error(bay_SME_UNM08_test_U[1])`. Also, there was a significant effect of *predictiveness* on both incongruent trials, *F*(`r sme_mem_UNM08_test_predxc[2,3]`, `r sme_mem_UNM08_test_predxc[2,4]`) = `r sme_mem_UNM08_test_predxc[2,5]`, *p* = `r sme_mem_UNM08_test_predxc[2,9]`, *η~p~^2^* = `r sme_mem_UNM08_test_predxc[2,8]`, `r report_BF_and_error(bay_SME_UNM08_test_incong[1])`, and congruent trials, *F*(`r sme_mem_UNM08_test_predxc[1,3]`, `r sme_mem_UNM08_test_predxc[1,4]`) = `r sme_mem_UNM08_test_predxc[1,5]`, *p* = `r sme_mem_UNM08_test_predxc[1,9]`, *η~p~^2^* = `r sme_mem_UNM08_test_predxc[1,8]`, `r report_BF_and_error(bay_SME_UNM08_test_cong[1])`.
