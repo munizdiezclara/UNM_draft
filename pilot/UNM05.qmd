@@ -1,0 +1,484 @@
+---
+title: "UNM05"
+format: docx
+editor: visual
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(afex)
+library(BayesFactor)
+library(apa)
+library(emmeans)
+library(papaja)
+library(rstatix)
+library("writexl")
+options(scipen=999)
+
+# function to force scientific formatting of numbers (used for large BFs)
+changeSciNot <- function(n) {
+  output <- format(n, scientific = TRUE, digits = 2) #Transforms the number into scientific notation even if small
+  output <- sub("e", "x10^", output) #Replace e with 10^
+  output <- sub("\\+0?", "", output) #Remove + symbol and leading zeros on exponent, if > 1
+  output <- sub("-0?", "-", output) #Leaves - symbol but removes leading zeros on exponent, if < 1
+  output <- paste0(output,"^")
+  # output = strsplit(output, "^", fixed = TRUE)
+  # output = paste0(output[[1]][1],"^", output[[1]][2], "^")
+  output
+}
+# function to extract and report BFs with error %s
+report_BF_and_error <- function(BF_in, sci_not = FALSE, hyp = "alt"){
+  
+  if (hyp == "alt") {
+    BF_notation = "BF~10~ = "
+  } else if (hyp == "null") {
+    BF_notation = "BF~01~ = "
+  }
+  
+  if (sci_not == TRUE) {
+    BF_value = changeSciNot(extractBF(BF_in)$bf) # change to sci notation
+  } else {
+    BF_value = round(extractBF(BF_in)$bf,2) # otherwise round
+  }
+  
+  paste0(BF_notation, 
+         BF_value, 
+         " &plusmn; ", 
+         round(100*extractBF(BF_in)$error,2), 
+         "%")
+}
+```
+
+The aim of this experiment was to develop a recognition memory test that was sensitive to detecting differences in the predictive validity of cues. All participants undertook the same training with the first phase of a “learned predictiveness” design (see Table 1). In this design, cues A and B are perfectly predictive of the outcomes that follow them, while cues X and Y are non-predictive. This learning phase was followed by two recognition memory tests. In both tests, two images were presented side-by-side, with one image being a cue presented in the training phase and the other image being a variation of one of the cues (hereafter, the “foil”). In Test 1, the foil had the same shape as the target but there was variation in its colours. In Test 2, the foil was a variation of one of the other cues. There were two different types of test trial in Test 2: congruent trials, in which the target and the foil were of the same predictiveness, and incongruent trials, in which the target and foil differed in their predictiveness. There were three between-subject groups, which differed in terms of the similarity that the foils had to the cues: High, Medium and Low similarity (see @fig-foil_example). The design of this can be seen in @tbl-expdesing. Note that during the training stage cues A, B, X and Y were all presented equally frequently and equivalently recently to the recognition memory tests. Other things being equal, then, their memory traces should be equivalent. Thus, if recognition scores differ between these stimuli, it would indicate a difference in the level of processing that the cues underwent during training.
+
+::: {#tbl-expdesign apa-note="Uppercase letters A, B, X, and Y represent the cues presented during training. O1 and O2 represent the outcomes presented in training. Lowercase letters *a*, *b*, *x*, and *y* represent the foils that are similar to their respective (uppercase letter) cues presented in the training phase." apa-twocolumn="true"}
++-------------+-------------+--------------------------+----------------------------+
+| Training    | Test 1      | Test2 - congruent trials | Test2 - incongruent trials |
++:===========:+:===========:+:========================:+:==========================:+
+| AX-O1       | A vs *a*    | A vs *b*                 | A vs *x* or *y*            |
++-------------+-------------+--------------------------+----------------------------+
+| AY-O1       | B vs *b*    | B vs *a*                 | B vs *x* or *y*            |
++-------------+-------------+--------------------------+----------------------------+
+| BX-O2       | X vs *x*    | X vs *y*                 | X vs *a* or *b*            |
++-------------+-------------+--------------------------+----------------------------+
+| BY-O2       | Y vs *y*    | Y vs *x*                 | Y vs *a* or *b*            |
++-------------+-------------+--------------------------+----------------------------+
+
+Design of the experiment
+:::
+
+## Methods
+
+### Participants
+
+```{r, include=FALSE}
+#load the data
+load("UNM05_proc_data.RData")
+
+#add a group variable
+training <- training %>%
+  mutate(group = case_when(session == 1 ~ "High",
+                                session == 2 ~ "Medium",
+                                session == 3 ~ "Low"))
+test1 <- test1 %>%
+  mutate(group = case_when(session == 1 ~ "High",
+                                session == 2 ~ "Medium",
+                                session == 3 ~ "Low"))
+test2 <- test2 %>%
+  mutate(group = case_when(session == 1 ~ "High",
+                                session == 2 ~ "Medium",
+                                session == 3 ~ "Low"),
+         distractor = distractor_test2,
+         trial_type = case_when((target == 1 & distractor == 2) | (target == 2 & distractor == 1) | (target == 3 & distractor == 4) | (target == 4 & distractor == 3) ~ "P-Con" ,
+                                (target == 5 & distractor == 6) | (target == 6 & distractor == 5) |  (target == 7 & distractor == 8) | (target == 8 & distractor == 7)~ "NP-Con",
+                                (target == 1 & (distractor == 5 | distractor == 6)) | (target == 2 & (distractor == 5 | distractor == 6)) | (target == 3 & (distractor == 7 | distractor == 8)) | (target == 4 & (distractor == 7 | distractor == 8)) ~ "P-Incon",
+                                  (target == 5 & (distractor == 1 | distractor == 2)) | (target == 6 & (distractor == 1 | distractor == 2)) | (target == 7 & (distractor == 3 | distractor == 4)) | (target == 8 & (distractor == 3 | distractor == 4)) ~  "NP-Incon"),
+         #add a congruence variable
+         congruence = case_when ((trial_type == "P-Con") | (trial_type == "NP-Con") ~ "congruent",
+                                 (trial_type == "P-Incon") | (trial_type == "NP-Incon") ~ "incongruent"))
+
+#Clean participants that did not pass check 2 and/or 3
+training <- filter(training, !pNum %in% not_passed_pNum$pNum)
+test1 <- filter(test1, !pNum %in% not_passed_pNum$pNum)
+test2 <- filter(test2, !pNum %in% not_passed_pNum$pNum)
+```
+
+`r nrow(demographics)` participants were recruited through Prolific. The sample consisted of `r length(which(demographics$gender == "female"))` women, `r length(which(demographics$gender == "male"))` men and one non-binary person, with `r n_distinct(demographics$Nationality)` different nationalities. The mean age was `r format(mean(demographics$age, na.rm = TRUE), digits = 3)` for the `r nrow(demographics) - sum(is.na(demographics$age))` participants that reported their age, being (range `r min(demographics$age, na.rm = TRUE)` - `r max(demographics$age, na.rm = TRUE)`. Pre-screening of participants in Prolific ensured that they had normal or corrected to normal vision, fluency in English language, and had not participated in previous studies from our lab. Participants were rewarded with £2.70 for their participation in the study. Participants were randomly allocated to each of the three groups, according to the foil-to-cue similarity during the memory tests (High, Medium and Low). Six participants were excluded, as they failed at least one of the comprehension checks before the memory tests, resulting on `r length(which(demographics$session == 1)) - length(which(not_passed_pNum$session == 1))` in group High, `r length(which(demographics$session == 2)) - length(which(not_passed_pNum$session == 2))` in group Medium, and `r length(which(demographics$session == 3)) - length(which(not_passed_pNum$session == 3))` in group Low.
+
+### Apparatus and stimuli
+
+Participants were presented with a task built in PsychoPy [v. 2022.2.4, @peircePsychoPy2ExperimentsBehavior2019] and hosted in Pavlovia. The task was designed so it could only be run on a computer, but not on mobile devices. The screen background colour was grey (RGB: 128, 128, 128) and all stimuli and instructions were presented against this background. The four cues presented to each participant (A, B, X and Y) were randomly selected from a set of eight images, representing imaginary chemical compounds made of three red circles and three blue circles connected with black lines. Each cue was 945 x 945 pixels, automatically re-scaled to 0.4 x 0.4 of the window height. The outcomes (O1 and O2) were two images displaying a mutant creature, black with yellow details. Each was 332 x 664 pixels, automatically re-scaled to 0.16 x 0.2 of the window height.
+
+Examples of the cue images are shown in @fig-foil_example. The foils used in the tests were colour-modifications of the original cues: for the High similarity group, the colours of one red and one blue circle were switched (four remained unchanged); for the Medium similarity group, the colours of two red and two blue circles were switched (two remained unchanged); and for the Low similarity group, the colours of all circles were switched. All of the images used in the experiment are presented in Appendix I.
+
+```{r fig-foil_example}
+#| fig-cap: Example of the modifications in the original cue image to create the foils.
+#| apa-twocolumn: true
+#| apa-note: "The top row shows an example cue used in the training phase, with three potential foils (depending on condition) shown in the bottom row. High - two of the circles have swapped colours; Medium - four circles have swapped colours; Low - all six circles have swapped colours."
+#| out-width: 100%
+#| fig-pos: h
+knitr::include_graphics("foil_example.png")
+```
+
+### Design
+
+The experiment used a mixed design, with cue-predictiveness (P and NP) manipulated within-subjects and the similarity between targets and foils manipulated between-subjects. The training phase consisted of four blocks, with each block consisting of 20 trials. As shown in @tbl-expdesign, there were four trial types (compound cues), with cues A and B predictive of outcome 1 and 2, respectively. Cues X and Y were paired equally often with outcomes 1 and 2 and were therefore non-predictive. Each compound cue was presented 5 times per block. The position of the cues and the outcomes (right-left), as well as the order of presentation of the trials, was fully randomized within each block.
+
+Test 1 consisted of two presentations of each cue (8 trials in total). On each trial the target cue was presented with its corresponding foil. The left-right display of the target and the foil was counterbalanced, in such a way that each target appeared once on the left and once on the right.
+
+Test 2 consisted of six presentations of each of the four cues (24 trials in total). Each cue was presented twice with each of the three foils shown in @tbl-expdesign. For example, cue A was presented with the foil corresponding to cue B, the foil corresponding to cue X, and the foil corresponding to cue Y.
+
+### Procedure
+
+Participants were presented with the study information and responded to a series of questions to give informed consent. If participants gave consent, they proceeded to the training phase instructions. These described the initial learning task, in which they would see two images of fictitious chemicals that would be mixed to produce a mutant creature. Participants were told that their task was to predict which mutant will result from each combination of chemicals. They were also instructed to use the feedback provided after their decision to make their future choices more accurate.
+
+After reading the instructions, participants were presented with a comprehension check, in which the instructions were summarised, and they were asked to select the answer that best described what they had to do in the task. The experiment ended if participants failed this comprehension check twice. If participants passed the comprehension check, they proceeded to the training phase.
+
+All the trials in the training phase started with a 0.5 second blank screen. After that, two cues were presented in the top part and the two outcomes in the bottom part. The coordinates (x/y PsychoPy height units) of the centre of the four stimuli images were: left cue, -0.3 x 0.2; right cue, 0.3 x 0.2 left outcome, -0.125 x -0.2; right outcome, 0.125 x -0.2. All stimuli were rescaled according to the height of the monitor. The participants had to select one of the outcomes by clicking on them, which was indicated by a yellow frame surrounding the selected outcome. Feedback was provided after 0.5 seconds: the correct outcome was surrounded by a green frame. If the correct outcome was selected by participants, the message “CORRECT!” was displayed in the centre of the screen in green (RGB: 0, 255, 0), otherwise the message “INCORRECT!” appeared in red (RGB: 255, 0, 0). After two seconds, the next trial started. If participants failed to select an outcome within 10 seconds of the trial starting, all images disappeared from the screen and the message “TIMEOUT - TOO SLOW” was presented in the centre of the screen in red, and the next trial started after one second. An example of a training trial can be seen in @fig-trainexample.
+
+```{r @fig-trainexample}
+#| label: fig-trainexample
+#| fig-cap: An example of a Training Trial.
+#| apa-twocolumn: true
+#| apa-note: "The timings represent the duration of each display. "
+#| out-width: 100%
+#| fig-pos: h
+knitr::include_graphics("trainexample.png")
+```
+
+Once participants had completed the training phase, the instructions for Test 1 were displayed, telling participants that they were about to see two similar chemicals on each trial, and only one of them had appeared in the previous task. They had to select that chemical and then rate their confidence on a scale from 1 to 10 (see below). No feedback on response accuracy was provided. After the instructions, a comprehension check was included, presented only once and participants continued to the test, irrespective of the response given.
+
+All test trials started with a 0.5 second blank screen. After that, the images of a target (a cue presented in the training phase), and a foil were presented in the top half of the screen. These images had the same size and position as in the training phase. Participants had to click on the image they thought they had seen in the previous phase, after which a rating scale was displayed for them to give a confidence rating. Above this rating scale, the question *How confident are you of your response?* was displayed. The rating scale had 10 points, with the labels *I am guessing* on the left end (point 1), and *I am certain* on the right end (point 10), and a red dot in the middle. Participants had to click on the rating scale to move the red dot to give their confidence rating. After this, a button with the word *CONTINUE* appeared. All responses in the test phase had no time limit and participants could advance to the next test trial at their own pace.
+
+Once participants had completed Test 1, the instructions for Test 2 were displayed. They were very similar to Test 1 instructions, except it stated that the two chemicals would not be similar, but that it was still the case that only one of them had been presented in the first task. Another comprehension check was included before the start of Test 2. The test trials procedure is shown in @fig-testexample.
+
+```{r @fig-testexample, echo=FALSE}
+#| label: fig-testexample
+#| fig-cap: An example of a Test Trial.
+#| apa-twocolumn: true
+#| apa-note: "The timings represent the duration of each display. "
+#| out-width: 100%
+#| fig-pos: h
+knitr::include_graphics("testexample.png")
+```
+
+## Results
+
+In all statistical tests, we adopt a significance level of .05. Greenhouse–Geisser corrected degrees of freedom were used where Mauchly’s test indicated that the assumption of sphericity was violated.
+
+Participants that failed either the comprehension check before Test 1 or Test 2 were excluded from these analyses. Six participants were excluded based on this criterion (three from group High, and three from group Low).
+
+```{r, include = FALSE}
+#Calculate the mean accuracy and standard error for each block, including the groups
+MA_training <- training %>%
+  group_by(block, group) %>%
+  summarise(mean_accuracy = mean(correct_answer, na.rm = TRUE), 
+            se_accuracy = sd(correct_answer, na.rm = TRUE)/sqrt(length(correct_answer)))
+```
+
+The dependent variable during training was the proportion of responses on a block in which participants selected the correct outcome. In @fig-training the mean accuracy for each similarity group is displayed across the four blocks of training. All groups showed a similar increase in responding across blocks, reaching an approximate accuracy of 0.85 in the final block of the experiment.
+
+```{r, echo = FALSE, warning=FALSE}
+#| label: fig-training
+#| fig-cap: Accuracy during the training phase of Experiment.
+#| apa-note: "Proportion of accurate responses (±SEM) on the training phase, plotted against the four blocks of trials, for each similarity group."
+#| fig-height: 4
+ggplot(MA_training, mapping = aes(x = block, y = mean_accuracy, group = factor(group, levels = c("High", "Medium", "Low")))) +
+  geom_point(mapping = aes(shape = factor(group, levels = c("High", "Medium", "Low")), color = factor(group, levels = c("High", "Medium", "Low"))), size = 2.5) +
+  geom_line(mapping = aes(color = factor(group, levels = c("High", "Medium", "Low")))) +
+  geom_errorbar(aes(x= block, y = mean_accuracy, ymin = mean_accuracy-se_accuracy, ymax = mean_accuracy+se_accuracy), colour = "black", width=.1)+
+  scale_x_continuous(name = "Block") + 
+  scale_color_discrete(type = c("#AF8DC3", "#FEB24C", "#7FBF7B"))+
+  labs(shape = "Similarity", color = "Similarity") +
+  scale_y_continuous(name = "Accuracy", limits = c(NA, 1))+
+  theme_apa()
+```
+
+```{r, include=FALSE}
+#ANOVA
+acc_training <- training %>%
+  group_by (pNum, block, group) %>%
+  summarise(mean_response = mean(correct_answer, na.rm = TRUE))
+acc_training$block <- factor(acc_training$block)
+acc_training$pNum <- factor(acc_training$pNum)
+acc_training$group <- factor(acc_training$group)
+ANOVA_acc <- aov_car(formula = mean_response ~ group + Error(pNum/block), data = acc_training)
+print(ANOVA_acc)
+#Bayesian Anova
+bay_ANOVA_acc <- anovaBF(formula = mean_response ~ group + block + pNum,
+        data = data.frame(acc_training),
+        whichRandom = "pNum")
+print(bay_ANOVA_acc)
+bay_ANOVA_acc_int <- bay_ANOVA_acc[4]/bay_ANOVA_acc[3]
+print(bay_ANOVA_acc_int)
+```
+
+This was confirmed by a mixed model Analysis of Variance (ANOVA) with the within-subjects factor *block* (1-4), and the between-subjects factor *similarity* (High, Medium, and Low). This analysis found a significant main effect of the *block*, `r apa(ANOVA_acc, effect = "block")`, `r report_BF_and_error(bay_ANOVA_acc[1], sci_not = TRUE)`. There was no main effect of *similarity*, `r apa(ANOVA_acc, effect = "group")`, `r report_BF_and_error(bay_ANOVA_acc[2])` nor an interaction effect, `r apa(ANOVA_acc, effect = "group:block")`, `r report_BF_and_error(bay_ANOVA_acc_int[1])`. These results indicate that the training was equally effective for the three similarity groups, all of them increasing their performance as the phase progressed.
+
+```{r, include=FALSE}
+#Calculate the mean accuracy and standard error for each block, including the groups
+MA_test1 <- test1 %>%
+  group_by(predictiveness, group) %>%
+    summarise(mean_acc = mean(acc, na.rm = TRUE), 
+            se_acc = sd(acc, na.rm = TRUE)/sqrt(length(acc)))
+```
+
+The mean accuracy for each group and type of cue (predictive vs non-predictive) on Test 1 is displayed in @fig_acctest1. In group High similarity, the accuracy for non-predictive cues was higher than for predictive cues, whereas in groups with Medium and Low similarity, this relationship was inverted. 
+
+```{r, echo = FALSE, warning=FALSE}
+#| label: fig-acc-test1
+#| fig-cap: Accuracy on Test 1.
+#| apa-note: "Proportion of accurate responses (±SEM) on Test 1 for each similarity group."
+#| fig-height: 4
+ggplot(data = MA_test1, mapping = aes(x = factor(group, levels = c("High", "Medium", "Low")), y = mean_acc, fill = predictiveness)) +
+  geom_col(position = position_dodge2()) +
+  geom_errorbar(aes(y= mean_acc, ymin = mean_acc - se_acc, ymax = mean_acc + se_acc), width = .2, position = position_dodge(0.9)) +
+  coord_cartesian(ylim = c(0, 1))+
+  scale_x_discrete (name = "Similarity") +
+  scale_y_continuous(name = "Accuracy") +
+  coord_cartesian(ylim = c(0.5, 1)) +
+  scale_fill_discrete(type = c("#AF8DC3", "#7FBF7B"))+
+  theme_apa()
+```
+```{r, include=FALSE}
+#ANOVA mem_score
+acc_test1 <- test1 %>%
+  group_by (pNum, group, predictiveness) %>%
+  summarise(acc = mean(acc, na.rm = TRUE))
+acc_test1$predictiveness <- factor(acc_test1$predictiveness)
+acc_test1$group <- factor(acc_test1$group)
+acc_test1$pNum <- factor(acc_test1$pNum)
+ANOVA_acc_test1 <- aov_car(formula = acc ~ group + Error(pNum*predictiveness), data = acc_test1)
+print(ANOVA_acc_test1)
+bay_ANOVA_acc_test1 <- anovaBF(formula = acc ~ group*predictiveness + pNum,
+        data = data.frame(acc_test1),
+        whichRandom = "pNum")
+print(bay_ANOVA_acc_test1)
+bay_ANOVA_acc_test1_int <- bay_ANOVA_acc_test1[4]/bay_ANOVA_acc_test1[3]
+print(bay_ANOVA_acc_test1_int)
+```
+
+However, the mixed methods ANOVA did not find any significant effects, *similarity*: `r apa(ANOVA_acc_test1, effect = "group")`, `r report_BF_and_error(bay_ANOVA_acc_test1[1], sci_not = TRUE)`, *predictiveness*: `r apa(ANOVA_acc, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_acc_test1[2])` nor a *similarity x predictiveness* interaction effect, `r apa(ANOVA_acc, effect = "group:predictiveness")`, `r report_BF_and_error(bay_ANOVA_acc_test1_int[1])`. 
+
+```{r, include = FALSE}
+#create the memory_score
+test1 <- test1 %>%
+mutate (c_mem_score = case_when(acc == 0 ~ 0, acc == 1 ~ mem_score))
+#factorize the session, which is the factor that contains the group
+test1$session <- as.factor(test1$session)
+#Calculate the mean accuracy and standard error for each block, including the groups
+MS_test1 <- test1 %>%
+  group_by(predictiveness, group) %>%
+    summarise(mean_mem_score = mean(c_mem_score, na.rm = TRUE), 
+            se_mem_score = sd(c_mem_score, na.rm = TRUE)/sqrt(length(c_mem_score)))
+```
+
+For the test data, we calculated a “memory score” for each trial by multiplying by 1 the confidence rating given by participants on the trials in which the target was selected (correct responses), and by 0 on the trials in which the foil was selected (incorrect responses). Mean memory scores for Test 1 are displayed in @fig-test1. In groups Low and Medium similarity, memory score was higher for the predictive than the non-predictive cue, whereas this tendency was inverted in the High group. Also, groups Low and Medium showed higher memory score than group Low.
+
+```{r, echo = FALSE, warning=FALSE}
+#| label: fig-test1
+#| fig-cap: Memory scores during Test 1.
+#| apa-note: "Mean memory scores (±SEM) on Test 1 for predictive and non-predictive trials in the High, Medium and Low similarity groups."
+#| fig-height: 4
+ggplot(MS_test1, mapping = aes(x = factor(group, levels = c("High", "Medium", "Low")), y = mean_mem_score, fill = predictiveness)) +
+  geom_col(position = position_dodge2()) +
+  geom_errorbar(aes(ymin = mean_mem_score - se_mem_score, ymax = mean_mem_score + se_mem_score), width=.2, position=position_dodge(0.9)) +
+  scale_x_discrete (name = "Similarity") +
+  scale_fill_discrete(type = c("#AF8DC3", "#7FBF7B"))+
+  scale_y_continuous(name = "Memory score")+
+  #scale_fill_grey(start = 0.33) +
+  theme_apa()
+```
+
+```{r, include=FALSE}
+#ANOVA mem_score
+memscore_test1 <- test1 %>%
+  group_by (pNum, group, predictiveness) %>%
+  summarise(mem_score = mean(c_mem_score, na.rm = TRUE))
+memscore_test1$predictiveness <- factor(memscore_test1$predictiveness)
+memscore_test1$group <- factor(memscore_test1$group)
+memscore_test1$pNum <- factor(memscore_test1$pNum)
+ANOVA_test1 <- aov_car(formula = mem_score ~ group + Error(pNum*predictiveness), data = memscore_test1)
+print(ANOVA_test1)
+bay_ANOVA_test1 <- anovaBF(formula = mem_score ~ group*predictiveness + pNum,
+        data = data.frame(memscore_test1),
+        whichRandom = "pNum")
+print(bay_ANOVA_test1)
+bay_ANOVA_test1_int <- bay_ANOVA_test1[4]/bay_ANOVA_test1[3]
+print(bay_ANOVA_test1_int)
+```
+
+These differences, however, were very small, and a mixed model ANOVA of the memory scores revealed none of the main effects or the interaction were significant: *similarity*: `r apa(ANOVA_test1, effect = "group")`, `r report_BF_and_error(bay_ANOVA_test1[1])`; *predictiveness*: `r apa(ANOVA_test1, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_test1[2])`; *similarity x predictiveness*: `r apa(ANOVA_test1, effect = "group:predictiveness")`, `r report_BF_and_error(bay_ANOVA_test1_int[1])`. Of note, there was moderate evidence for a null-effect of predictiveness, suggesting that Test 1 failed to reveal any differences in cue-processing between predictive and non-predictive cues.
+
+```{r, include=FALSE}
+#Calculate the mean accuracy and standard error for each block, including the groups
+MA_test2 <- test2 %>%
+  group_by(trial_type, group) %>%
+    summarise(mean_acc = mean(acc, na.rm = TRUE), 
+            se_acc = sd(acc, na.rm = TRUE)/sqrt(length(acc)))
+```
+
+The mean accuracy for each group and type of cue (predictive vs non-predictive) on Test 2 is displayed in @fig_acctest2. In group High similarity, the accuracy was higher for predictive than non-predictive cues, with higher accuracy for congruent (in which target and foil were either both predictive or both non-predictive) than incongruent cues (in which the target and foil differed in their predictiveness). In groups with Medium and Low similarity, accuracy was very similar for all types of cues, being generally lower for non-predictive than predictive cues, and lower for congruent than incongruent cues. 
+
+```{r, echo = FALSE, warning=FALSE}
+#| label: fig-acc-test2
+#| fig-cap: Accuracy on Test 2.
+#| apa-note: "Proportion of accurate responses (±SEM) on Test 2 for each similarity group."
+#| fig-height: 4
+ggplot(data = MA_test2, mapping = aes(x = factor(group, levels = c("High", "Medium", "Low")), y = mean_acc, fill = trial_type)) +
+  geom_col(position = position_dodge2()) +
+  geom_errorbar(aes(y= mean_acc, ymin = mean_acc - se_acc, ymax = mean_acc + se_acc), width = .2, position = position_dodge(0.9)) +
+  coord_cartesian(ylim = c(0, 1))+
+  scale_x_discrete (name = "Similarity") +
+  scale_y_continuous(name = "Accuracy") +
+  coord_cartesian(ylim = c(0.5, 1)) +
+  scale_fill_discrete(type = c("#7B3294", "#C2A5CF", "#008837", "#A6DBA0"))+
+  theme_apa()
+```
+```{r, include=FALSE}
+#ANOVA mem_score
+acc_test2 <- test2 %>%
+  group_by (pNum, group, predictiveness, congruence) %>%
+  summarise(acc = mean(acc, na.rm = TRUE))
+acc_test2$predictiveness <- factor(acc_test2$predictiveness)
+acc_test2$group <- factor(acc_test2$group)
+acc_test2$congruence <- factor(acc_test2$congruence)
+acc_test2$pNum <- factor(acc_test2$pNum)
+ANOVA_acc_test2 <- aov_car(formula = acc ~ group + Error(pNum*predictiveness*congruence), data = acc_test2)
+print(ANOVA_acc_test2)
+bay_ANOVA_acc_test2 <- anovaBF(formula = acc ~ group*predictiveness*congruence + pNum,
+        data = data.frame(acc_test2),
+        whichRandom = "pNum")
+print(bay_ANOVA_acc_test2)
+bay_ANOVA_acc_test2_sxp <- bay_ANOVA_acc_test2[4]/bay_ANOVA_acc_test2[3]
+print(bay_ANOVA_acc_test2_sxp)
+bay_ANOVA_acc_test2_pxc <- bay_ANOVA_acc_test2[13]/bay_ANOVA_acc_test2[7]
+print(bay_ANOVA_acc_test2_pxc)
+bay_ANOVA_acc_test2_sxc <- bay_ANOVA_acc_test2[10]/bay_ANOVA_acc_test2[6]
+print(bay_ANOVA_acc_test2_sxc)
+bay_ANOVA_acc_test2_sxpxc <- bay_ANOVA_acc_test2[18]/bay_ANOVA_acc_test2[17]
+print(bay_ANOVA_acc_test2_sxpxc)
+```
+
+These data were analysed using a mixed ANOVA of memory scores with the factors of *predictiveness* (predictive vs. non-predictive target cue), *congruence* (target and foil same predictiveness or not), and *similarity* (High, Medium, Low), that did not find any significant effects or interactions, *similarity*: `r apa(ANOVA_acc_test2, effect = "group")`, `r report_BF_and_error(bay_ANOVA_acc_test2[1])`; *predictiveness*: `r apa(ANOVA_acc_test2, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_acc_test2[2])`; *congruence*: `r apa(ANOVA_acc_test2, effect = "congruence")`, `r report_BF_and_error(bay_ANOVA_acc_test2[5])`; *similarity x predictiveness*: `r apa(ANOVA_acc_test2, effect = "group:predictiveness")`, `r report_BF_and_error(bay_ANOVA_acc_test2_sxp[1])`; *predictiveness x congruence*: `r apa(ANOVA_acc_test2, effect = "predictiveness:congruence")`, `r report_BF_and_error(bay_ANOVA_acc_test2_pxc[1])`; *similarity x congruence*: `r apa(ANOVA_acc_test2, effect = "group:congruence")`, `r report_BF_and_error(bay_ANOVA_acc_test2_sxc[1])`; *similarity x predictiveness x congruence*: `r apa(ANOVA_acc_test2, effect = "group:predictiveness:congruence")`, `r report_BF_and_error(bay_ANOVA_acc_test2_sxpxc[1])`. 
+
+```{r, include = FALSE}
+#create the memory_score
+test2 <- test2 %>% 
+  mutate (c_mem_score = case_when(acc == 0 ~ 0, acc == 1 ~ mem_score))
+#Calculate the mean accuracy and standard error for each block, including the groups
+MS_test2 <- test2 %>%
+  group_by(trial_type, group) %>%
+    summarise(mean_mem_score = mean(c_mem_score, na.rm = TRUE), 
+            se_mem_score = sd(c_mem_score, na.rm = TRUE)/sqrt(length(c_mem_score)))
+```
+
+@fig-test2 shows the data from Test 2. Overall, mean memory scores were lower for the non-predictive than for the predictive cues. This difference was more pronounced in the High group than in the other groups. However, there were no apparent differences between the congruent trials and incongruent trials.
+
+```{r, echo = FALSE, warning=FALSE}
+#| label: fig-test2
+#| fig-cap: Memory scores during Test 2.
+#| apa-note: "Mean memory scores (±SEM) on Test 2 in the High, Medium and Low similarity groups. The four bars per group represent the four types of trials: trials in which a non-predictive target was presented with a non-predictive foil (NP-Con), trials in which a non-predictive target was presented with a predictive foil (NP-Incon), trials in which a predictive target was presented with a non-predictive foil (P-Incon), and trials in which a predictive target was presented with a predictive foil (P-Con)."
+#| fig-height: 4
+ggplot(MS_test2, mapping = aes(x = factor(group, levels = c("High", "Medium", "Low")), y = mean_mem_score, fill = trial_type)) +
+  geom_col(position = position_dodge2()) +
+  geom_errorbar(aes(ymin = mean_mem_score - se_mem_score, ymax = mean_mem_score + se_mem_score), width=.2, position=position_dodge(0.9)) +
+  scale_x_discrete (name = "Similarity") +
+  scale_y_continuous(name = "Memory score")+
+  labs(fill = "Trial type")+
+  scale_fill_discrete(type = c("#7B3294", "#C2A5CF", "#008837", "#A6DBA0"))+
+  theme_apa()
+```
+
+```{r, include=FALSE}
+#ANOVA mem_score
+memscore_test2 <- test2 %>%
+  group_by (pNum, group, predictiveness, congruence) %>%
+  summarise(mem_score = mean(c_mem_score, na.rm = TRUE))
+memscore_test2$predictiveness <- factor(memscore_test2$predictiveness)
+memscore_test2$congruence <- factor(memscore_test2$congruence)
+memscore_test2$group <- factor(memscore_test2$group)
+memscore_test2$pNum <- factor(memscore_test2$pNum)
+ANOVA_test2 <- aov_car(formula = mem_score ~ group + Error(pNum*predictiveness*congruence), data = memscore_test2)
+print(ANOVA_test2)
+bay_ANOVA_test2  <- anovaBF(formula = mem_score ~ group + predictiveness + congruence + pNum,
+        data = data.frame(memscore_test2),
+        whichRandom = "pNum")
+print(bay_ANOVA_test2)
+bay_ANOVA_test2_sxp <- bay_ANOVA_test2[4]/bay_ANOVA_test2[3]
+print(bay_ANOVA_test2_sxp)
+bay_ANOVA_test2_pxc <- bay_ANOVA_test2[13]/bay_ANOVA_test2[7]
+print(bay_ANOVA_test2_pxc)
+bay_ANOVA_test2_sxc <- bay_ANOVA_test2[10]/bay_ANOVA_test2[6]
+print(bay_ANOVA_test2_sxc)
+bay_ANOVA_test2_sxpxc <- bay_ANOVA_test2[18]/bay_ANOVA_test2[17]
+print(bay_ANOVA_test2_sxpxc)
+```
+
+These data were analysed using a mixed ANOVA of memory scores with the factors of *predictiveness* (predictive vs. non-predictive target cue), *congruence* (target and foil same predictiveness or not), and *similarity* (High, Medium, Low). This analysis found that the only significant differences were due to the main effect of *predictiveness*, `r apa(ANOVA_test2, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_test2[2])`. No other significant effects were found, *similarity*: `r apa(ANOVA_test2, effect = "group")`, `r report_BF_and_error(bay_ANOVA_test2[1])`; *congruence*: `r apa(ANOVA_test2, effect = "congruence")`, `r report_BF_and_error(bay_ANOVA_test2[5])`; *similarity x predictiveness*: `r apa(ANOVA_test2, effect = "group:predictiveness")`, `r report_BF_and_error(bay_ANOVA_test2_sxp[1])`; *predictiveness x congruence*: `r apa(ANOVA_test2, effect = "predictiveness:congruence")`, `r report_BF_and_error(bay_ANOVA_test2_pxc[1])`; *similarity x congruence*: `r apa(ANOVA_test2, effect = "group:congruence")`, `r report_BF_and_error(bay_ANOVA_test2_sxc[1])`; *similarity x predictiveness x congruence*: `r apa(ANOVA_test2, effect = "group:predictiveness:congruence")`, `r report_BF_and_error(bay_ANOVA_test2_sxpxc[1])`. The results indicate that, in Test 2, participants showed better memory for predictive than non-predictive cues, but there were no differences due to the congruence of the test trial, nor the similarity of the foils to the training stimuli.
+
+```{r, include = FALSE}
+test2_L <- filter(test2, group == "Low") %>%
+  group_by (pNum, predictiveness, congruence) %>%
+  summarise(mem_score = mean(c_mem_score, na.rm = TRUE))
+test2_L$pNum <- factor(test2_L$pNum)
+test2_L$predictiveness <- factor(test2_L$predictiveness)
+test2_L$congruence <- factor(test2_L$congruence)
+# ANOVA with two within factors
+ANOVA_test2_L <- aov_car(mem_score ~ predictiveness*congruence + Error(pNum/predictiveness*congruence), data=test2_L)
+print(ANOVA_test2_L)
+#bayesian ANOVA
+bay_ANOVA_test2_L <- anovaBF(formula = mem_score ~ congruence*predictiveness + pNum,
+                                    data = data.frame(test2_L),
+                                    whichRandom = "pNum")
+print(bay_ANOVA_test2_L)
+bay_ANOVA_test2_L_int <- bay_ANOVA_test2_L[4]/bay_ANOVA_test2_L[3]
+print(bay_ANOVA_test2_L_int)
+```
+
+```{r, include = FALSE}
+test2_M <- filter(test2, group == "Medium") %>%
+  group_by (pNum, predictiveness, congruence) %>%
+  summarise(mem_score = mean(c_mem_score, na.rm = TRUE))
+test2_M$pNum <- factor(test2_M$pNum)
+test2_M$predictiveness <- factor(test2_M$predictiveness)
+test2_M$congruence <- factor(test2_M$congruence)
+# ANOVA with two within factors
+ANOVA_test2_M <- aov_car(mem_score ~ predictiveness*congruence + Error(pNum/predictiveness*congruence), data=test2_M)
+print(ANOVA_test2_M)
+#bayesian ANOVA
+bay_ANOVA_test2_M <- anovaBF(formula = mem_score ~ congruence*predictiveness + pNum,
+                                   data = data.frame(test2_M),
+                                   whichRandom = "pNum")
+print(bay_ANOVA_test2_M)
+bay_ANOVA_test2_M_int <- bay_ANOVA_test2_M[4]/bay_ANOVA_test2_M[3]
+print(bay_ANOVA_test2_M_int)
+```
+
+```{r, include = FALSE}
+test2_H <- filter(test2, group == "High") %>%
+  group_by (pNum, predictiveness, congruence) %>%
+  summarise(mem_score = mean(c_mem_score, na.rm = TRUE))
+test2_H$pNum <- factor(test2_H$pNum)
+test2_H$predictiveness <- factor(test2_H$predictiveness)
+test2_H$congruence <- factor(test2_H$congruence)
+# ANOVA with two within factors
+ANOVA_test2_H <- aov_car(mem_score ~ predictiveness*congruence + Error(pNum/predictiveness*congruence), data=test2_H)
+print(ANOVA_test2_H)
+#bayesian ANOVA
+bay_ANOVA_test2_H <- anovaBF(formula = mem_score ~ congruence*predictiveness + pNum,
+                                    data = data.frame(test2_H),
+                                    whichRandom = "pNum")
+print(bay_ANOVA_test2_H)
+bay_ANOVA_test2_H_int <- bay_ANOVA_test2_H[4]/bay_ANOVA_test2_H[3]
+print(bay_ANOVA_test2_H_int)
+```
+
+Despite there being no meaningful effects of similarity, and since the aim of this experiment was to determine the most sensitive way of testing participants’ memory, exploratory analyses were conducted on the data from each similarity group separately. For each, we conducted a within-subjects ANOVA with the factors *predictiveness* (predictive vs non-predictive) and *congruence* (congruent vs incongruent) for the accuracy and the memory scores. In group Low, there was no main effect of *predictiveness*, `r apa(ANOVA_test2_L, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_test2_L[1])`, nor of *congruence*, `r apa(ANOVA_test2_L, effect = "congruence")`, `r report_BF_and_error(bay_ANOVA_test2_L[2])` and no interaction, `r apa(ANOVA_test2_L, effect = "group:predictiveness")`, `r report_BF_and_error(bay_ANOVA_test2_L_int[1])`. For group Medium, there was also no effect of *predictiveness*: `r apa(ANOVA_test2_M, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_test2_M[1])`, *congruence*: `r apa(ANOVA_test2_M, effect = "congruence")`, `r report_BF_and_error(bay_ANOVA_test2_M[2])`, and no interaction *group x predictiveness*: `r apa(ANOVA_test2_M, effect = "group:predictiveness")`, `r report_BF_and_error(bay_ANOVA_test2_M_int[1])`). However, for group High there was a significant effect of *predictiveness*, `r apa(ANOVA_test2_H, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_test2_H[1])`, but no effect of *congruence*, `r apa(ANOVA_test2_H, effect = "congruence")`, `r report_BF_and_error(bay_ANOVA_test2_H[2])`, and no interaction, `r apa(ANOVA_test2_H, effect = "predictiveness:congruence")`, `r report_BF_and_error(bay_ANOVA_test2_H_int[1])`. These results indicate that the only group that had a better memory for predictive stimuli over non-predictive stimuli was the High similarity group, irrespective of the congruence between foil and target in test.
+
+## Discussion
+
+This experiment aimed to find an effective method for examining memory cues which had been established as either predictive or non-predictive of an outcome during a previous learning task. Two different tests were used, both involving the presentation of a target (a previously trained cue) and a foil (a novel cue), which had the colours of some its elements swapped. In Test 1, the foil was the same shape as the target while in Test 2, the foil was derived from a different cue from the target. Three groups of participants received different levels of foil-to-cue similarity. Test 1 revealed no differences in memory due to predictiveness nor due to the foil-to-cue similarity. Test 2 showed better memory scores for predictive than non-predictive cues, and, although there was no significant effect of, nor any interaction with, the factor of the similarity, further analysis showed that only the High similarity group (in which the colours changed in two out of the six circles) showed an effect of cue-predictiveness on recognition memory.
+
+Somewhat surprisingly there was no effect of foil-to-cue congruence in the data, with the predictiveness effect being observed both when the pairs of stimuli were congruent in their predictiveness (i.e., P-Con; NP-Con) and incongruent (i.e., P-Incon; NP-Incon). This is surprising, because there are seemingly different sources of memory that might contribute to these two trial types. Take for example the two trial types where the NP cue is the target stimulus. On NP-Con trials, the participant must rely on their memory of only NP cues to make a response, while on “NP-Incon” trials, the participant should be able to use their (presumably better) memory about P cues to detect the P foil. In principle, this should lead to better performance on the NP-Incon trials compared to NP-Con trials: this was clearly not the case. The critical factor in determining memory scores is whether the “P cue” was the target or the foil on the given trial: “P-Incon” trials are performed better than “NP-Incon” trials. It is possible that there is strong generalisation from the P cue to the presented P foil, and this is mistakenly identified as the target stimulus (especially so in the case of the High similarity condition). What is clear is that the only variable that affected memory scores was the predictiveness of the target stimulus, and so Test 2 represents a useful measure of recognition memory for stimuli in the task.
