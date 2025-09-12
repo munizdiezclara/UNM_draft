@@ -1,0 +1,516 @@
+---
+title: "Between experiments comparison"
+format: docx
+---
+
+To have an idea of the difference in responding between the Uncertain group in Experiment 1 and the Uncertain group in Experiment 2 (known as Unexpected Uncertain from now on), a between experiment comparison would be performed. For that, results from both Certain groups would be collapse. 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(afex)
+library(BayesFactor)
+library(apa)
+library(emmeans)
+library(papaja)
+library(rstatix)
+library(effectsize)
+library("writexl")
+options(scipen=999)
+bfit = 10000
+
+# function to force scientific formatting of numbers (used for large BFs)
+changeSciNot <- function(n) {
+  output <- format(n, scientific = TRUE, digits = 2) #Transforms the number into scientific notation even if small
+  output <- sub("e", "x10^", output) #Replace e with 10^
+  output <- sub("\\+0?", "", output) #Remove + symbol and leading zeros on exponent, if > 1
+  output <- sub("-0?", "-", output) #Leaves - symbol but removes leading zeros on exponent, if < 1
+  output <- paste0(output,"^")
+  # output = strsplit(output, "^", fixed = TRUE)
+  # output = paste0(output[[1]][1],"^", output[[1]][2], "^")
+  output
+}
+# function to extract and report BFs with error %s
+report_BF_and_error <- function(BF_in, sci_not = FALSE, hyp = "alt"){
+  
+  if (hyp == "alt") {
+    BF_notation = "BF~10~ = "
+  } else if (hyp == "null") {
+    BF_notation = "BF~01~ = "
+  }
+  
+  if (sci_not == TRUE) {
+    BF_value = changeSciNot(extractBF(BF_in)$bf) # change to sci notation
+  } else {
+    BF_value = round(extractBF(BF_in)$bf,2) # otherwise round
+  }
+  
+  paste0(BF_notation, 
+         BF_value, 
+         " &plusmn; ", 
+         round(100*extractBF(BF_in)$error,2), 
+         "%")
+}
+```
+
+```{r, include=FALSE}
+#load the data
+load("UNM07_proc_data.RData")
+UNM07_demographics <- demographics
+UNM07_training <- training
+UNM07_test <- test
+UNM07_not_passed <- not_passed_pNum
+
+#create the PPR measure
+UNM07_training <- UNM07_training %>%
+  mutate(prob_response = case_when((cue1 == 1 | cue1 == 3) & response == "o1_image" ~ 1,
+                                   (cue1 == 1 | cue1 == 3) & response == "o2_image" ~ 0, 
+                                   (cue1 == 2 | cue1 == 4) & response == "o1_image" ~ 0,
+                                   (cue1 == 2 | cue1 == 4) & response == "o2_image" ~ 1))
+
+#detect and clean participants that not passed the test comprehension check
+UNM07_training <- filter(UNM07_training, !pNum %in% UNM07_not_passed$pNum)
+UNM07_test <- filter(UNM07_test, !pNum %in% UNM07_not_passed$pNum)
+```
+```{r, include=FALSE}
+#load the data
+load("UNM08_proc_data.RData")
+UNM08_demographics <- demographics
+UNM08_training <- rbind(stage1, stage2)
+UNM08_test <- test
+UNM08_not_passed <- not_passed_pNum
+UNM08_training <- filter(UNM08_training, !pNum %in% UNM08_not_passed$pNum)
+UNM08_test <- filter(UNM08_test, !pNum %in% UNM08_not_passed$pNum)
+
+#create the PPR measure
+UNM08_training <- UNM08_training %>%
+  mutate(prob_response = case_when((cue1 == 1 | cue1 == 3) & response == "o1_image" ~ 1,
+                                   (cue1 == 1 | cue1 == 3) & response == "o2_image" ~ 0,
+                                   (cue1 == 2 | cue1 == 4) & response == "o1_image" ~ 0,
+                                   (cue1 == 2 | cue1 == 4) & response == "o2_image" ~ 1))
+
+#detect and clean participants that had an PPR lower than 0.6 in the final block or not passed the test comprehension check
+UNM08_block6 <- filter(UNM08_training, block == 6) %>%
+  group_by(pNum, condition) %>%
+ summarise (mean_response = mean(prob_response, na.rm = TRUE))
+UNM08_low_acc_total <- filter(UNM08_block6, mean_response < 0.75) 
+UNM08_low_acc <- UNM08_low_acc_total$pNum
+UNM08_training <- filter(UNM08_training, !pNum %in% UNM08_low_acc_total$pNum)
+UNM08_test <- filter(UNM08_test, !pNum %in% UNM08_low_acc_total$pNum)
+```
+
+```{r, include = FALSE}
+UNM08_test <- UNM08_test %>%
+  mutate(pNum = pNum + (max(UNM07_test$pNum)), #modify UNM08 pNum so it continues from UNM07
+         condition = case_when(condition == "Certain Long" ~ "Certain", 
+                               condition == "Certain Short" ~ "Certain", 
+                               condition == "Uncertain" ~ "Unexpected Uncertain"), #change the name of the conditions to match the two databases
+         cue_type = case_when(cue_type == "C_P" ~ "C_P",
+                              cue_type == "C_NP" ~ "C_NP",
+                              cue_type == "CS_P" ~ "C_P",
+                              cue_type == "CS_NP" ~ "C_NP",
+                              cue_type == "U_P" ~ "UU_P",
+                              cue_type == "U_NP" ~ "UU_NP"))
+BEC_test <- bind_rows(UNM07_test, UNM08_test)
+```
+
+```{r, include=FALSE}
+#Calculate the mean accuracy and standard error for each block, including the groups
+MA_BEC_test <- BEC_test %>%
+  group_by(predictiveness, condition) %>%
+    summarise(mean_acc = mean(acc, na.rm = TRUE), 
+            se_acc = sd(acc, na.rm = TRUE)/sqrt(length(acc)))
+```
+
+@fig-acctestBEC shows the accuracy results from the recognition memory test. Overall, accuracy was higher in group Unexpected Uncertain compared with the two other groups. Accuracy for non-predictive cues was lower than for the predictive cues in group Certain, but this difference was not evident in the other two groups.
+
+```{r, echo=FALSE, message=FALSE}
+#| label: fig-acctestBVEC
+#| fig-cap: Accuracy on the test phase of both experiments.
+#| apa-note: "Mean accuracy (±SEM) during the test phase of Experiments 1 and  2, across the three groups."
+#| fig-height: 4
+ggplot(data = MA_BEC_test, mapping = aes(x = factor(condition, level=c('Certain', 'Uncertain','Unexpected Uncertain')), y = mean_acc, fill = predictiveness)) +
+  geom_col(position = position_dodge2()) +
+  geom_errorbar(aes(y= mean_acc, ymin = mean_acc - se_acc, ymax = mean_acc + se_acc), width = .2, position = position_dodge(0.9)) +
+  scale_x_discrete (name = "Group") +
+  scale_y_continuous(name = "Accuracy") +
+  coord_cartesian(ylim = c(0.5, 1)) +
+  scale_fill_discrete(type = c("#AF8DC3", "#7FBF7B"))+
+  theme_apa()
+```
+
+```{r, include=FALSE}
+#ANOVA accuracy
+acc_BEC_test <- BEC_test %>%
+  group_by (pNum, condition, predictiveness) %>%
+  summarise(acc = mean(acc, na.rm = TRUE))
+acc_BEC_test$predictiveness <- factor(acc_BEC_test$predictiveness)
+acc_BEC_test$condition <- factor(acc_BEC_test$condition)
+acc_BEC_test$pNum <- factor(acc_BEC_test$pNum)
+ANOVA_acc_BEC_test <- aov_car(formula = acc ~ condition + Error(pNum*predictiveness), data = acc_BEC_test)
+print(ANOVA_acc_BEC_test)
+
+bay_ANOVA_acc_BEC_test <- anovaBF(formula = acc ~ condition*predictiveness + pNum,
+        data = data.frame(acc_BEC_test),
+        whichRandom = "pNum", 
+        iterations = bfit)
+print(bay_ANOVA_acc_BEC_test)
+
+bay_ANOVA_acc_BEC_test_gxp <- bay_ANOVA_acc_BEC_test[4]/bay_ANOVA_acc_BEC_test[3]
+print(bay_ANOVA_acc_BEC_test_gxp)
+```
+
+```{r, include = FALSE}
+# Pairwise comparisons for the main effect of condition
+acc_BEC_test_interaction <- emmeans(ANOVA_acc_BEC_test, ~condition)
+pairs(acc_BEC_test_interaction, adjust = "bon")
+
+acc_BEC_test_C <- subset(acc_BEC_test, condition == "Certain", acc, drop = TRUE)
+acc_BEC_test_U <- subset(acc_BEC_test, condition == "Uncertain", acc, drop = TRUE)
+acc_BEC_test_UU <- subset(acc_BEC_test, condition == "Unexpected Uncertain", acc, drop = TRUE)
+
+acc_cohensd_CU <- effectsize::cohens_d(acc_BEC_test_C, acc_BEC_test_U)
+acc_cohensd_CUU <- effectsize::cohens_d(acc_BEC_test_C, acc_BEC_test_UU)
+acc_cohensd_UUU <- effectsize::cohens_d(acc_BEC_test_U, acc_BEC_test_UU)
+
+bay_t.test_acc_BEC_test_CU <-  ttestBF(acc_BEC_test_C, acc_BEC_test_U)
+print(bay_t.test_acc_BEC_test_CU)
+bay_t.test_acc_BEC_test_CUU <-  ttestBF(acc_BEC_test_C, acc_BEC_test_UU)
+print(bay_t.test_acc_BEC_test_CUU)
+bay_t.test_acc_BEC_test_UUU <-  ttestBF(acc_BEC_test_U, acc_BEC_test_UU)
+print(bay_t.test_acc_BEC_test_UUU)
+```
+
+```{r, include = FALSE}
+# SME of the condition:predictiveness interaction
+SME_BEC_test <- BEC_test %>%
+  group_by (pNum, condition, predictiveness) %>%
+  summarise(mem_score = mean(c_mem_score, na.rm = TRUE))
+#calculate the simple main effect of predictiveness
+sme_BEC_test_pred <- SME_BEC_test %>%
+  group_by(condition) %>%
+  anova_test(mem_score ~ predictiveness + Error(pNum/predictiveness), effect.size = "pes") %>%
+  get_anova_table() %>%
+  adjust_pvalue(method = "bonferroni")
+sme_BEC_test_pred #Call the output table
+
+SME_BEC_test_C <- filter(BEC_test, condition == "Certain") %>%
+  group_by(pNum, predictiveness) %>%
+  summarise(mem_score = mean(c_mem_score, na.rm = TRUE))
+SME_BEC_test_C$predictiveness <- factor(SME_BEC_test_C$predictiveness)
+SME_BEC_test_C$pNum <- factor(SME_BEC_test_C$pNum)
+
+SME_BEC_test_UU<- filter(BEC_test, condition == "Unexpected Uncertain") %>%
+  group_by(pNum, predictiveness) %>%
+  summarise(mem_score = mean(c_mem_score, na.rm = TRUE))
+SME_BEC_test_UU$predictiveness <- factor(SME_BEC_test_UU$predictiveness)
+SME_BEC_test_UU$pNum <- factor(SME_BEC_test_UU$pNum)
+
+SME_BEC_test_U <- filter(BEC_test, condition == "Uncertain") %>%
+  group_by(pNum, predictiveness) %>%
+  summarise(mem_score = mean(c_mem_score, na.rm = TRUE))
+SME_BEC_test_U$predictiveness <- factor(SME_BEC_test_U$predictiveness)
+SME_BEC_test_U$pNum <- factor(SME_BEC_test_U$pNum)
+
+bay_SME_BEC_test_C <- anovaBF(formula = mem_score ~ predictiveness + pNum,
+        data = data.frame(SME_BEC_test_C),
+        whichRandom = "pNum",
+        iterations = bfit)
+print(bay_SME_BEC_test_C)
+
+bay_SME_BEC_test_UU <- anovaBF(formula = mem_score ~ predictiveness + pNum,
+        data = data.frame(SME_BEC_test_UU),
+        whichRandom = "pNum",
+        iterations = bfit)
+print(bay_SME_BEC_test_UU)
+
+bay_SME_BEC_test_U <- anovaBF(formula = mem_score ~ predictiveness + pNum,
+        data = data.frame(SME_BEC_test_U),
+        whichRandom = "pNum",
+        iterations = bfit)
+print(bay_SME_BEC_test_U)
+```
+```{r, include = FALSE}
+#calculate the simple main effect of condition
+sme_BEC_test_condition <- SME_BEC_test %>%
+  group_by(predictiveness) %>%
+  anova_test(mem_score ~ condition, effect.size = "pes") %>%
+  get_anova_table() %>%
+  adjust_pvalue(method = "bonferroni")
+sme_BEC_test_condition #Call the output table
+
+SME_BEC_test_NP <- filter(BEC_test, predictiveness == "non-predictive") %>%
+  group_by(pNum, condition) %>%
+  summarise(mem_score = mean(c_mem_score, na.rm = TRUE))
+SME_BEC_test_NP$condition <- factor(SME_BEC_test_NP$condition)
+SME_BEC_test_NP$pNum <- factor(SME_BEC_test_NP$pNum)
+
+SME_BEC_test_P <- filter(BEC_test, predictiveness == "predictive") %>%
+  group_by(pNum, condition) %>%
+  summarise(mem_score = mean(c_mem_score, na.rm = TRUE))
+SME_BEC_test_P$condition <- factor(SME_BEC_test_P$condition)
+SME_BEC_test_P$pNum <- factor(SME_BEC_test_P$pNum)
+
+bay_SME_BEC_test_NP <- anovaBF(formula = mem_score ~ condition,
+        data = data.frame(SME_BEC_test_NP),
+        whichRandom = "pNum",
+        iterations = bfit)
+print(bay_SME_BEC_test_NP)
+
+bay_SME_BEC_test_P <- anovaBF(formula = mem_score ~ condition,
+        data = data.frame(SME_BEC_test_P),
+        whichRandom = "pNum",
+        iterations = bfit)
+print(bay_SME_BEC_test_P)
+```
+There was a significant main effect of *group*, `r apa(ANOVA_acc_BEC_test, effect = "condition")`, `r report_BF_and_error(bay_ANOVA_acc_BEC_test[1])`, and a main effect of *predictiveness*: `r apa(ANOVA_acc_BEC_test, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_acc_BEC_test[2])`, as well as a significant  *group x predictiveness* interaction, `r apa(ANOVA_acc_BEC_test, effect = "condition:predictiveness")`, `r report_BF_and_error(bay_ANOVA_acc_BEC_test_gxp[1])`. Bonferroni corrected pairwise comparisons on the main effect of *group* showed no differences between group Certain and group Uncertain, *t*(227) = 0.621,*p* = 1, *d* = 0.082, `r report_BF_and_error(bay_t.test_acc_BEC_test_CU[1])`, whereas there were significant differences between group Certain and group Unexpected Uncertain, *t*(227) = 3.267,*p* = .004, *d* = 0.492, `r report_BF_and_error(bay_t.test_acc_BEC_test_CUU[1])`. Regarding groups Unexpected Uncertain and Uncertain, the traditional analysis failed to reach significance, *t*(227) = 3.267,*p* = .071, *d* = 0.443, but the bayesian approach showed moderate evidence in favor of the alternative hypothesis, `r report_BF_and_error(bay_t.test_acc_BEC_test_UUU[1])`. Furthermore, simple main effects showed a significant effect of *predictiveness* for group Certain, *F* (`r sme_BEC_test_pred[1, 3]`, `r sme_BEC_test_pred[1, 4]`) = `r sme_BEC_test_pred[1, 5]`, *p* < 0.001, *η~p~^2^* = `r sme_BEC_test_pred[1, 8]`, `r report_BF_and_error(bay_SME_BEC_test_C[1])` but not for group Uncertain, *F* (`r sme_BEC_test_pred[2, 3]`, `r sme_BEC_test_pred[2, 4]`) = `r sme_BEC_test_pred[2, 5]`, *p* = `r sme_BEC_test_pred[2, 9]`, *η~p~^2^* = `r sme_BEC_test_pred[2, 8]`, `r report_BF_and_error(bay_SME_BEC_test_U[1])`, nor for group Unexpected Uncertain, *F* (`r sme_BEC_test_pred[3, 3]`, `r sme_BEC_test_pred[3, 4]`) = `r sme_BEC_test_pred[3, 5]`, *p* = `r sme_BEC_test_pred[3, 9]`, *η~p~^2^* = `r sme_BEC_test_pred[3, 8]`, `r report_BF_and_error(bay_SME_BEC_test_U[1])`. It is also important to note that when the simple main effect of *group* was analysed, this was significant for the non-predictive cues, *F* (`r sme_BEC_test_condition[1, 3]`, `r sme_BEC_test_condition[1, 4]`) = `r sme_BEC_test_condition[1, 5]`, *p* = `r sme_BEC_test_condition[1, 9]`, *η~p~^2^* = `r sme_BEC_test_condition[1, 8]`, `r report_BF_and_error(bay_SME_BEC_test_NP[1])`, and  for the predictive cues, *F*(`r sme_BEC_test_condition[2, 3]`, `r sme_BEC_test_condition[2, 4]`) = `r sme_BEC_test_condition[2, 5]`, *p* = `r sme_BEC_test_condition[2, 9]`, *η~p~^2^* = `r sme_BEC_test_condition[2, 8]`, `r report_BF_and_error(bay_SME_BEC_test_P[1])`.
+
+
+```{r, include = FALSE}
+#create the memory_score
+BEC_test <- BEC_test %>%
+  mutate (c_mem_score = case_when(acc == 0 ~ 0, acc == 1 ~ mem_score))
+#Calculate the mean PPR and standard error for each block, including the groups
+BEC_MS_test <- BEC_test %>%
+  group_by(predictiveness, condition) %>%
+    summarise(mean_mem_score = mean(c_mem_score, na.rm = TRUE), 
+            se_mem_score = sd(c_mem_score, na.rm = TRUE)/sqrt(length(c_mem_score)))
+```
+
+@fig-testBEC shows the recognition memory scores for the three conditions. Memory for non-predictive cues was lower than for predictive cues in all groups, but this difference was notably attenuated in the Uncertain group. Mirroring the accuracy data, the memory scores for the cues in group Unexpected Uncertain were on average higher, than those for groups Certain and Uncertain.
+
+```{r, echo = FALSE, message=FALSE}
+#| label: fig-testBEC
+#| fig-cap: Memory scores on the Test of Experiments 1 and 2.
+#| apa-note: "Mean memory scores (±SEM) during the Test of Experiments 1 and 2 for predictive and non-predictive trials across the three groups."
+#| fig-height: 4
+ggplot(BEC_MS_test, mapping = aes(x = factor(condition, level=c('Certain', 'Uncertain', 'Unexpected Uncertain')), y = mean_mem_score, fill = predictiveness)) +
+  geom_col(position = position_dodge2()) +
+  geom_errorbar(aes(ymin = mean_mem_score - se_mem_score, ymax = mean_mem_score + se_mem_score), width=.2, position=position_dodge(0.9)) +
+  scale_x_discrete (name = "Group") +
+  scale_fill_discrete(type = c("#AF8DC3", "#7FBF7B"))+
+  scale_y_continuous(name = "Memory score")+
+  #scale_fill_grey(start = 0.33) +
+  theme_apa()
+```
+```{r, include=FALSE}
+#ANOVA mem_score
+BEC_memscore_test <- BEC_test %>%
+  group_by (pNum, condition, predictiveness) %>%
+  summarise(mem_score = mean(c_mem_score, na.rm = TRUE))
+BEC_memscore_test$predictiveness <- factor(BEC_memscore_test$predictiveness)
+BEC_memscore_test$condition <- factor(BEC_memscore_test$condition)
+BEC_memscore_test$pNum <- factor(BEC_memscore_test$pNum)
+ANOVA_BEC_test <- aov_car(formula = mem_score ~ condition + Error(pNum*predictiveness), data = BEC_memscore_test)
+print(ANOVA_BEC_test)
+bay_ANOVA_BEC_test <- anovaBF(formula = mem_score ~ condition + predictiveness ,
+        data = data.frame(BEC_memscore_test),
+        whichRandom = "pNum", 
+        iterations = bfit)
+print(bay_ANOVA_BEC_test)
+bay_ANOVA_BEC_test_gxp <- bay_ANOVA_BEC_test[4]/bay_ANOVA_BEC_test[3]
+print(bay_ANOVA_BEC_test_gxp)
+```
+
+```{r, include = FALSE}
+# Pairwise comparisons for the main effect of condition
+BEC_test_interaction <- emmeans(ANOVA_BEC_test, ~condition)
+pairs(BEC_test_interaction, adjust = "bon")
+
+BEC_test_C <- subset(BEC_memscore_test, (condition == "Certain"), mem_score, drop = TRUE)
+BEC_test_U <- subset(BEC_memscore_test, condition == "Uncertain", mem_score, drop = TRUE)
+BEC_test_UU <- subset(BEC_memscore_test, condition == "Unexpected Uncertain", mem_score, drop = TRUE)
+
+cohensd_CU <- effectsize::cohens_d(BEC_test_C, BEC_test_U)
+cohensd_CUU <- effectsize::cohens_d(BEC_test_C, BEC_test_UU)
+cohensd_UUU <- effectsize::cohens_d(BEC_test_U, BEC_test_UU)
+
+bay_t.test_BEC_int_CU <-  ttestBF(BEC_test_C, BEC_test_U)
+print(bay_t.test_BEC_int_CU)
+bay_t.test_BEC_int_CUU <-  ttestBF(BEC_test_C, BEC_test_UU)
+print(bay_t.test_BEC_int_CUU)
+bay_t.test_BEC_int_UUU <-  ttestBF(BEC_test_U, BEC_test_UU)
+print(bay_t.test_BEC_int_UUU)
+```
+```{r, include = FALSE}
+# SME of the condition:predictiveness interaction
+SME_BEC_test <- BEC_test %>%
+  group_by (pNum, condition, predictiveness) %>%
+  summarise(mem_score = mean(c_mem_score, na.rm = TRUE))
+#calculate the simple main effect of predictiveness
+sme_BEC_test_pred <- SME_BEC_test %>%
+  group_by(condition) %>%
+  anova_test(mem_score ~ predictiveness + Error(pNum/predictiveness), effect.size = "pes") %>%
+  get_anova_table() %>%
+  adjust_pvalue(method = "bonferroni")
+sme_BEC_test_pred #Call the output table
+
+SME_BEC_test_C <- filter(BEC_test, condition == "Certain") %>%
+  group_by(pNum, predictiveness) %>%
+  summarise(mem_score = mean(c_mem_score, na.rm = TRUE))
+SME_BEC_test_C$predictiveness <- factor(SME_BEC_test_C$predictiveness)
+SME_BEC_test_C$pNum <- factor(SME_BEC_test_C$pNum)
+bay_SME_BEC_test_C <- anovaBF(formula = mem_score ~ predictiveness + pNum,
+        data = data.frame(SME_BEC_test_C),
+        whichRandom = "pNum",
+        iterations = bfit)
+print(bay_SME_BEC_test_C)
+
+SME_BEC_test_U <- filter(BEC_test, condition == "Uncertain") %>%
+  group_by(pNum, predictiveness) %>%
+  summarise(mem_score = mean(c_mem_score, na.rm = TRUE))
+SME_BEC_test_U$predictiveness <- factor(SME_BEC_test_U$predictiveness)
+SME_BEC_test_U$pNum <- factor(SME_BEC_test_U$pNum)
+bay_SME_BEC_test_U <- anovaBF(formula = mem_score ~ predictiveness + pNum,
+        data = data.frame(SME_BEC_test_U),
+        whichRandom = "pNum",
+        iterations = bfit)
+print(bay_SME_BEC_test_U)
+
+SME_BEC_test_UU <- filter(BEC_test, condition == "Unexpected Uncertain") %>%
+  group_by(pNum, predictiveness) %>%
+  summarise(mem_score = mean(c_mem_score, na.rm = TRUE))
+SME_BEC_test_UU$predictiveness <- factor(SME_BEC_test_UU$predictiveness)
+SME_BEC_test_UU$pNum <- factor(SME_BEC_test_UU$pNum)
+bay_SME_BEC_test_UU <- anovaBF(formula = mem_score ~ predictiveness + pNum,
+        data = data.frame(SME_BEC_test_UU),
+        whichRandom = "pNum",
+        iterations = bfit)
+print(bay_SME_BEC_test_UU)
+```
+```{r, include = FALSE}
+#calculate the simple main effect of condition
+sme_BEC_test_condition <- SME_BEC_test %>%
+  group_by(predictiveness) %>%
+  anova_test(mem_score ~ condition, effect.size = "pes") %>%
+  get_anova_table() %>%
+  adjust_pvalue(method = "bonferroni")
+sme_BEC_test_condition #Call the output table
+
+SME_BEC_test_NP <- filter(BEC_test, predictiveness == "non-predictive") %>%
+  group_by(pNum, condition) %>%
+  summarise(mem_score = mean(c_mem_score, na.rm = TRUE))
+SME_BEC_test_NP$condition <- factor(SME_BEC_test_NP$condition)
+SME_BEC_test_NP$pNum <- factor(SME_BEC_test_NP$pNum)
+
+SME_BEC_test_P <- filter(BEC_test, predictiveness == "predictive") %>%
+  group_by(pNum, condition) %>%
+  summarise(mem_score = mean(c_mem_score, na.rm = TRUE))
+SME_BEC_test_P$condition <- factor(SME_BEC_test_P$condition)
+SME_BEC_test_P$pNum <- factor(SME_BEC_test_P$pNum)
+
+bay_SME_BEC_test_NP <- anovaBF(formula = mem_score ~ condition,
+        data = data.frame(SME_BEC_test_NP),
+        whichRandom = "pNum",
+        iterations = bfit)
+print(bay_SME_BEC_test_NP)
+
+bay_SME_BEC_test_P <- anovaBF(formula = mem_score ~ condition,
+        data = data.frame(SME_BEC_test_P),
+        whichRandom = "pNum",
+        iterations = bfit)
+print(bay_SME_BEC_test_P)
+```
+
+A mixed model ANOVA, including the between-subjects factor *group* (Certain Long, Certain Short, Uncertain), and the within-subjects factor *predictiveness* (predictive vs non-predictive) showed significant main effects of *group*, `r apa(ANOVA_BEC_test, effect = "condition")`, `r report_BF_and_error(bay_ANOVA_BEC_test_gxp[1])`, and *predictiveness*, `r apa(ANOVA_BEC_test, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_BEC_test[2])`, and a significant *group x predictiveness* interaction, `r apa(ANOVA_BEC_test, effect = "condition:predictiveness")`, `r report_BF_and_error(bay_ANOVA_BEC_test_gxp[1])`. Bonferroni corrected pairwise comparisons on the main effect of *group* showed no significant difference between group Certain and group Uncertain, *t*(227) = 0.264, *p* = 1, *d* = 0.038, `r report_BF_and_error(bay_t.test_BEC_int_CU[1])`, but there were significant differences between groups Certain and Unexpected Uncertain, *t*(227) = 2.654, *p* = .026, *d* = 0.421, `r report_BF_and_error(bay_t.test_BEC_int_CUU[1])`, and between groups Uncertain and Unexpected uncertain, *t*(227) = 2.435, *p* = .047, *d* = 0.480, `r report_BF_and_error(bay_t.test_BEC_int_UUU[1])`. Furthermore, simple main effects showed a significant effect of *predictiveness* for group Certain, *F* (`r sme_BEC_test_pred[1, 3]`, `r sme_BEC_test_pred[1, 4]`) = `r sme_BEC_test_pred[1, 5]`, *p* < 0.001, *η~p~^2^* = `r sme_BEC_test_pred[1, 8]`, `r report_BF_and_error(bay_SME_BEC_test_CL[1])`, but not for group Uncertain, *F* (`r sme_BEC_test_pred[2, 3]`, `r sme_BEC_test_pred[2, 4]`) = `r sme_BEC_test_pred[2, 5]`, *p* = `r sme_BEC_test_pred[2, 9]`, *η~p~^2^* = `r sme_BEC_test_pred[2, 8]`, `r report_BF_and_error(bay_SME_BEC_test_CS[1])`, nor for group Unexpected Uncertain, *F* (`r sme_BEC_test_pred[3, 3]`, `r sme_BEC_test_pred[3, 4]`) = `r sme_BEC_test_pred[3, 5]`, *p* = `r sme_BEC_test_pred[3, 9]`, *η~p~^2^* = `r sme_BEC_test_pred[3, 8]`, `r report_BF_and_error(bay_SME_BEC_test_U[1])`. It is also important to note that when the simple main effect of *group* was analysed, this was significant for the non-predictive cues, *F* (`r sme_BEC_test_condition[1, 3]`, `r sme_BEC_test_condition[1, 4]`) = `r sme_BEC_test_condition[1, 5]`, *p* = `r sme_BEC_test_condition[1, 9]`, *η~p~^2^* = `r sme_BEC_test_condition[1, 8]`, `r report_BF_and_error(bay_SME_BEC_test_NP[1])`, and for the predictive cues, *F* (`r sme_BEC_test_condition[2, 3]`, `r sme_BEC_test_condition[2, 4]`) = `r sme_BEC_test_condition[2, 5]`, *p* = `r sme_BEC_test_condition[2, 9]`, *η~p~^2^* = `r sme_BEC_test_condition[2, 8]`, `r report_BF_and_error(bay_SME_BEC_test_P[1])`.
+
+## Just groups Uncertain and Unexpected Uncertain
+
+```{r, include=FALSE}
+BEC_test <- filter(BEC_test, condition == "Uncertain"| condition == "Unexpected Uncertain")
+
+#Calculate the mean accuracy and standard error for each block, including the groups
+MA_BEC_test <- BEC_test %>%
+  group_by(predictiveness, condition) %>%
+    summarise(mean_acc = mean(acc, na.rm = TRUE), 
+            se_acc = sd(acc, na.rm = TRUE)/sqrt(length(acc)))
+```
+
+@fig-acctestBEC shows the accuracy results from the recognition memory test. Overall, accuracy was higher in group Unexpected Uncertain compared with group Uncertain. None of the groups shows differences in accuracy betweeen predictive and non-predictive cues.
+
+```{r, echo=FALSE, message=FALSE}
+#| label: fig-acctestBVEC
+#| fig-cap: Accuracy on the test phase of both experiments.
+#| apa-note: "Mean accuracy (±SEM) during the test phase of Experiments 1 and  2, across the three groups."
+#| fig-height: 4
+ggplot(data = MA_BEC_test, mapping = aes(x = factor(condition, level=c('Uncertain','Unexpected Uncertain')), y = mean_acc, fill = predictiveness)) +
+  geom_col(position = position_dodge2()) +
+  geom_errorbar(aes(y= mean_acc, ymin = mean_acc - se_acc, ymax = mean_acc + se_acc), width = .2, position = position_dodge(0.9)) +
+  scale_x_discrete (name = "Group") +
+  scale_y_continuous(name = "Accuracy") +
+  coord_cartesian(ylim = c(0.5, 1)) +
+  scale_fill_discrete(type = c("#AF8DC3", "#7FBF7B"))+
+  theme_apa()
+```
+
+```{r, include=FALSE}
+#ANOVA accuracy
+acc_BEC_test <- BEC_test %>%
+  group_by (pNum, condition, predictiveness) %>%
+  summarise(acc = mean(acc, na.rm = TRUE))
+acc_BEC_test$predictiveness <- factor(acc_BEC_test$predictiveness)
+acc_BEC_test$condition <- factor(acc_BEC_test$condition)
+acc_BEC_test$pNum <- factor(acc_BEC_test$pNum)
+ANOVA_acc_BEC_test <- aov_car(formula = acc ~ condition + Error(pNum*predictiveness), data = acc_BEC_test)
+print(ANOVA_acc_BEC_test)
+
+bay_ANOVA_acc_BEC_test <- anovaBF(formula = acc ~ condition*predictiveness + pNum,
+        data = data.frame(acc_BEC_test),
+        whichRandom = "pNum", 
+        iterations = bfit)
+print(bay_ANOVA_acc_BEC_test)
+
+bay_ANOVA_acc_BEC_test_gxp <- bay_ANOVA_acc_BEC_test[4]/bay_ANOVA_acc_BEC_test[3]
+print(bay_ANOVA_acc_BEC_test_gxp)
+```
+
+There was a significant main effect of *group*, `r apa(ANOVA_acc_BEC_test, effect = "condition")`, `r report_BF_and_error(bay_ANOVA_acc_BEC_test[1])`, but not significant main effect of *predictiveness*, `r apa(ANOVA_acc_BEC_test, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_acc_BEC_test[2])`, nor a significant  *group x predictiveness* interaction, `r apa(ANOVA_acc_BEC_test, effect = "condition:predictiveness")`, `r report_BF_and_error(bay_ANOVA_acc_BEC_test_gxp[1])`.
+
+
+```{r, include = FALSE}
+#create the memory_score
+BEC_test <- BEC_test %>%
+  mutate (c_mem_score = case_when(acc == 0 ~ 0, acc == 1 ~ mem_score))
+#Calculate the mean PPR and standard error for each block, including the groups
+BEC_MS_test <- BEC_test %>%
+  group_by(predictiveness, condition) %>%
+    summarise(mean_mem_score = mean(c_mem_score, na.rm = TRUE), 
+            se_mem_score = sd(c_mem_score, na.rm = TRUE)/sqrt(length(c_mem_score)))
+```
+
+@fig-testBEC shows the recognition memory scores for the three conditions. Memory for non-predictive cues was similar to predictive cues in both groups. Mirroring the accuracy data, the memory scores for the cues in group Unexpected Uncertain were on average higher, than those for group Uncertain.
+
+```{r, echo = FALSE, message=FALSE}
+#| label: fig-testBEC
+#| fig-cap: Memory scores on the Test of Experiments 1 and 2.
+#| apa-note: "Mean memory scores (±SEM) during the Test of Experiments 1 and 2 for predictive and non-predictive trials across the three groups."
+#| fig-height: 4
+ggplot(BEC_MS_test, mapping = aes(x = factor(condition, level=c('Uncertain', 'Unexpected Uncertain')), y = mean_mem_score, fill = predictiveness)) +
+  geom_col(position = position_dodge2()) +
+  geom_errorbar(aes(ymin = mean_mem_score - se_mem_score, ymax = mean_mem_score + se_mem_score), width=.2, position=position_dodge(0.9)) +
+  scale_x_discrete (name = "Group") +
+  scale_fill_discrete(type = c("#AF8DC3", "#7FBF7B"))+
+  scale_y_continuous(name = "Memory score")+
+  #scale_fill_grey(start = 0.33) +
+  theme_apa()
+```
+```{r, include=FALSE}
+#ANOVA mem_score
+BEC_memscore_test <- BEC_test %>%
+  group_by (pNum, condition, predictiveness) %>%
+  summarise(mem_score = mean(c_mem_score, na.rm = TRUE))
+BEC_memscore_test$predictiveness <- factor(BEC_memscore_test$predictiveness)
+BEC_memscore_test$condition <- factor(BEC_memscore_test$condition)
+BEC_memscore_test$pNum <- factor(BEC_memscore_test$pNum)
+ANOVA_BEC_test <- aov_car(formula = mem_score ~ condition + Error(pNum*predictiveness), data = BEC_memscore_test)
+print(ANOVA_BEC_test)
+bay_ANOVA_BEC_test <- anovaBF(formula = mem_score ~ condition + predictiveness ,
+        data = data.frame(BEC_memscore_test),
+        whichRandom = "pNum", 
+        iterations = bfit)
+print(bay_ANOVA_BEC_test)
+bay_ANOVA_BEC_test_gxp <- bay_ANOVA_BEC_test[4]/bay_ANOVA_BEC_test[3]
+print(bay_ANOVA_BEC_test_gxp)
+```
+
+A mixed model ANOVA, including the between-subjects factor *group* (Uncertain vs Unexpected Uncertain), and the within-subjects factor *predictiveness* (predictive vs non-predictive) showed significant main effects of *group*, `r apa(ANOVA_BEC_test, effect = "condition")`, `r report_BF_and_error(bay_ANOVA_BEC_test_gxp[1])`, but not a significant main effect *predictiveness*, `r apa(ANOVA_BEC_test, effect = "predictiveness")`, `r report_BF_and_error(bay_ANOVA_BEC_test[2])`, nor a significant *group x predictiveness* interaction, `r apa(ANOVA_BEC_test, effect = "condition:predictiveness")`, `r report_BF_and_error(bay_ANOVA_BEC_test_gxp[1])`.
